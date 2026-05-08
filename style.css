@@ -436,6 +436,7 @@ body::before {
 /* =============================================
    FOOTER
    ============================================= */
+/* ============================================= FOOTER ============================================= */
 .footer {
     display: flex;
     justify-content: space-between;
@@ -449,6 +450,22 @@ body::before {
     color: #2e2e2e;
     border-top: 1px solid var(--line);
     animation: fade-up 700ms 400ms var(--ease-out) both;
+}
+
+.footer__social {
+    display: flex;
+    gap: 16px;
+}
+
+.footer__icon {
+    width: 18px;
+    height: 18px;
+    color: var(--muted);
+    transition: color 0.2s ease-in-out;
+}
+
+.footer__icon:hover {
+    color: var(--text);
 }
 
 /* =============================================

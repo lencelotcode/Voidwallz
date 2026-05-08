@@ -1,99 +1,142 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="voidwallz is coming soon. Curated dark wallpapers for every screen." />
-    <title>voidwallz | Coming Soon</title>
-    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="style.css" />
-  </head>
-  <body>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta
+            name="description"
+            content="voidwallz is coming soon. Curated dark wallpapers for every screen."
+        />
+        <title>voidwallz | Coming Soon</title>
+        <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@700;800&display=swap"
+            rel="stylesheet"
+        />
+        <link rel="stylesheet" href="style.css" />
+    </head>
+    <body>
+        <!-- NOISE OVERLAY -->
+        <div class="noise" aria-hidden="true"></div>
 
-    <!-- NOISE OVERLAY -->
-    <div class="noise" aria-hidden="true"></div>
+        <!-- AMBIENT GLOW -->
+        <div class="glow glow--top" aria-hidden="true"></div>
+        <div class="glow glow--bottom" aria-hidden="true"></div>
 
-    <!-- AMBIENT GLOW -->
-    <div class="glow glow--top" aria-hidden="true"></div>
-    <div class="glow glow--bottom" aria-hidden="true"></div>
+        <!-- HEADER -->
+        <header class="header">
+            <a class="header__brand" href="/">
+                <img
+                    src="assets/logo1.png"
+                    alt="voidwallz"
+                    class="header__logo"
+                />
+            </a>
+            <div class="header__status">
+                <span class="header__dot" aria-hidden="true"></span>
+                Launching Soon
+            </div>
+        </header>
 
-    <!-- HEADER -->
-    <header class="header">
-      <a class="header__brand" href="/">
-        <img src="assets/logo1.png" alt="voidwallz" class="header__logo" />
-      </a>
-      <div class="header__status">
-        <span class="header__dot" aria-hidden="true"></span>
-        Launching Soon
-      </div>
-    </header>
+        <!-- MAIN -->
+        <main class="main">
+            <!-- HERO -->
+            <section class="hero">
+                <p class="hero__eyebrow">Walls from the void</p>
 
-    <!-- MAIN -->
-    <main class="main">
+                <h1 class="hero__title">
+                    <span class="hero__line hero__line--light">Coming</span>
+                    <span class="hero__line hero__line--red">Soon</span>
+                </h1>
 
-      <!-- HERO -->
-      <section class="hero">
-        <p class="hero__eyebrow">Walls from the void</p>
+                <div class="hero__rule" aria-hidden="true"></div>
 
-        <h1 class="hero__title">
-          <span class="hero__line hero__line--light">Coming</span>
-          <span class="hero__line hero__line--red">Soon</span>
-        </h1>
+                <p class="hero__copy">
+                    Curated dark wallpapers for desktop, mobile, and tablet
+                    screens. No clutter, no paywalls, just sharp visuals built
+                    for dark mode.
+                </p>
+            </section>
 
-        <div class="hero__rule" aria-hidden="true"></div>
+            <!-- PREVIEW FRAMES -->
+            <section class="preview" aria-label="Wallpaper preview">
+                <div class="preview__stack">
+                    <div class="frame frame--1" aria-hidden="true">
+                        <div class="frame__scan"></div>
+                        <div class="frame__grid"></div>
+                    </div>
+                    <div class="frame frame--2" aria-hidden="true">
+                        <div class="frame__scan"></div>
+                        <div class="frame__grid"></div>
+                    </div>
+                    <div class="frame frame--3" aria-hidden="true">
+                        <div class="frame__scan"></div>
+                        <div class="frame__grid"></div>
+                    </div>
+                </div>
+            </section>
 
-        <p class="hero__copy">
-          Curated dark wallpapers for desktop, mobile, and tablet screens.
-          No clutter, no paywalls, just sharp visuals built for dark mode.
-        </p>
-      </section>
+            <!-- STATS -->
+            <section class="stats" aria-label="Resolution options">
+                <div class="stats__item">
+                    <strong class="stats__value">4K</strong>
+                    <span class="stats__label">Desktop</span>
+                </div>
+                <div class="stats__divider" aria-hidden="true"></div>
+                <div class="stats__item">
+                    <strong class="stats__value">8K</strong>
+                    <span class="stats__label">Archive</span>
+                </div>
+                <div class="stats__divider" aria-hidden="true"></div>
+                <div class="stats__item">
+                    <strong class="stats__value">Free</strong>
+                    <span class="stats__label">Drops</span>
+                </div>
+            </section>
+        </main>
 
-      <!-- PREVIEW FRAMES -->
-      <section class="preview" aria-label="Wallpaper preview">
-        <div class="preview__stack">
-          <div class="frame frame--1" aria-hidden="true">
-            <div class="frame__scan"></div>
-            <div class="frame__grid"></div>
-          </div>
-          <div class="frame frame--2" aria-hidden="true">
-            <div class="frame__scan"></div>
-            <div class="frame__grid"></div>
-          </div>
-          <div class="frame frame--3" aria-hidden="true">
-            <div class="frame__scan"></div>
-            <div class="frame__grid"></div>
-          </div>
-        </div>
-      </section>
-
-      <!-- STATS -->
-      <section class="stats" aria-label="Resolution options">
-        <div class="stats__item">
-          <strong class="stats__value">4K</strong>
-          <span class="stats__label">Desktop</span>
-        </div>
-        <div class="stats__divider" aria-hidden="true"></div>
-        <div class="stats__item">
-          <strong class="stats__value">8K</strong>
-          <span class="stats__label">Archive</span>
-        </div>
-        <div class="stats__divider" aria-hidden="true"></div>
-        <div class="stats__item">
-          <strong class="stats__value">Free</strong>
-          <span class="stats__label">Drops</span>
-        </div>
-      </section>
-
-    </main>
-
-    <!-- FOOTER -->
-    <footer class="footer">
-      <span class="footer__brand">voidwallz</span>
-      <span class="footer__tagline">Dark wallpapers for every screen</span>
-    </footer>
-
-  </body>
+        <!-- FOOTER -->
+        <footer class="footer">
+            <span class="footer__brand">voidwallz</span>
+            <span class="footer__tagline"
+                >Dark wallpapers for every screen</span
+            >
+            <div class="footer__social">
+                <a
+                    href="https://x.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Follow us on X"
+                >
+                    <svg
+                        class="footer__icon"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                    >
+                        <path
+                            d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"
+                        />
+                    </svg>
+                </a>
+                <a
+                    href="https://instagram.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Follow us on Instagram"
+                >
+                    <svg
+                        class="footer__icon"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                    >
+                        <path
+                            d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.162 6.162 6.162 6.162-2.759 6.162-6.162-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4s1.791-4 4-4 4 1.79 4 4-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44 1.441-.645 1.441-1.44-.645-1.44-1.441-1.44z"
+                        />
+                    </svg>
+                </a>
+            </div>
+        </footer>
+    </body>
 </html>
