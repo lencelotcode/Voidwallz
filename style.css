@@ -119,6 +119,8 @@ body {
     align-items: center;
     padding: clamp(16px, 5vw, 32px);
     isolation: isolate;
+    /* FIX 1: prevent any child element from bleeding outside the page */
+    overflow-x: hidden;
 }
 
 .page::before {
@@ -214,7 +216,10 @@ header {
 
 main {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(340px, 520px);
+    /* FIX 2: changed minmax(340px, 520px) → minmax(0, 520px)
+       The old 340px minimum forced grid wider than viewport on
+       screens between ~680px–860px, causing the right-side bleed. */
+    grid-template-columns: minmax(0, 1fr) minmax(0, 520px);
     gap: clamp(40px, 7vw, 96px);
     align-items: center;
     padding: clamp(80px, 15vw, 112px) 0 clamp(40px, 8vw, 56px);
@@ -424,6 +429,8 @@ footer {
         justify-self: stretch;
         width: 100%;
         min-height: clamp(200px, 50vw, 380px);
+        /* FIX 3: clip frames that offset beyond container */
+        overflow: hidden;
     }
 
     .frame {
@@ -499,6 +506,12 @@ footer {
 
     section {
         padding-block: 4rem;
+    }
+
+    /* FIX 4: first section inside main was double-stacking top padding
+       from both `section { padding-block: 4rem }` and `main { padding: 4rem 0 }` */
+    main > section:first-child {
+        padding-block-start: 0;
     }
 
     h1 {
@@ -702,14 +715,15 @@ footer {
         top: 0;
     }
 
+    /* FIX 5: tightened offsets so frames stay within preview bounds */
     .frame:nth-child(2) {
         top: 50px;
-        right: 12px;
+        right: 10px;
     }
 
     .frame:nth-child(3) {
         top: 100px;
-        right: 24px;
+        right: 20px;
     }
 
     footer {
@@ -815,6 +829,15 @@ footer {
 
     .frame {
         width: 96%;
+    }
+
+    /* FIX 6: ultra-small frame offsets to stay in bounds */
+    .frame:nth-child(2) {
+        right: 8px;
+    }
+
+    .frame:nth-child(3) {
+        right: 16px;
     }
 
     footer {
