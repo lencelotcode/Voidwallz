@@ -267,43 +267,6 @@
         animation: fade-up 740ms 420ms ease both;
       }
 
-      .actions {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 12px;
-        margin-top: 34px;
-        animation: fade-up 760ms 520ms ease both;
-      }
-
-      .button {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-height: 44px;
-        padding: 0 22px;
-        color: var(--text);
-        border: 1px solid var(--line);
-        text-decoration: none;
-        font-size: 10px;
-        letter-spacing: 0.18em;
-        text-transform: uppercase;
-        transition: border-color 160ms ease, color 160ms ease, background 160ms ease;
-      }
-
-      .button.primary {
-        border-color: var(--red);
-        background: var(--red);
-      }
-
-      .button:hover {
-        border-color: var(--text);
-      }
-
-      .button.primary:hover {
-        border-color: #922828;
-        background: #922828;
-      }
-
       .preview {
         position: relative;
         min-height: 440px;
@@ -497,11 +460,6 @@
           height: 30px;
         }
 
-        .actions,
-        .button {
-          width: 100%;
-        }
-
         .meta {
           grid-template-columns: 1fr;
         }
@@ -536,10 +494,6 @@
               Curated dark wallpapers for desktop, mobile, and tablet screens.
               No clutter, no paywalls, just sharp visuals built for dark mode.
             </p>
-            <div class="actions">
-              <a class="button primary" href="mailto:hello@voidwallz.com">Notify Me</a>
-              <a class="button" href="https://github.com/" target="_blank" rel="noreferrer">Follow Updates</a>
-            </div>
           </section>
 
           <section class="preview" aria-label="Wallpaper preview frames">
