@@ -233,7 +233,7 @@ h1 {
     margin: 0;
     max-width: 560px;
     font-family: "Syne", sans-serif;
-    font-size: clamp(32px, 11vw, 82px);
+    font-size: clamp(2.8rem, 13vw, 6rem);
     font-weight: 800;
     line-height: 0.95;
     text-transform: uppercase;
@@ -267,8 +267,8 @@ h1 span {
     max-width: 560px;
     margin: 0;
     color: var(--soft);
-    font-size: clamp(13px, 3.5vw, 15px);
-    line-height: clamp(1.6, 2vw, 1.9);
+    font-size: clamp(0.875rem, 3.5vw, 1rem);
+    line-height: 1.7;
     letter-spacing: 0.3px;
     animation: fade-up 740ms 420ms ease both;
 }
@@ -410,15 +410,19 @@ footer {
 @media (max-width: 860px) {
     .page {
         align-items: flex-start;
+        padding-block: 4rem 2rem;
     }
 
     main {
         grid-template-columns: 1fr;
+        padding: 4rem 0;
+        gap: 3rem;
     }
 
     .preview {
         justify-self: stretch;
         width: 100%;
+        min-height: clamp(200px, 50vw, 380px);
     }
 
     .frame {
@@ -437,8 +441,35 @@ footer {
 
     .meta {
         position: relative;
-        margin-top: clamp(16px, 5vw, 24px);
+        margin-top: 1.5rem;
         width: 100%;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.8rem;
+        border: 1px solid var(--line);
+        background: rgba(5, 5, 5, 0.72);
+        backdrop-filter: blur(12px);
+        padding: 1.2rem;
+        border-radius: 2px;
+    }
+
+    .meta div {
+        border: none;
+        padding: 0;
+        text-align: center;
+    }
+
+    .meta div:last-child {
+        border: none;
+    }
+
+    .meta strong {
+        font-size: clamp(1rem, 4vw, 1.25rem);
+        margin-bottom: 0.5rem;
+    }
+
+    .meta span {
+        font-size: clamp(0.625rem, 1.8vw, 0.75rem);
     }
 
     footer {
@@ -446,8 +477,73 @@ footer {
         left: auto;
         right: auto;
         bottom: auto;
-        margin-top: clamp(24px, 6vw, 40px);
+        margin-top: 4rem;
         flex-direction: column;
+    }
+}
+
+@media (max-width: 768px) {
+    .page {
+        padding: clamp(1rem, 4vw, 2rem);
+        align-items: flex-start;
+    }
+
+    h1 {
+        font-size: clamp(3rem, 14vw, 5.5rem);
+        line-height: 0.9;
+        letter-spacing: -0.04em;
+        max-width: 100%;
+        margin-bottom: 1.5rem;
+    }
+
+    .eyebrow {
+        margin-bottom: 1.5rem;
+        font-size: clamp(0.625rem, 2vw, 0.75rem);
+    }
+
+    .rule {
+        margin: 1.5rem 0;
+    }
+
+    .copy {
+        font-size: 1rem;
+        line-height: 1.7;
+        max-width: 90%;
+        margin-bottom: 2rem;
+    }
+
+    main {
+        padding: 4rem 0 2rem 0;
+        gap: 3rem;
+    }
+
+    .preview {
+        min-height: clamp(220px, 55vw, 360px);
+    }
+
+    .meta {
+        gap: 0.8rem;
+        padding: 1.2rem;
+        margin-top: 1.5rem;
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .meta div {
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100px;
+    }
+
+    .meta strong {
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .meta span {
+        font-size: 0.7rem;
     }
 }
 
@@ -459,27 +555,55 @@ footer {
     }
 
     main {
-        padding-top: clamp(70px, 18vw, 100px);
-        gap: clamp(24px, 8vw, 48px);
+        padding-top: 3rem;
+        gap: 2.5rem;
     }
 
     h1 {
+        font-size: clamp(2.5rem, 12vw, 4rem);
+        line-height: 0.9;
+        letter-spacing: -0.04em;
         max-width: 100%;
         word-spacing: 100vw;
+        margin-bottom: 1.2rem;
+    }
+
+    .copy {
+        font-size: 0.95rem;
+        line-height: 1.7;
+        max-width: 95%;
+    }
+
+    .rule {
+        margin: 1.2rem 0;
     }
 
     .meta {
         grid-template-columns: 1fr;
+        padding: 1rem;
+        gap: 0.5rem;
+        min-height: auto;
     }
 
     .meta div {
         border-right: 0;
         border-bottom: 1px solid var(--line);
-        padding: clamp(12px, 3.5vw, 16px);
+        padding: 1rem 0;
+        display: block;
+        min-height: auto;
     }
 
     .meta div:last-child {
         border-bottom: 0;
+    }
+
+    .meta strong {
+        font-size: 1rem;
+        margin-bottom: 0.4rem;
+    }
+
+    .meta span {
+        font-size: 0.65rem;
     }
 
     .frame {
@@ -499,37 +623,85 @@ footer {
         top: clamp(100px, 30vw, 150px);
         right: clamp(24px, 6vw, 40px);
     }
+
+    .preview {
+        min-height: clamp(200px, 50vw, 320px);
+    }
 }
 
 /* Ultra-small phones (320px - 380px) */
 @media (max-width: 380px) {
     .page {
-        padding: clamp(12px, 4vw, 16px);
+        padding: 1rem;
+        padding-top: 3rem;
     }
 
     header {
-        top: clamp(12px, 3vw, 16px);
-        left: clamp(12px, 4vw, 16px);
-        right: clamp(12px, 4vw, 16px);
+        top: 1rem;
+        left: 1rem;
+        right: 1rem;
     }
 
     h1 {
-        line-height: 1;
+        font-size: clamp(2.2rem, 11vw, 3.5rem);
+        line-height: 0.85;
+        letter-spacing: -0.05em;
+        margin-bottom: 1rem;
+    }
+
+    .eyebrow {
+        font-size: 0.6rem;
+        margin-bottom: 1rem;
+    }
+
+    .rule {
+        margin: 1rem 0;
+        width: 100%;
     }
 
     .copy {
+        font-size: 0.9rem;
+        line-height: 1.7;
         max-width: 100%;
+        margin-bottom: 1.5rem;
     }
 
-    .preview {
-        min-height: clamp(200px, 55vw, 300px);
+    main {
+        padding-top: 2.5rem;
+        padding-bottom: 1rem;
+        gap: 2rem;
     }
 
-    .frame {
-        width: 94%;
+    .meta {
+        grid-template-columns: 1fr;
+        padding: 1rem;
+        gap: 0.3rem;
+    }
+
+    .meta div {
+        padding: 0.8rem 0;
     }
 
     .meta strong {
-        font-size: clamp(14px, 4.5vw, 18px);
+        font-size: 0.95rem;
+        margin-bottom: 0.3rem;
+    }
+
+    .meta span {
+        font-size: 0.6rem;
+    }
+
+    .preview {
+        min-height: clamp(180px, 50vw, 280px);
+    }
+
+    .frame {
+        width: 95%;
+    }
+
+    footer {
+        margin-top: 2.5rem;
+        font-size: 0.65rem;
+        gap: 1rem;
     }
 }
