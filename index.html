@@ -3,68 +3,97 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta
-      name="description"
-      content="voidwallz is coming soon. Curated dark wallpapers for every screen."
-    />
+    <meta name="description" content="voidwallz is coming soon. Curated dark wallpapers for every screen." />
     <title>voidwallz | Coming Soon</title>
     <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@700;800&display=swap"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="style.css" />
-    <script src="script.js" defer></script>
   </head>
   <body>
-    <div class="page">
-      <header>
-        <a class="brand" href="/">
-          <img class="brand-logo" src="assets/logo1.png" alt="voidwallz" />
-        </a>
-        <div class="status">Launching Soon</div>
-      </header>
 
-      <div class="shell">
-        <main>
-          <section>
-            <p class="eyebrow">Walls from the void</p>
-            <h1>Coming <span>Soon</span></h1>
-            <div class="rule"></div>
-            <p class="copy">
-              Curated dark wallpapers for desktop, mobile, and tablet screens.
-              No clutter, no paywalls, just sharp visuals built for dark mode.
-            </p>
-          </section>
+    <!-- NOISE OVERLAY -->
+    <div class="noise" aria-hidden="true"></div>
 
-          <section class="preview" aria-label="Wallpaper preview frames">
-            <div class="frame"></div>
-            <div class="frame"></div>
-            <div class="frame"></div>
-            <div class="meta">
-              <div>
-                <strong>4K</strong>
-                <span>Desktop</span>
-              </div>
-              <div>
-                <strong>8K</strong>
-                <span>Archive</span>
-              </div>
-              <div>
-                <strong>Free</strong>
-                <span>Drops</span>
-              </div>
-            </div>
-          </section>
-        </main>
+    <!-- AMBIENT GLOW -->
+    <div class="glow glow--top" aria-hidden="true"></div>
+    <div class="glow glow--bottom" aria-hidden="true"></div>
+
+    <!-- HEADER -->
+    <header class="header">
+      <a class="header__brand" href="/">
+        <img src="assets/logo1.png" alt="voidwallz" class="header__logo" />
+      </a>
+      <div class="header__status">
+        <span class="header__dot" aria-hidden="true"></span>
+        Launching Soon
       </div>
+    </header>
 
-      <footer>
-        <span>voidwallz</span>
-        <span>Dark wallpapers for every screen</span>
-      </footer>
-    </div>
+    <!-- MAIN -->
+    <main class="main">
+
+      <!-- HERO -->
+      <section class="hero">
+        <p class="hero__eyebrow">Walls from the void</p>
+
+        <h1 class="hero__title">
+          <span class="hero__line hero__line--light">Coming</span>
+          <span class="hero__line hero__line--red">Soon</span>
+        </h1>
+
+        <div class="hero__rule" aria-hidden="true"></div>
+
+        <p class="hero__copy">
+          Curated dark wallpapers for desktop, mobile, and tablet screens.
+          No clutter, no paywalls, just sharp visuals built for dark mode.
+        </p>
+      </section>
+
+      <!-- PREVIEW FRAMES -->
+      <section class="preview" aria-label="Wallpaper preview">
+        <div class="preview__stack">
+          <div class="frame frame--1" aria-hidden="true">
+            <div class="frame__scan"></div>
+            <div class="frame__grid"></div>
+          </div>
+          <div class="frame frame--2" aria-hidden="true">
+            <div class="frame__scan"></div>
+            <div class="frame__grid"></div>
+          </div>
+          <div class="frame frame--3" aria-hidden="true">
+            <div class="frame__scan"></div>
+            <div class="frame__grid"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- STATS -->
+      <section class="stats" aria-label="Resolution options">
+        <div class="stats__item">
+          <strong class="stats__value">4K</strong>
+          <span class="stats__label">Desktop</span>
+        </div>
+        <div class="stats__divider" aria-hidden="true"></div>
+        <div class="stats__item">
+          <strong class="stats__value">8K</strong>
+          <span class="stats__label">Archive</span>
+        </div>
+        <div class="stats__divider" aria-hidden="true"></div>
+        <div class="stats__item">
+          <strong class="stats__value">Free</strong>
+          <span class="stats__label">Drops</span>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <span class="footer__brand">voidwallz</span>
+      <span class="footer__tagline">Dark wallpapers for every screen</span>
+    </footer>
+
   </body>
 </html>
