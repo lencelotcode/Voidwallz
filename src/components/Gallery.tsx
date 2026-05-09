@@ -18,33 +18,9 @@ export default function Gallery({
     error,
     reload,
   } = useWallpapers();
-  const [isMobileDevice, setIsMobileDevice] = useState(false);
-
-  // Detect device type
-  useEffect(() => {
-    const checkDeviceType = () => {
-      const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-      const isMobile =
-        /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(
-          userAgent.toLowerCase(),
-        );
-      setIsMobileDevice(isMobile);
-    };
-
-    checkDeviceType();
-    window.addEventListener("resize", checkDeviceType);
-    return () => window.removeEventListener("resize", checkDeviceType);
-  }, []);
-
-  // Determine which wallpapers to display based on view and device
-  const displayedDesktop =
-    view === "phone" || (isMobileDevice && view === "all")
-      ? []
-      : desktopWallpapers;
-  const displayedMobile =
-    view === "desktop" || (!isMobileDevice && view === "all")
-      ? []
-      : mobileWallpapers;
+  // Determine which wallpapers to display based on view
+  const displayedDesktop = view === "phone" ? [] : desktopWallpapers;
+  const displayedMobile = view === "desktop" ? [] : mobileWallpapers;
 
   return (
     <section
