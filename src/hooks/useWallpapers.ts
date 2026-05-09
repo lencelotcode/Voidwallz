@@ -41,6 +41,7 @@ const fallbackDesktop: Wallpaper[] = [
     originalUrl:
       "https://images.unsplash.com/photo-1604871000636-074fa5117945?auto=format&fit=crop&q=80&w=1600&h=900",
     device: "desktop",
+    downloads: 0,
   },
   {
     id: 2,
@@ -53,6 +54,7 @@ const fallbackDesktop: Wallpaper[] = [
     originalUrl:
       "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&q=80&w=1600&h=900",
     device: "desktop",
+    downloads: 0,
   },
   {
     id: 3,
@@ -65,6 +67,7 @@ const fallbackDesktop: Wallpaper[] = [
     originalUrl:
       "https://images.unsplash.com/photo-1518818419601-72c8673f5852?auto=format&fit=crop&q=80&w=1600&h=900",
     device: "desktop",
+    downloads: 0,
   },
   {
     id: 4,
@@ -77,6 +80,7 @@ const fallbackDesktop: Wallpaper[] = [
     originalUrl:
       "https://images.unsplash.com/photo-1634055627253-15df1f63fcb3?auto=format&fit=crop&q=80&w=1600&h=900",
     device: "desktop",
+    downloads: 0,
   },
 ];
 
@@ -92,6 +96,7 @@ const fallbackMobile: Wallpaper[] = [
     originalUrl:
       "https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?auto=format&fit=crop&q=80&w=600&h=1200",
     device: "mobile",
+    downloads: 0,
   },
   {
     id: 6,
@@ -104,6 +109,7 @@ const fallbackMobile: Wallpaper[] = [
     originalUrl:
       "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=600&h=1200",
     device: "mobile",
+    downloads: 0,
   },
   {
     id: 7,
@@ -116,6 +122,7 @@ const fallbackMobile: Wallpaper[] = [
     originalUrl:
       "https://images.unsplash.com/photo-1506443432602-ac2fcd6f54e0?auto=format&fit=crop&q=80&w=600&h=1200",
     device: "mobile",
+    downloads: 0,
   },
   {
     id: 8,
@@ -128,6 +135,7 @@ const fallbackMobile: Wallpaper[] = [
     originalUrl:
       "https://images.unsplash.com/photo-1557672172-298e090bd0f1?auto=format&fit=crop&q=80&w=600&h=1200",
     device: "mobile",
+    downloads: 0,
   },
 ];
 
@@ -185,10 +193,14 @@ function mapFileToWallpaper(
       ? `${DESKTOP_PREVIEWS_FOLDER}/${file.name}`
       : `${MOBILE_PREVIEWS_FOLDER}/${file.name}`;
 
+  // Find original file matching name (base)
+  const baseName = file.name.replace(/\.[^/.]+$/, "");
+  const originalName = file.name.replace(/\.[^/.]+$/, ".png"); // Assuming originals are .png
+
   const originalPath =
     folder === "desktop"
-      ? `${DESKTOP_ORIGINALS_FOLDER}/${file.name}`
-      : `${MOBILE_ORIGINALS_FOLDER}/${file.name}`;
+      ? `${DESKTOP_ORIGINALS_FOLDER}/${originalName}`
+      : `${MOBILE_ORIGINALS_FOLDER}/${originalName}`;
 
   const previewUrl = supabase
     ? supabase.storage.from(BUCKET_NAME).getPublicUrl(previewPath).data

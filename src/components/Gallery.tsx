@@ -41,38 +41,42 @@ export default function Gallery({
 
       {/* Skeleton Loading for Desktop */}
       {loading && (
-        <div className="grid md:grid-cols-4 grid-cols-1 gap-px bg-white/5">
-          {Array(8)
-            .fill(0)
-            .map((_, i) => (
-              <div
-                key={`skeleton-desktop-${i}`}
-                className="relative flex flex-col items-center justify-center h-[400px] md:h-[500px] overflow-hidden bg-void-black/30 animate-pulse"
-              >
-                <div className="w-[200px] md:w-[260px] aspect-[16/10] border-[4px] md:border-[6px] border-black/20 rounded-lg bg-black/10 shadow-[0_20px_50px_rgba(0,0,0,0.3)] overflow-hidden ring-1 ring-white/5">
-                  <div className="w-full h-full bg-black/20 animate-shimmer" />
+        <>
+          <div className="grid md:grid-cols-4 grid-cols-1 gap-px bg-white/5">
+            {Array(8)
+              .fill(0)
+              .map((_, i) => (
+                <div
+                  key={`skeleton-desktop-${i}`}
+                  className="relative flex flex-col items-center justify-center h-[400px] md:h-[500px] overflow-hidden bg-void-black/30 animate-pulse"
+                >
+                  <div className="w-[200px] md:w-[260px] aspect-[16/10] border-[4px] md:border-[6px] border-black/20 rounded-lg bg-black/10 shadow-[0_20px_50px_rgba(0,0,0,0.3)] overflow-hidden ring-1 ring-white/5">
+                    <div className="w-full h-full bg-black/20 animate-shimmer" />
+                  </div>
                 </div>
-              </div>
-            ))}
-        </div>
+              ))}
+          </div>
+        </>
       )}
 
       {/* Skeleton Loading for Mobile */}
       {loading && (
-        <div className="grid md:grid-cols-4 grid-cols-1 gap-px bg-white/5">
-          {Array(8)
-            .fill(0)
-            .map((_, i) => (
-              <div
-                key={`skeleton-mobile-${i}`}
-                className="relative flex flex-col items-center justify-center h-[500px] md:h-[600px] overflow-hidden bg-void-black/30 animate-pulse"
-              >
-                <div className="w-[160px] aspect-[9/19.5] border-[6px] border-black/20 rounded-[2rem] bg-black/10 shadow-[0_20px_50px_rgba(0,0,0,0.3)] ring-1 ring-white/5 flex items-center justify-center">
-                  <div className="w-full h-full bg-black/20 animate-shimmer rounded-[1.5rem]" />
+        <>
+          <div className="grid md:grid-cols-4 grid-cols-1 gap-px bg-white/5">
+            {Array(8)
+              .fill(0)
+              .map((_, i) => (
+                <div
+                  key={`skeleton-mobile-${i}`}
+                  className="relative flex flex-col items-center justify-center h-[500px] md:h-[600px] overflow-hidden bg-void-black/30 animate-pulse"
+                >
+                  <div className="w-[160px] aspect-[9/19.5] border-[6px] border-black/20 rounded-[2rem] bg-black/10 shadow-[0_20px_50px_rgba(0,0,0,0.3)] ring-1 ring-white/5 flex items-center justify-center">
+                    <div className="w-full h-full bg-black/20 animate-shimmer rounded-[1.5rem]" />
+                  </div>
                 </div>
-              </div>
-            ))}
-        </div>
+              ))}
+          </div>
+        </>
       )}
 
       {/* Desktop Section */}
@@ -146,6 +150,7 @@ export default function Gallery({
                   </div>
                 </motion.div>
               ))}
+            </div>
           ) : (
             <div className="py-16 text-center">
               <p className="text-sm font-mono uppercase tracking-widest opacity-40">
@@ -153,6 +158,8 @@ export default function Gallery({
               </p>
             </div>
           )}
+        </>
+      )}
 
       {/* Phone Section */}
       {!loading && (view === "all" || view === "phone") && (

@@ -31,7 +31,7 @@ export default function WallpaperModal({
     };
   }, [selectedWp, onClose]);
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     setIsDownloading(true);
 
     if (!selectedWp?.originalUrl) {
@@ -41,18 +41,26 @@ export default function WallpaperModal({
     }
 
     try {
-      // Trigger download of original file
-      const link = document.createElement("a");
-      link.href = selectedWp.originalUrl;
+      // Use fetch to download the blob, which avoids browser security blocks on direct cross-origin links
+      const response = await fetch(selectedWp.originalUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
 
-      // Extract file extension from format (e.g., "8K AVIF" -> "avif")
-      const formatParts = selectedWp.format.split(" ");
-      const extension = formatParts[formatParts.length - 1].toLowerCase();
+      // Create a temporary link element
+      const link = document.createElement("a");
+      link.href = url;
+
+      // Extract file extension from originalUrl
+      const urlPath = new URL(selectedWp.originalUrl).pathname;
+      const extension = urlPath.split(".").pop() || "png";
 
       link.download = `${selectedWp.title.replace(/\s+/g, "_")}.${extension}`;
       document.body.appendChild(link);
       link.click();
+
+      // Cleanup
       document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
 
       // Show success feedback
       console.log(`Downloading: ${selectedWp.title} (${selectedWp.format})`);

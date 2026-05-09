@@ -20,7 +20,11 @@ const wallpaperOfTheDay: Wallpaper = {
   category: "Wallpaper of the Day",
   format: "8K AVIF",
   downloads: 48920,
-  imgUrl: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=1600"
+  previewUrl:
+    "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=1600",
+  originalUrl:
+    "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=100",
+  device: "desktop",
 };
 
 function Hero() {
@@ -77,7 +81,7 @@ function Hero() {
         >
           <div className="w-full h-full border border-white/10 p-2 relative overflow-hidden bg-white/5">
             <img
-              src={wallpaperOfTheDay.imgUrl}
+              src={wallpaperOfTheDay.previewUrl}
               alt={wallpaperOfTheDay.title}
               className="w-full h-full object-cover filter brightness-75 group-hover:scale-105 group-hover:brightness-90 transition-all duration-1000 ease-out"
             />
@@ -145,9 +149,9 @@ function Hero() {
         </div>
       </motion.div>
 
-      <WallpaperModal 
-        selectedWp={selectedWp} 
-        onClose={() => setSelectedWp(null)} 
+      <WallpaperModal
+        selectedWp={selectedWp}
+        onClose={() => setSelectedWp(null)}
       />
     </section>
   );
@@ -313,7 +317,7 @@ function Footer() {
         </div>
 
         <div className="w-full md:w-1/3 flex justify-center md:justify-end">
-          <motion.div 
+          <motion.div
             className="relative w-16 h-16 opacity-20 hover:opacity-60 transition-opacity cursor-pointer delay-75"
             whileHover={{ scale: 1.05 }}
           >
@@ -325,15 +329,15 @@ function Footer() {
             </div>
             {/* Phone frame */}
             <div className="absolute bottom-0 left-0 w-8 h-12 border border-current rounded-sm bg-void-black"></div>
-            
+
             {/* Abstract shapes / artwork */}
-            <motion.div 
-              className="absolute top-2 left-2 w-6 h-6 border border-current rounded-full" 
-              style={{ clipPath: 'polygon(0 0, 100% 0, 100% 50%, 0 50%)' }}
+            <motion.div
+              className="absolute top-2 left-2 w-6 h-6 border border-current rounded-full"
+              style={{ clipPath: "polygon(0 0, 100% 0, 100% 50%, 0 50%)" }}
               animate={{ rotate: 360 }}
               transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
             />
-            <motion.div 
+            <motion.div
               className="absolute bottom-2 left-4 w-4 h-4 rounded-full bg-current"
               animate={{ y: [0, -4, 0], scale: [1, 1.1, 1] }}
               transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
@@ -410,7 +414,9 @@ export default function App() {
 
   return (
     <div className="no-cursor bg-void-black min-h-screen text-void-light overflow-x-hidden selection:bg-white selection:text-black relative">
-      <Cursor />
+      <div className="hidden md:block">
+        <Cursor />
+      </div>
 
       <div className="fixed top-0 w-full h-px bg-gradient-to-r from-void-black via-white to-void-black opacity-30 z-[60]" />
 
