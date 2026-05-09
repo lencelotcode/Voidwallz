@@ -150,19 +150,9 @@ export default function WallpaperModal({
                     </span>
                   </div>
                   <div className="flex justify-between border-b border-white/5 pb-2">
-                    <span>Resolution</span>
-                    <span className="text-white opacity-100">
-                      8192 &times; 4608
-                    </span>
-                  </div>
-                  <div className="flex justify-between border-b border-white/5 pb-2">
-                    <span>Color Space</span>
-                    <span className="text-white opacity-100">Display P3</span>
-                  </div>
-                  <div className="flex justify-between border-b border-white/5 pb-2">
-                    <span>Downloads</span>
-                    <span className="text-white opacity-100">
-                      {selectedWp.downloads.toLocaleString()}
+                    <span>Device</span>
+                    <span className="text-white opacity-100 capitalize">
+                      {selectedWp.device}
                     </span>
                   </div>
                 </div>

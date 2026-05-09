@@ -167,28 +167,9 @@ export default function Gallery({
                     <h3 className="bg-white text-black text-xl md:text-2xl font-sans font-bold uppercase tracking-wider px-4 py-1 mt-1 text-center max-w-[90%] leading-tight text-stroke-none">
                       {wp.title}
                     </h3>
-                    <div className="mt-4 flex items-center justify-center gap-2 text-[10px] bg-black/50 backdrop-blur-md px-3 py-1 font-mono uppercase tracking-widest text-white/80 border border-white/10 rounded-full">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="12"
-                        height="12"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                        <polyline points="7 10 12 15 17 10"></polyline>
-                        <line x1="12" y1="15" x2="12" y2="3"></line>
-                      </svg>
-                      {wp.downloads.toLocaleString()}
-                    </div>
                   </div>
                 </motion.div>
               ))}
-            </div>
           ) : (
             <div className="py-16 text-center">
               <p className="text-sm font-mono uppercase tracking-widest opacity-40">
@@ -248,24 +229,6 @@ export default function Gallery({
                     <h3 className="bg-white text-black text-xl md:text-2xl font-sans font-bold uppercase tracking-wider px-4 py-1 mt-1 text-center max-w-[90%] leading-tight text-stroke-none">
                       {wp.title}
                     </h3>
-                    <div className="mt-4 flex items-center justify-center gap-2 text-[10px] bg-black/50 backdrop-blur-md px-3 py-1 font-mono uppercase tracking-widest text-white/80 border border-white/10 rounded-full">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="12"
-                        height="12"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                        <polyline points="7 10 12 15 17 10"></polyline>
-                        <line x1="12" y1="15" x2="12" y2="3"></line>
-                      </svg>
-                      {wp.downloads.toLocaleString()}
-                    </div>
                   </div>
                 </motion.div>
               ))}

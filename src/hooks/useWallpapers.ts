@@ -36,7 +36,6 @@ const fallbackDesktop: Wallpaper[] = [
     serial: "ID: V-082",
     category: "Minimal / Abstract",
     format: "8K AVIF",
-    downloads: 14205,
     previewUrl:
       "https://images.unsplash.com/photo-1604871000636-074fa5117945?auto=format&fit=crop&q=80&w=1600&h=900",
     originalUrl:
@@ -48,8 +47,7 @@ const fallbackDesktop: Wallpaper[] = [
     title: "Angular Drift",
     serial: "ID: V-104",
     category: "Dark / Geometry",
-    format: "RAW",
-    downloads: 8942,
+    format: "8K WEBP",
     previewUrl:
       "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&q=80&w=1600&h=900",
     originalUrl:
@@ -61,8 +59,7 @@ const fallbackDesktop: Wallpaper[] = [
     title: "Nested Void",
     serial: "ID: V-211",
     category: "Monochrome / Render",
-    format: "8K PRO",
-    downloads: 23150,
+    format: "8K AVIF",
     previewUrl:
       "https://images.unsplash.com/photo-1518818419601-72c8673f5852?auto=format&fit=crop&q=80&w=1600&h=900",
     originalUrl:
@@ -74,8 +71,7 @@ const fallbackDesktop: Wallpaper[] = [
     title: "Chrome Aesthetic",
     serial: "ID: V-310",
     category: "3D / Silver",
-    format: "5K AVIF",
-    downloads: 5021,
+    format: "8K AVIF",
     previewUrl:
       "https://images.unsplash.com/photo-1634055627253-15df1f63fcb3?auto=format&fit=crop&q=80&w=1600&h=900",
     originalUrl:
@@ -91,7 +87,6 @@ const fallbackMobile: Wallpaper[] = [
     serial: "ID: V-001",
     category: "Dark / Space",
     format: "4K MOBILE",
-    downloads: 32014,
     previewUrl:
       "https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?auto=format&fit=crop&q=80&w=600&h=1200",
     originalUrl:
@@ -103,8 +98,7 @@ const fallbackMobile: Wallpaper[] = [
     title: "Obsidian Wave",
     serial: "ID: V-999",
     category: "Liquid / Fluid",
-    format: "PRO MOBILE",
-    downloads: 18452,
+    format: "4K MOBILE",
     previewUrl:
       "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=600&h=1200",
     originalUrl:
@@ -116,8 +110,7 @@ const fallbackMobile: Wallpaper[] = [
     title: "Grain Matrix",
     serial: "ID: V-402",
     category: "Texture / Film",
-    format: "RAW MOBILE",
-    downloads: 9802,
+    format: "4K MOBILE",
     previewUrl:
       "https://images.unsplash.com/photo-1506443432602-ac2fcd6f54e0?auto=format&fit=crop&q=80&w=600&h=1200",
     originalUrl:
@@ -129,8 +122,7 @@ const fallbackMobile: Wallpaper[] = [
     title: "Void Aura",
     serial: "ID: V-505",
     category: "Gradient / Minimal",
-    format: "8K MOBILE",
-    downloads: 41200,
+    format: "4K MOBILE",
     previewUrl:
       "https://images.unsplash.com/photo-1557672172-298e090bd0f1?auto=format&fit=crop&q=80&w=600&h=1200",
     originalUrl:
