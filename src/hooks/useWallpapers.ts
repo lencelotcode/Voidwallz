@@ -281,7 +281,7 @@ export function useWallpapers(): UseWallpapersResult {
             .from(BUCKET_NAME)
             .list(DESKTOP_PREVIEWS_FOLDER, {
               limit: 100,
-              sortBy: { column: "name", order: "asc" },
+              sortBy: { column: "created_at", order: "desc" },
             });
 
         console.log("Desktop API response:", {
@@ -306,7 +306,7 @@ export function useWallpapers(): UseWallpapersResult {
           .from(BUCKET_NAME)
           .list(MOBILE_PREVIEWS_FOLDER, {
             limit: 100,
-            sortBy: { column: "name", order: "asc" },
+            sortBy: { column: "created_at", order: "desc" },
           });
 
         console.log("Mobile API response:", {

@@ -7,13 +7,14 @@ import Loader from "./components/Loader";
 import Navbar from "./components/Navbar";
 import WallpaperModal from "./components/WallpaperModal";
 import { Wallpaper } from "./types";
+import { useWallpapers } from "./hooks/useWallpapers";
 import {
   PrivacyPolicy,
   TermsOfService,
   License,
 } from "./components/LegalPages";
 
-const wallpaperOfTheDay: Wallpaper = {
+const fallbackWallpaperOfTheDay: Wallpaper = {
   id: 999,
   title: "Liquid Void",
   serial: "ID: V-142",
@@ -29,6 +30,13 @@ const wallpaperOfTheDay: Wallpaper = {
 
 function Hero() {
   const [selectedWp, setSelectedWp] = useState<Wallpaper | null>(null);
+  const { desktopWallpapers, mobileWallpapers } = useWallpapers();
+
+  // Dynamically select the newest wallpaper (first in the list since it's sorted by created_at desc)
+  const dynamicWp = desktopWallpapers[0] || mobileWallpapers[0];
+  const wallpaperOfTheDay = dynamicWp
+    ? { ...dynamicWp, category: "Wallpaper of the Day" }
+    : fallbackWallpaperOfTheDay;
 
   return (
     <section className="relative min-h-screen flex flex-col justify-center px-10 pt-32 pb-16 overflow-hidden border-b border-white/5">
@@ -177,50 +185,101 @@ function Marquee() {
 }
 
 function Manifesto() {
+  const steps = [
+    {
+      num: "01",
+      title: "Discover",
+      desc: "We explore emerging digital aesthetics to uncover atmospheric compositions shaped through modern visual creation and cinematic design.",
+    },
+    {
+      num: "02",
+      title: "Refine",
+      desc: "Every wallpaper is carefully refined, color-balanced, and optimized to preserve depth, clarity, and visual harmony across modern displays.",
+    },
+    {
+      num: "03",
+      title: "Elevate",
+      desc: "Prepared in native resolutions from mobile to 8K, each piece is designed to transform everyday screens into immersive digital environments.",
+    },
+  ];
+
   return (
     <section
       id="about"
-      className="py-32 px-10 border-t border-white/5 bg-void-black"
+      className="py-32 md:py-48 px-6 md:px-10 border-t border-white/5 bg-void-black relative overflow-hidden"
     >
-      <div className="flex flex-col md:flex-row gap-16 md:gap-32 justify-between">
-        <div className="md:w-1/3">
-          <p className="text-[10px] opacity-30 uppercase tracking-[0.3em] mb-4">
+      {/* Ambient background glow */}
+      <div className="absolute top-1/2 left-1/4 w-[400px] h-[400px] bg-white/[0.015] rounded-full blur-[100px] pointer-events-none -translate-y-1/2 mix-blend-screen" />
+
+      <div className="max-w-[1400px] mx-auto flex flex-col lg:flex-row gap-20 lg:gap-32 justify-between relative z-10">
+        <div className="lg:w-5/12 flex flex-col justify-start">
+          <motion.p
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="text-[10px] text-white/40 uppercase tracking-[0.4em] mb-8 font-mono"
+          >
             Philosophy
-          </p>
-          <h2 className="text-4xl md:text-5xl font-serif italic font-light tracking-tighter leading-tight">
-            How we craft <br /> our voids.
-          </h2>
+          </motion.p>
+          <motion.h2
+            initial={{ opacity: 0, y: 20, filter: "blur(8px)" }}
+            whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 1.2, ease: [0.21, 0.47, 0.32, 0.98] }}
+            className="text-5xl md:text-7xl lg:text-[5rem] font-serif italic font-light tracking-tighter leading-[1.05] max-w-[12ch] text-white/90 drop-shadow-sm"
+          >
+            How we craft our voids.
+          </motion.h2>
         </div>
 
-        <div className="md:w-2/3 grid grid-cols-1 md:grid-cols-2 gap-8 border-l border-white/5 pl-8 md:pl-16">
-          <div className="group hover-trigger cursor-default">
-            <span className="text-[10px] opacity-40 font-mono mb-2 block">
-              01 // Discover
-            </span>
-            <p className="text-sm opacity-50 mt-4 leading-relaxed">
-              We scour the digital frontier for the most striking, minimal
-              artistry that doesn't scream for attention, but rather commands it
-              quietly.
-            </p>
-          </div>
-          <div className="group hover-trigger cursor-default">
-            <span className="text-[10px] opacity-40 font-mono mb-2 block">
-              02 // Refine
-            </span>
-            <p className="text-sm opacity-50 mt-4 leading-relaxed">
-              Every image is color-graded, contrast-adjusted, and tested on
-              high-density OLED displays to ensure absolute pixel perfection.
-            </p>
-          </div>
-          <div className="group hover-trigger cursor-default mt-8 md:mt-0">
-            <span className="text-[10px] opacity-40 font-mono mb-2 block">
-              03 // Elevate
-            </span>
-            <p className="text-sm opacity-50 mt-4 leading-relaxed">
-              We organize and crop resources into native resolutions spanning
-              from mobile up to 8K, ensuring your setup always looks
-              intentional.
-            </p>
+        <div className="lg:w-7/12 relative pl-8 md:pl-16">
+          {/* Animated Vertical Line */}
+          <motion.div
+            initial={{ height: 0 }}
+            whileInView={{ height: "100%" }}
+            viewport={{ once: true }}
+            transition={{ duration: 1.5, ease: "easeInOut" }}
+            className="absolute top-0 left-0 w-px bg-gradient-to-b from-white/20 via-white/5 to-transparent"
+          />
+
+          <div className="flex flex-col gap-16 md:gap-24">
+            {steps.map((step, i) => (
+              <motion.div
+                key={step.num}
+                initial={{ opacity: 0, x: -20, filter: "blur(4px)" }}
+                whileInView={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{
+                  duration: 1,
+                  delay: i * 0.2,
+                  ease: [0.21, 0.47, 0.32, 0.98],
+                }}
+                className="group cursor-default relative"
+              >
+                {/* Node on the timeline */}
+                <motion.div
+                  initial={{ scale: 0, opacity: 0 }}
+                  whileInView={{ scale: 1, opacity: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: i * 0.2 + 0.6 }}
+                  className="absolute top-2 -left-[35px] md:-left-[67px] w-1.5 h-1.5 bg-white/40 rounded-full group-hover:bg-white/90 transition-colors duration-500 shadow-[0_0_12px_rgba(255,255,255,0.3)]"
+                />
+
+                <div className="flex items-center gap-4 mb-4 md:mb-6">
+                  <span className="text-[10px] text-white/30 font-mono tracking-widest">
+                    {step.num}
+                  </span>
+                  <span className="w-8 h-px bg-white/10 group-hover:w-12 transition-all duration-700 ease-out" />
+                  <span className="text-[10px] text-white/60 font-mono tracking-widest uppercase">
+                    {step.title}
+                  </span>
+                </div>
+                <p className="text-sm md:text-base text-white/50 leading-[1.8] group-hover:text-white/70 transition-colors duration-500 max-w-lg font-light">
+                  {step.desc}
+                </p>
+              </motion.div>
+            ))}
           </div>
         </div>
       </div>
@@ -236,20 +295,6 @@ function Footer() {
           <h2 className="text-4xl md:text-5xl font-serif italic tracking-tighter mb-8 leading-tight">
             Embrace the <br /> void.
           </h2>
-          <p className="text-sm opacity-40 max-w-sm mb-8 leading-relaxed">
-            Join our newsletter for weekly drops of exclusive, high-resolution
-            minimal wallpapers. No spam, just aesthetics.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4">
-            <input
-              type="email"
-              placeholder="ENTER EMAIL"
-              className="bg-white/5 border border-white/10 px-6 py-3 text-[10px] uppercase tracking-widest font-mono text-white focus:outline-none focus:border-white/30 transition-colors w-full sm:w-64"
-            />
-            <button className="bg-white text-black px-6 py-3 text-[10px] font-bold uppercase tracking-widest hover:bg-white/90 transition-colors hover-trigger">
-              Subscribe
-            </button>
-          </div>
         </div>
 
         <div className="flex flex-col sm:flex-row justify-start md:justify-end gap-16 md:gap-32">
@@ -276,6 +321,24 @@ function Footer() {
                 className="group-hover:scale-110 transition-transform"
               />
               <span>X // Twitter</span>
+            </a>
+            <a
+              href="https://discord.gg/xhWGaPp8H2"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 text-sm opacity-60 hover:opacity-100 transition-opacity hover-trigger group"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                fill="currentColor"
+                viewBox="0 0 16 16"
+                className="group-hover:scale-110 transition-transform"
+              >
+                <path d="M13.545 2.907a13.227 13.227 0 0 0-3.257-1.011.05.05 0 0 0-.052.025c-.141.25-.297.577-.406.833a12.19 12.19 0 0 0-3.658 0 8.258 8.258 0 0 0-.412-.833.051.051 0 0 0-.052-.025c-1.125.194-2.22.534-3.257 1.011a.041.041 0 0 0-.021.018C.356 6.024-.213 9.047.066 12.032c.001.014.01.028.021.037a13.276 13.276 0 0 0 3.995 2.02.05.05 0 0 0 .056-.019c.308-.42.582-.863.818-1.329a.05.05 0 0 0-.01-.059.051.051 0 0 0-.018-.011 8.875 8.875 0 0 1-1.248-.595.05.05 0 0 1-.02-.066l.015-.019c.084-.063.168-.129.248-.195a.05.05 0 0 1 .051-.007c2.619 1.196 5.454 1.196 8.041 0a.052.052 0 0 1 .053.007c.08.066.164.132.248.195a.051.051 0 0 1-.004.085 8.254 8.254 0 0 1-1.249.594.05.05 0 0 0-.03.03.052.052 0 0 0 .003.041c.24.465.515.909.817 1.329a.05.05 0 0 0 .056.019 13.235 13.235 0 0 0 4.001-2.02.049.049 0 0 0 .021-.037c.334-3.451-.559-6.449-2.366-9.106a.034.034 0 0 0-.02-.019Zm-8.198 7.307c-.789 0-1.438-.724-1.438-1.612 0-.889.637-1.613 1.438-1.613.807 0 1.45.73 1.438 1.613 0 .888-.637 1.612-1.438 1.612Zm5.316 0c-.788 0-1.438-.724-1.438-1.612 0-.889.637-1.613 1.438-1.613.807 0 1.451.73 1.438 1.613 0 .888-.631 1.612-1.438 1.612Z" />
+              </svg>
+              <span>Discord</span>
             </a>
           </div>
 
