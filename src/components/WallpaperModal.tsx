@@ -98,8 +98,9 @@ export default function WallpaperModal({
                 ✕
               </span>
             </div>
-            <div className="absolute -right-2 top-1/2 -translate-y-1/2 hidden md:block">
-              <span className="text-[9px] font-mono uppercase tracking-widest text-white/50 group-hover:text-white/80 transition-colors ml-2 whitespace-nowrap">
+            {/* Close label appears on hover for desktop only */}
+            <div className="absolute -right-12 top-1/2 -translate-y-1/2 hidden md:group-hover:block">
+              <span className="text-[9px] font-mono uppercase tracking-widest text-white/50 group-hover:text-white/80 transition-all ml-2 whitespace-nowrap">
                 Close
               </span>
             </div>
