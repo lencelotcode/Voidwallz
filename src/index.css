@@ -86,3 +86,31 @@
     background-size: 1000px 100%;
     animation: shimmer 2s infinite;
 }
+
+/* Luxury Modal Close Button */
+.modal-close-button {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.modal-close-button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.05);
+}
+
+/* Luxury Glassmorphism */
+.luxury-glass {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    background: rgba(10, 10, 10, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.luxury-glass:hover {
+    background: rgba(10, 10, 10, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+/* Smooth fade for modal */
+.modal-fade {
+    transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}

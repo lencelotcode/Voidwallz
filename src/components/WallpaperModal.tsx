@@ -87,15 +87,22 @@ export default function WallpaperModal({
             onClick={onClose}
           />
 
-          {/* Close Button */}
+          {/* Close Button - Luxury Cinematic Design */}
           <button
-            className="absolute top-6 right-4 md:top-8 md:right-8 cursor-pointer hover-trigger group bg-black/50 backdrop-blur-lg px-4 py-2 rounded-full border border-white/10 hover:bg-white/10 transition-colors"
-            style={{ zIndex: 100000 }}
+            className="absolute top-4 right-4 md:top-6 md:right-6 cursor-pointer hover-trigger group z-[100000] modal-close-button"
             onClick={onClose}
+            aria-label="Close modal"
           >
-            <span className="text-white opacity-80 group-hover:opacity-100 text-[10px] uppercase tracking-widest font-mono transition-opacity">
-              Close [ESC]
-            </span>
+            <div className="w-11 h-11 rounded-full luxury-glass flex items-center justify-center hover:bg-black/60 transition-all duration-300 hover:scale-105">
+              <span className="text-void-light opacity-80 group-hover:opacity-100 text-lg font-light tracking-wider">
+                ✕
+              </span>
+            </div>
+            <div className="absolute -right-2 top-1/2 -translate-y-1/2 hidden md:block">
+              <span className="text-[9px] font-mono uppercase tracking-widest text-white/50 group-hover:text-white/80 transition-colors ml-2 whitespace-nowrap">
+                Close
+              </span>
+            </div>
           </button>
 
           {/* Modal */}
@@ -104,10 +111,10 @@ export default function WallpaperModal({
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.95, opacity: 0, y: 20 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="w-full max-w-6xl max-h-[90vh] overflow-y-auto bg-void-black border border-white/10 flex flex-col md:flex-row shadow-2xl relative z-10"
+            className="w-full max-w-5xl max-h-[90vh] overflow-y-auto bg-void-black border border-white/10 flex flex-col md:flex-row shadow-2xl relative z-10"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="w-full md:w-2/3 min-h-[50vh] flex items-center justify-center bg-void-black/50 relative overflow-hidden border-b md:border-b-0 md:border-r border-white/10 group p-8">
+            <div className="w-full md:w-3/5 min-h-[50vh] flex items-center justify-center bg-void-black/50 relative overflow-hidden border-b md:border-b-0 md:border-r border-white/10 group p-6 md:p-8">
               <img
                 src={selectedWp.previewUrl}
                 loading="lazy"
@@ -116,7 +123,7 @@ export default function WallpaperModal({
               />
             </div>
 
-            <div className="w-full md:w-1/3 p-8 md:p-12 flex flex-col justify-between bg-void-gray/30 backdrop-blur-md">
+            <div className="w-full md:w-2/5 p-6 md:p-10 flex flex-col justify-between bg-void-gray/30 backdrop-blur-md">
               <div>
                 <span className="text-[10px] opacity-40 font-mono mb-4 block uppercase tracking-widest">
                   Metadata
