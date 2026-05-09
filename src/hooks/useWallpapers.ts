@@ -3,8 +3,10 @@ import { supabase } from "../lib/supabase";
 import type { Wallpaper } from "../types";
 
 export const BUCKET_NAME = "wallpapers";
-export const DESKTOP_FOLDER = "desktop";
-export const MOBILE_FOLDER = "mobile";
+export const DESKTOP_PREVIEWS_FOLDER = "desktop/previews";
+export const DESKTOP_ORIGINALS_FOLDER = "desktop/originals";
+export const MOBILE_PREVIEWS_FOLDER = "mobile/previews";
+export const MOBILE_ORIGINALS_FOLDER = "mobile/originals";
 
 interface StorageFile {
   name: string;
@@ -35,8 +37,11 @@ const fallbackDesktop: Wallpaper[] = [
     category: "Minimal / Abstract",
     format: "8K AVIF",
     downloads: 14205,
-    imgUrl:
+    previewUrl:
       "https://images.unsplash.com/photo-1604871000636-074fa5117945?auto=format&fit=crop&q=80&w=1600&h=900",
+    originalUrl:
+      "https://images.unsplash.com/photo-1604871000636-074fa5117945?auto=format&fit=crop&q=80&w=1600&h=900",
+    device: "desktop",
   },
   {
     id: 2,
@@ -45,8 +50,11 @@ const fallbackDesktop: Wallpaper[] = [
     category: "Dark / Geometry",
     format: "RAW",
     downloads: 8942,
-    imgUrl:
+    previewUrl:
       "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&q=80&w=1600&h=900",
+    originalUrl:
+      "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&q=80&w=1600&h=900",
+    device: "desktop",
   },
   {
     id: 3,
@@ -55,8 +63,11 @@ const fallbackDesktop: Wallpaper[] = [
     category: "Monochrome / Render",
     format: "8K PRO",
     downloads: 23150,
-    imgUrl:
+    previewUrl:
       "https://images.unsplash.com/photo-1518818419601-72c8673f5852?auto=format&fit=crop&q=80&w=1600&h=900",
+    originalUrl:
+      "https://images.unsplash.com/photo-1518818419601-72c8673f5852?auto=format&fit=crop&q=80&w=1600&h=900",
+    device: "desktop",
   },
   {
     id: 4,
@@ -65,8 +76,11 @@ const fallbackDesktop: Wallpaper[] = [
     category: "3D / Silver",
     format: "5K AVIF",
     downloads: 5021,
-    imgUrl:
+    previewUrl:
       "https://images.unsplash.com/photo-1634055627253-15df1f63fcb3?auto=format&fit=crop&q=80&w=1600&h=900",
+    originalUrl:
+      "https://images.unsplash.com/photo-1634055627253-15df1f63fcb3?auto=format&fit=crop&q=80&w=1600&h=900",
+    device: "desktop",
   },
 ];
 
@@ -78,8 +92,11 @@ const fallbackMobile: Wallpaper[] = [
     category: "Dark / Space",
     format: "4K MOBILE",
     downloads: 32014,
-    imgUrl:
+    previewUrl:
       "https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?auto=format&fit=crop&q=80&w=600&h=1200",
+    originalUrl:
+      "https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?auto=format&fit=crop&q=80&w=600&h=1200",
+    device: "mobile",
   },
   {
     id: 6,
@@ -88,8 +105,11 @@ const fallbackMobile: Wallpaper[] = [
     category: "Liquid / Fluid",
     format: "PRO MOBILE",
     downloads: 18452,
-    imgUrl:
+    previewUrl:
       "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=600&h=1200",
+    originalUrl:
+      "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=600&h=1200",
+    device: "mobile",
   },
   {
     id: 7,
@@ -98,8 +118,11 @@ const fallbackMobile: Wallpaper[] = [
     category: "Texture / Film",
     format: "RAW MOBILE",
     downloads: 9802,
-    imgUrl:
+    previewUrl:
       "https://images.unsplash.com/photo-1506443432602-ac2fcd6f54e0?auto=format&fit=crop&q=80&w=600&h=1200",
+    originalUrl:
+      "https://images.unsplash.com/photo-1506443432602-ac2fcd6f54e0?auto=format&fit=crop&q=80&w=600&h=1200",
+    device: "mobile",
   },
   {
     id: 8,
@@ -108,8 +131,11 @@ const fallbackMobile: Wallpaper[] = [
     category: "Gradient / Minimal",
     format: "8K MOBILE",
     downloads: 41200,
-    imgUrl:
+    previewUrl:
       "https://images.unsplash.com/photo-1557672172-298e090bd0f1?auto=format&fit=crop&q=80&w=600&h=1200",
+    originalUrl:
+      "https://images.unsplash.com/photo-1557672172-298e090bd0f1?auto=format&fit=crop&q=80&w=600&h=1200",
+    device: "mobile",
   },
 ];
 
@@ -159,11 +185,28 @@ function mapFileToWallpaper(
   folder: "desktop" | "mobile",
   index: number,
 ): Wallpaper {
-  const path = `${folder}/${file.name}`;
-  const publicUrl = supabase
-    ? supabase.storage.from(BUCKET_NAME).getPublicUrl(path).data.publicUrl
-    : "";
   const { title, category, format } = parseFilename(file.name);
+
+  // Determine preview and original paths
+  const previewPath =
+    folder === "desktop"
+      ? `${DESKTOP_PREVIEWS_FOLDER}/${file.name}`
+      : `${MOBILE_PREVIEWS_FOLDER}/${file.name}`;
+
+  const originalPath =
+    folder === "desktop"
+      ? `${DESKTOP_ORIGINALS_FOLDER}/${file.name}`
+      : `${MOBILE_ORIGINALS_FOLDER}/${file.name}`;
+
+  const previewUrl = supabase
+    ? supabase.storage.from(BUCKET_NAME).getPublicUrl(previewPath).data
+        .publicUrl
+    : "";
+
+  const originalUrl = supabase
+    ? supabase.storage.from(BUCKET_NAME).getPublicUrl(originalPath).data
+        .publicUrl
+    : "";
 
   // Determine if it's mobile format
   const displayFormat = folder === "mobile" ? `${format} MOBILE` : format;
@@ -181,7 +224,9 @@ function mapFileToWallpaper(
     category,
     format: displayFormat,
     downloads,
-    imgUrl: publicUrl,
+    previewUrl,
+    originalUrl,
+    device: folder,
   };
 }
 
@@ -221,16 +266,24 @@ export function useWallpapers(): UseWallpapersResult {
         setLoading(true);
         setError(null);
 
-        // Fetch desktop wallpapers
-        console.log("Fetching desktop wallpapers from:", DESKTOP_FOLDER);
+        // Fetch desktop wallpapers from previews folder
+        console.log(
+          "Fetching desktop wallpapers from:",
+          DESKTOP_PREVIEWS_FOLDER,
+        );
         console.log("Bucket:", BUCKET_NAME);
         const { data: desktopFiles, error: desktopError } =
-          await supabase.storage.from(BUCKET_NAME).list(DESKTOP_FOLDER, {
-            limit: 100,
-            sortBy: { column: "name", order: "asc" },
-          });
+          await supabase.storage
+            .from(BUCKET_NAME)
+            .list(DESKTOP_PREVIEWS_FOLDER, {
+              limit: 100,
+              sortBy: { column: "name", order: "asc" },
+            });
 
-        console.log("Desktop API response:", { data: desktopFiles, error: desktopError });
+        console.log("Desktop API response:", {
+          data: desktopFiles,
+          error: desktopError,
+        });
 
         if (desktopError) {
           console.error("Desktop wallpapers error:", desktopError);
@@ -242,17 +295,20 @@ export function useWallpapers(): UseWallpapersResult {
           console.log("Desktop files data:", desktopFiles);
         }
 
-        // Fetch mobile wallpapers
-        console.log("Fetching mobile wallpapers from:", MOBILE_FOLDER);
+        // Fetch mobile wallpapers from previews folder
+        console.log("Fetching mobile wallpapers from:", MOBILE_PREVIEWS_FOLDER);
         console.log("Bucket:", BUCKET_NAME);
         const { data: mobileFiles, error: mobileError } = await supabase.storage
           .from(BUCKET_NAME)
-          .list(MOBILE_FOLDER, {
+          .list(MOBILE_PREVIEWS_FOLDER, {
             limit: 100,
             sortBy: { column: "name", order: "asc" },
           });
 
-        console.log("Mobile API response:", { data: mobileFiles, error: mobileError });
+        console.log("Mobile API response:", {
+          data: mobileFiles,
+          error: mobileError,
+        });
 
         if (mobileError) {
           console.error("Mobile wallpapers error:", mobileError);
@@ -289,7 +345,9 @@ export function useWallpapers(): UseWallpapersResult {
             setDesktopWallpapers([]);
             setMobileWallpapers([]);
             setIsUsingFallback(false);
-            setError("No wallpapers found. Upload some images to your storage bucket.");
+            setError(
+              "No wallpapers found. Upload some images to your storage bucket.",
+            );
           } else {
             setDesktopWallpapers(desktopResult);
             setMobileWallpapers(mobileResult);

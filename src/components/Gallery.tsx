@@ -1,5 +1,5 @@
 import { motion } from "motion/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Wallpaper } from "../types";
 import { useWallpapers } from "../hooks/useWallpapers";
 import WallpaperModal from "./WallpaperModal";
@@ -10,11 +10,41 @@ export default function Gallery({
   view?: "all" | "desktop" | "phone";
 }) {
   const [selectedWp, setSelectedWp] = useState<Wallpaper | null>(null);
-  const { desktopWallpapers, mobileWallpapers, loading, isUsingFallback, error, reload } = useWallpapers();
+  const {
+    desktopWallpapers,
+    mobileWallpapers,
+    loading,
+    isUsingFallback,
+    error,
+    reload,
+  } = useWallpapers();
+  const [isMobileDevice, setIsMobileDevice] = useState(false);
 
-  // Determine which wallpapers to display based on view
-  const displayedDesktop = view === "phone" ? [] : desktopWallpapers;
-  const displayedMobile = view === "desktop" ? [] : mobileWallpapers;
+  // Detect device type
+  useEffect(() => {
+    const checkDeviceType = () => {
+      const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+      const isMobile =
+        /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(
+          userAgent.toLowerCase(),
+        );
+      setIsMobileDevice(isMobile);
+    };
+
+    checkDeviceType();
+    window.addEventListener("resize", checkDeviceType);
+    return () => window.removeEventListener("resize", checkDeviceType);
+  }, []);
+
+  // Determine which wallpapers to display based on view and device
+  const displayedDesktop =
+    view === "phone" || (isMobileDevice && view === "all")
+      ? []
+      : desktopWallpapers;
+  const displayedMobile =
+    view === "desktop" || (!isMobileDevice && view === "all")
+      ? []
+      : mobileWallpapers;
 
   return (
     <section
@@ -30,6 +60,42 @@ export default function Gallery({
               Loading Wallpapers...
             </span>
           </div>
+        </div>
+      )}
+
+      {/* Skeleton Loading for Desktop */}
+      {loading && (
+        <div className="grid md:grid-cols-4 grid-cols-1 gap-px bg-white/5">
+          {Array(8)
+            .fill(0)
+            .map((_, i) => (
+              <div
+                key={`skeleton-desktop-${i}`}
+                className="relative flex flex-col items-center justify-center h-[400px] md:h-[500px] overflow-hidden bg-void-black/30 animate-pulse"
+              >
+                <div className="w-[200px] md:w-[260px] aspect-[16/10] border-[4px] md:border-[6px] border-black/20 rounded-lg bg-black/10 shadow-[0_20px_50px_rgba(0,0,0,0.3)] overflow-hidden ring-1 ring-white/5">
+                  <div className="w-full h-full bg-black/20 animate-shimmer" />
+                </div>
+              </div>
+            ))}
+        </div>
+      )}
+
+      {/* Skeleton Loading for Mobile */}
+      {loading && (
+        <div className="grid md:grid-cols-4 grid-cols-1 gap-px bg-white/5">
+          {Array(8)
+            .fill(0)
+            .map((_, i) => (
+              <div
+                key={`skeleton-mobile-${i}`}
+                className="relative flex flex-col items-center justify-center h-[500px] md:h-[600px] overflow-hidden bg-void-black/30 animate-pulse"
+              >
+                <div className="w-[160px] aspect-[9/19.5] border-[6px] border-black/20 rounded-[2rem] bg-black/10 shadow-[0_20px_50px_rgba(0,0,0,0.3)] ring-1 ring-white/5 flex items-center justify-center">
+                  <div className="w-full h-full bg-black/20 animate-shimmer rounded-[1.5rem]" />
+                </div>
+              </div>
+            ))}
         </div>
       )}
 
@@ -78,13 +144,14 @@ export default function Gallery({
                 >
                   <div
                     className="absolute inset-0 bg-cover bg-center opacity-30 group-hover:opacity-60 transition-opacity duration-700 blur-[50px] scale-150"
-                    style={{ backgroundImage: `url(${wp.imgUrl})` }}
+                    style={{ backgroundImage: `url(${wp.previewUrl})` }}
                   />
 
                   <div className="relative z-10 flex flex-col items-center transition-transform duration-700 group-hover:scale-[1.05] group-hover:-translate-y-2">
                     <div className="w-[200px] md:w-[260px] aspect-[16/10] border-[4px] md:border-[6px] border-black rounded-lg relative bg-black shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden ring-1 ring-white/10">
                       <img
-                        src={wp.imgUrl}
+                        src={wp.previewUrl}
+                        loading="lazy"
                         className="w-full h-full object-cover"
                         alt={wp.title}
                       />
@@ -101,7 +168,21 @@ export default function Gallery({
                       {wp.title}
                     </h3>
                     <div className="mt-4 flex items-center justify-center gap-2 text-[10px] bg-black/50 backdrop-blur-md px-3 py-1 font-mono uppercase tracking-widest text-white/80 border border-white/10 rounded-full">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="12"
+                        height="12"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                      </svg>
                       {wp.downloads.toLocaleString()}
                     </div>
                   </div>
@@ -145,14 +226,15 @@ export default function Gallery({
                 >
                   <div
                     className="absolute inset-0 bg-cover bg-center opacity-30 group-hover:opacity-60 transition-opacity duration-700 blur-[50px] scale-150"
-                    style={{ backgroundImage: `url(${wp.imgUrl})` }}
+                    style={{ backgroundImage: `url(${wp.previewUrl})` }}
                   />
 
                   <div className="relative z-10 flex flex-col items-center transition-transform duration-700 group-hover:scale-[1.05] group-hover:-translate-y-2">
                     <div className="w-[160px] aspect-[9/19.5] border-[6px] border-black rounded-[2rem] relative bg-black shadow-[0_20px_50px_rgba(0,0,0,0.5)] ring-1 ring-white/10 flex items-center justify-center">
                       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-14 h-4 bg-black rounded-b-xl z-20" />
                       <img
-                        src={wp.imgUrl}
+                        src={wp.previewUrl}
+                        loading="lazy"
                         className="w-full h-full object-cover rounded-[1.5rem]"
                         alt={wp.title}
                       />
@@ -167,7 +249,21 @@ export default function Gallery({
                       {wp.title}
                     </h3>
                     <div className="mt-4 flex items-center justify-center gap-2 text-[10px] bg-black/50 backdrop-blur-md px-3 py-1 font-mono uppercase tracking-widest text-white/80 border border-white/10 rounded-full">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="12"
+                        height="12"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                      </svg>
                       {wp.downloads.toLocaleString()}
                     </div>
                   </div>

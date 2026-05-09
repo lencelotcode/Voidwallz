@@ -5,5 +5,7 @@ export interface Wallpaper {
   category: string;
   format: string;
   downloads: number;
-  imgUrl: string;
+  previewUrl: string;
+  originalUrl: string;
+  device: "desktop" | "mobile";
 }

@@ -33,6 +33,17 @@ export default function WallpaperModal({
 
   const handleDownload = () => {
     setIsDownloading(true);
+
+    // Trigger download of original file
+    if (selectedWp?.originalUrl) {
+      const link = document.createElement("a");
+      link.href = selectedWp.originalUrl;
+      link.download = `${selectedWp.title}.${selectedWp.format.split(" ")[0].toLowerCase()}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
     setTimeout(() => {
       setIsDownloading(false);
       onClose();
@@ -79,7 +90,8 @@ export default function WallpaperModal({
           >
             <div className="w-full md:w-2/3 min-h-[50vh] flex items-center justify-center bg-void-black/50 relative overflow-hidden border-b md:border-b-0 md:border-r border-white/10 group p-8">
               <img
-                src={selectedWp.imgUrl}
+                src={selectedWp.previewUrl}
+                loading="lazy"
                 alt={selectedWp.title}
                 className="w-full h-full object-contain max-h-full drop-shadow-2xl"
               />
@@ -159,7 +171,7 @@ export default function WallpaperModal({
                     Authorizing...
                   </>
                 ) : (
-                  `Download ${selectedWp.format}`
+                  `Download Original (${selectedWp.format})`
                 )}
               </button>
             </div>
@@ -167,6 +179,6 @@ export default function WallpaperModal({
         </motion.div>
       )}
     </AnimatePresence>,
-    document.body
+    document.body,
   );
 }
