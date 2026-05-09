@@ -34,14 +34,33 @@ export default function WallpaperModal({
   const handleDownload = () => {
     setIsDownloading(true);
 
-    // Trigger download of original file
-    if (selectedWp?.originalUrl) {
+    if (!selectedWp?.originalUrl) {
+      console.error("No original URL available for download");
+      setIsDownloading(false);
+      return;
+    }
+
+    try {
+      // Trigger download of original file
       const link = document.createElement("a");
       link.href = selectedWp.originalUrl;
-      link.download = `${selectedWp.title}.${selectedWp.format.split(" ")[0].toLowerCase()}`;
+
+      // Extract file extension from format (e.g., "8K AVIF" -> "avif")
+      const formatParts = selectedWp.format.split(" ");
+      const extension = formatParts[formatParts.length - 1].toLowerCase();
+
+      link.download = `${selectedWp.title.replace(/\s+/g, "_")}.${extension}`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+
+      // Show success feedback
+      console.log(`Downloading: ${selectedWp.title} (${selectedWp.format})`);
+    } catch (error) {
+      console.error("Download failed:", error);
+      alert("Failed to download wallpaper. Please try again.");
+      setIsDownloading(false);
+      return;
     }
 
     setTimeout(() => {
@@ -142,10 +161,13 @@ export default function WallpaperModal({
               </div>
 
               <button
-                className="w-full py-4 bg-white text-black font-bold uppercase tracking-widest text-[10px] hover:bg-white/80 transition-colors hover-trigger flex justify-center items-center gap-2 mt-8 md:mt-0"
+                className="w-full py-4 bg-white text-black font-bold uppercase tracking-widest text-[10px] hover:bg-white/80 transition-colors hover-trigger flex justify-center items-center gap-2 mt-8 md:mt-0 relative group"
                 onClick={handleDownload}
                 disabled={isDownloading}
               >
+                <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20">
+                  Download High-Quality Original
+                </span>
                 {isDownloading ? (
                   <>
                     <svg
@@ -171,7 +193,7 @@ export default function WallpaperModal({
                     Authorizing...
                   </>
                 ) : (
-                  `Download Original (${selectedWp.format})`
+                  `Download High-Quality (${selectedWp.format})`
                 )}
               </button>
             </div>
