@@ -153,8 +153,6 @@ export default function Gallery({
               </p>
             </div>
           )}
-        </>
-      )}
 
       {/* Phone Section */}
       {!loading && (view === "all" || view === "phone") && (
