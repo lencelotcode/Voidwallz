@@ -196,19 +196,21 @@ function mapFileToWallpaper(
   const { title, category, format } = parseFilename(file.name);
 
   // Determine preview and original paths
+  const baseName = file.name.replace(/\.[^/.]+$/, "");
+  const originalName = `${baseName}.png`; // Originals are .png
+
+  // Since we are fetching from originals, let's use the file itself as original
+  // and for now, let's point previewUrl to the same original,
+  // as the 'previews' folder didn't contain all files.
   const previewPath =
     folder === "desktop"
-      ? `${DESKTOP_PREVIEWS_FOLDER}/${file.name}`
-      : `${MOBILE_PREVIEWS_FOLDER}/${file.name}`;
-
-  // Find original file matching name (base)
-  const baseName = file.name.replace(/\.[^/.]+$/, "");
-  const originalName = file.name.replace(/\.[^/.]+$/, ".png"); // Assuming originals are .png
+      ? `${DESKTOP_ORIGINALS_FOLDER}/${file.name}`
+      : `${MOBILE_ORIGINALS_FOLDER}/${file.name}`;
 
   const originalPath =
     folder === "desktop"
-      ? `${DESKTOP_ORIGINALS_FOLDER}/${originalName}`
-      : `${MOBILE_ORIGINALS_FOLDER}/${originalName}`;
+      ? `${DESKTOP_ORIGINALS_FOLDER}/${file.name}`
+      : `${MOBILE_ORIGINALS_FOLDER}/${file.name}`;
 
   const previewUrl = supabase
     ? supabase.storage.from(BUCKET_NAME).getPublicUrl(previewPath).data
@@ -219,7 +221,6 @@ function mapFileToWallpaper(
     ? supabase.storage.from(BUCKET_NAME).getPublicUrl(originalPath).data
         .publicUrl
     : "";
-
   // Determine if it's mobile format
   const displayFormat = folder === "mobile" ? `${format} MOBILE` : format;
 
@@ -310,33 +311,33 @@ export function useWallpapers(): UseWallpapersResult {
         // Deduplicate concurrent requests
         if (!fetchPromise) {
           fetchPromise = (async () => {
-            // Fetch desktop wallpapers from previews folder
+            // Fetch desktop wallpapers from originals folder
             console.log(
               "Fetching desktop wallpapers from:",
-              DESKTOP_PREVIEWS_FOLDER,
+              DESKTOP_ORIGINALS_FOLDER,
             );
             console.log("Bucket:", BUCKET_NAME);
             const { data: desktopFiles, error: desktopError } =
               await supabase.storage
                 .from(BUCKET_NAME)
-                .list(DESKTOP_PREVIEWS_FOLDER, {
-                  limit: 100,
+                .list(DESKTOP_ORIGINALS_FOLDER, {
+                  limit: 1000,
                   sortBy: { column: "created_at", order: "desc" },
                 });
 
             if (desktopError) throw desktopError;
 
-            // Fetch mobile wallpapers from previews folder
+            // Fetch mobile wallpapers from originals folder
             console.log(
               "Fetching mobile wallpapers from:",
-              MOBILE_PREVIEWS_FOLDER,
+              MOBILE_ORIGINALS_FOLDER,
             );
             console.log("Bucket:", BUCKET_NAME);
             const { data: mobileFiles, error: mobileError } =
               await supabase.storage
                 .from(BUCKET_NAME)
-                .list(MOBILE_PREVIEWS_FOLDER, {
-                  limit: 100,
+                .list(MOBILE_ORIGINALS_FOLDER, {
+                  limit: 1000,
                   sortBy: { column: "created_at", order: "desc" },
                 });
 
