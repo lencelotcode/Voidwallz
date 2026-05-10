@@ -243,27 +243,55 @@ function mapFileToWallpaper(
   };
 }
 
+// Module-level cache to prevent redundant fetches
+let cachedDesktopWallpapers: Wallpaper[] | null = null;
+let cachedMobileWallpapers: Wallpaper[] | null = null;
+let fetchPromise: Promise<void> | null = null;
+
 /**
  * Custom hook to fetch wallpapers from Supabase storage
  */
 export function useWallpapers(): UseWallpapersResult {
-  const [desktopWallpapers, setDesktopWallpapers] = useState<Wallpaper[]>([]);
-  const [mobileWallpapers, setMobileWallpapers] = useState<Wallpaper[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [desktopWallpapers, setDesktopWallpapers] = useState<Wallpaper[]>(
+    cachedDesktopWallpapers || [],
+  );
+  const [mobileWallpapers, setMobileWallpapers] = useState<Wallpaper[]>(
+    cachedMobileWallpapers || [],
+  );
+  const [loading, setLoading] = useState(
+    !cachedDesktopWallpapers && !cachedMobileWallpapers,
+  );
   const [error, setError] = useState<string | null>(null);
   const [isUsingFallback, setIsUsingFallback] = useState(false);
   const [refreshIndex, setRefreshIndex] = useState(0);
 
-  const reload = () => setRefreshIndex((v) => v + 1);
+  const reload = () => {
+    cachedDesktopWallpapers = null;
+    cachedMobileWallpapers = null;
+    fetchPromise = null;
+    setRefreshIndex((v) => v + 1);
+  };
 
   useEffect(() => {
     let cancelled = false;
 
     async function fetchWallpapers() {
+      // If we already have cached data, don't fetch again
+      if (cachedDesktopWallpapers && cachedMobileWallpapers) {
+        if (!cancelled) {
+          setDesktopWallpapers(cachedDesktopWallpapers);
+          setMobileWallpapers(cachedMobileWallpapers);
+          setLoading(false);
+        }
+        return;
+      }
+
       // If Supabase is not configured, use fallback immediately
       if (!supabase) {
         console.warn("Supabase client is null - using fallback data");
         if (!cancelled) {
+          cachedDesktopWallpapers = fallbackDesktop;
+          cachedMobileWallpapers = fallbackMobile;
           setDesktopWallpapers(fallbackDesktop);
           setMobileWallpapers(fallbackMobile);
           setLoading(false);
@@ -276,85 +304,75 @@ export function useWallpapers(): UseWallpapersResult {
       console.log("Supabase client is configured. Fetching wallpapers...");
 
       try {
-        setLoading(true);
+        if (!cancelled) setLoading(true);
         setError(null);
 
-        // Fetch desktop wallpapers from previews folder
-        console.log(
-          "Fetching desktop wallpapers from:",
-          DESKTOP_PREVIEWS_FOLDER,
-        );
-        console.log("Bucket:", BUCKET_NAME);
-        const { data: desktopFiles, error: desktopError } =
-          await supabase.storage
-            .from(BUCKET_NAME)
-            .list(DESKTOP_PREVIEWS_FOLDER, {
-              limit: 100,
-              sortBy: { column: "created_at", order: "desc" },
-            });
+        // Deduplicate concurrent requests
+        if (!fetchPromise) {
+          fetchPromise = (async () => {
+            // Fetch desktop wallpapers from previews folder
+            console.log(
+              "Fetching desktop wallpapers from:",
+              DESKTOP_PREVIEWS_FOLDER,
+            );
+            console.log("Bucket:", BUCKET_NAME);
+            const { data: desktopFiles, error: desktopError } =
+              await supabase.storage
+                .from(BUCKET_NAME)
+                .list(DESKTOP_PREVIEWS_FOLDER, {
+                  limit: 100,
+                  sortBy: { column: "created_at", order: "desc" },
+                });
 
-        console.log("Desktop API response:", {
-          data: desktopFiles,
-          error: desktopError,
-        });
+            if (desktopError) throw desktopError;
 
-        if (desktopError) {
-          console.error("Desktop wallpapers error:", desktopError);
-          throw desktopError;
+            // Fetch mobile wallpapers from previews folder
+            console.log(
+              "Fetching mobile wallpapers from:",
+              MOBILE_PREVIEWS_FOLDER,
+            );
+            console.log("Bucket:", BUCKET_NAME);
+            const { data: mobileFiles, error: mobileError } =
+              await supabase.storage
+                .from(BUCKET_NAME)
+                .list(MOBILE_PREVIEWS_FOLDER, {
+                  limit: 100,
+                  sortBy: { column: "created_at", order: "desc" },
+                });
+
+            if (mobileError) throw mobileError;
+
+            const desktopResult = (desktopFiles || [])
+              .filter(
+                (file: StorageFile) =>
+                  file.metadata?.size > 0 && !file.name.startsWith("."),
+              )
+              .map((file: StorageFile, index: number) =>
+                mapFileToWallpaper(file, "desktop", index),
+              );
+
+            const mobileResult = (mobileFiles || [])
+              .filter(
+                (file: StorageFile) =>
+                  file.metadata?.size > 0 && !file.name.startsWith("."),
+              )
+              .map((file: StorageFile, index: number) =>
+                mapFileToWallpaper(file, "mobile", index),
+              );
+
+            cachedDesktopWallpapers = desktopResult;
+            cachedMobileWallpapers = mobileResult;
+          })();
         }
 
-        console.log("Desktop files found:", desktopFiles?.length || 0);
-        if (desktopFiles) {
-          console.log("Desktop files data:", desktopFiles);
-        }
-
-        // Fetch mobile wallpapers from previews folder
-        console.log("Fetching mobile wallpapers from:", MOBILE_PREVIEWS_FOLDER);
-        console.log("Bucket:", BUCKET_NAME);
-        const { data: mobileFiles, error: mobileError } = await supabase.storage
-          .from(BUCKET_NAME)
-          .list(MOBILE_PREVIEWS_FOLDER, {
-            limit: 100,
-            sortBy: { column: "created_at", order: "desc" },
-          });
-
-        console.log("Mobile API response:", {
-          data: mobileFiles,
-          error: mobileError,
-        });
-
-        if (mobileError) {
-          console.error("Mobile wallpapers error:", mobileError);
-          throw mobileError;
-        }
-
-        console.log("Mobile files found:", mobileFiles?.length || 0);
-        if (mobileFiles) {
-          console.log("Mobile files data:", mobileFiles);
-        }
+        await fetchPromise;
 
         if (!cancelled) {
-          // Map files to Wallpaper objects, filtering out any folders or invalid files
-          const desktopResult = (desktopFiles || [])
-            .filter(
-              (file: StorageFile) =>
-                file.metadata?.size > 0 && !file.name.startsWith("."),
-            )
-            .map((file: StorageFile, index: number) =>
-              mapFileToWallpaper(file, "desktop", index),
-            );
-
-          const mobileResult = (mobileFiles || [])
-            .filter(
-              (file: StorageFile) =>
-                file.metadata?.size > 0 && !file.name.startsWith("."),
-            )
-            .map((file: StorageFile, index: number) =>
-              mapFileToWallpaper(file, "mobile", index),
-            );
-
           // If no files found in storage, show empty state (don't use fallback)
-          if (desktopResult.length === 0 && mobileResult.length === 0) {
+          if (
+            cachedDesktopWallpapers?.length === 0 &&
+            cachedMobileWallpapers?.length === 0
+          ) {
             setDesktopWallpapers([]);
             setMobileWallpapers([]);
             setIsUsingFallback(false);
@@ -362,8 +380,8 @@ export function useWallpapers(): UseWallpapersResult {
               "No wallpapers found. Upload some images to your storage bucket.",
             );
           } else {
-            setDesktopWallpapers(desktopResult);
-            setMobileWallpapers(mobileResult);
+            setDesktopWallpapers(cachedDesktopWallpapers || []);
+            setMobileWallpapers(cachedMobileWallpapers || []);
             setIsUsingFallback(false);
           }
 
@@ -371,6 +389,7 @@ export function useWallpapers(): UseWallpapersResult {
         }
       } catch (err) {
         console.error("Error fetching wallpapers from Supabase:", err);
+        fetchPromise = null;
         if (!cancelled) {
           setDesktopWallpapers([]);
           setMobileWallpapers([]);

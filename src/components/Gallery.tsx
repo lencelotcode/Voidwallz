@@ -6,10 +6,11 @@ import WallpaperModal from "./WallpaperModal";
 
 export default function Gallery({
   view = "all",
+  onOpenModal,
 }: {
   view?: "all" | "desktop" | "phone";
+  onOpenModal: (wp: Wallpaper) => void;
 }) {
-  const [selectedWp, setSelectedWp] = useState<Wallpaper | null>(null);
   const {
     desktopWallpapers,
     mobileWallpapers,
@@ -119,7 +120,7 @@ export default function Gallery({
                   whileInView={{ opacity: 1 }}
                   viewport={{ once: true, margin: "-50px" }}
                   transition={{ duration: 0.6, delay: i * 0.1 }}
-                  onClick={() => setSelectedWp(wp)}
+                  onClick={() => onOpenModal(wp)}
                   className="relative flex flex-col items-center justify-center h-[400px] md:h-[500px] overflow-hidden group cursor-pointer hover-trigger bg-void-black"
                 >
                   <div
@@ -183,7 +184,7 @@ export default function Gallery({
                   whileInView={{ opacity: 1 }}
                   viewport={{ once: true, margin: "-50px" }}
                   transition={{ duration: 0.6, delay: i * 0.1 }}
-                  onClick={() => setSelectedWp(wp)}
+                  onClick={() => onOpenModal(wp)}
                   className="relative flex flex-col items-center justify-center h-[500px] md:h-[600px] overflow-hidden group cursor-pointer hover-trigger bg-void-black"
                 >
                   <div
@@ -223,11 +224,6 @@ export default function Gallery({
           )}
         </>
       )}
-
-      <WallpaperModal
-        selectedWp={selectedWp}
-        onClose={() => setSelectedWp(null)}
-      />
     </section>
   );
 }

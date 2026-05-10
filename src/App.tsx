@@ -15,6 +15,66 @@ import {
   License,
 } from "./components/LegalPages";
 
+export const navigateToWallpaper = (wp: Wallpaper) => {
+  const slug = wp.title.toLowerCase().replace(/\s+/g, "-");
+  window.history.pushState(null, "", `/${wp.device}/${slug}/`);
+  window.dispatchEvent(new Event("wallpaper-navigate"));
+};
+
+function WallpaperRouteManager() {
+  const { desktopWallpapers, mobileWallpapers, loading } = useWallpapers();
+  const [selectedWp, setSelectedWp] = useState<Wallpaper | null>(null);
+
+  useEffect(() => {
+    if (loading) return;
+
+    const handleUrlChange = () => {
+      const path = window.location.pathname;
+      const match = path.match(/^\/(desktop|mobile)\/([^/]+)\/?$/);
+
+      if (match) {
+        const device = match[1];
+        const rawSlug = match[2];
+        const slug = decodeURIComponent(rawSlug)
+          .toLowerCase()
+          .replace(/\s+/g, "-");
+
+        const allWallpapers =
+          device === "desktop" ? desktopWallpapers : mobileWallpapers;
+
+        const wp = allWallpapers.find((w) => {
+          const titleSlug = w.title.toLowerCase().replace(/\s+/g, "-");
+          return titleSlug === slug;
+        });
+
+        if (wp) {
+          setSelectedWp(wp);
+        } else {
+          setSelectedWp(null);
+        }
+      } else {
+        setSelectedWp(null);
+      }
+    };
+
+    handleUrlChange();
+    window.addEventListener("popstate", handleUrlChange);
+    window.addEventListener("wallpaper-navigate", handleUrlChange);
+
+    return () => {
+      window.removeEventListener("popstate", handleUrlChange);
+      window.removeEventListener("wallpaper-navigate", handleUrlChange);
+    };
+  }, [desktopWallpapers, mobileWallpapers, loading]);
+
+  const handleClose = () => {
+    window.history.pushState(null, "", window.location.hash || "/");
+    window.dispatchEvent(new Event("wallpaper-navigate"));
+  };
+
+  return <WallpaperModal selectedWp={selectedWp} onClose={handleClose} />;
+}
+
 const fallbackWallpaperOfTheDay: Wallpaper = {
   id: 999,
   title: "Liquid Void",
@@ -29,8 +89,7 @@ const fallbackWallpaperOfTheDay: Wallpaper = {
   device: "desktop",
 };
 
-function Hero() {
-  const [selectedWp, setSelectedWp] = useState<Wallpaper | null>(null);
+function Hero({ onOpenModal }: { onOpenModal: (wp: Wallpaper) => void }) {
   const { desktopWallpapers, mobileWallpapers, loading } = useWallpapers();
 
   // Dynamically select the newest wallpaper (first in the list since it's sorted by created_at desc)
@@ -78,7 +137,7 @@ function Hero() {
         </div>
 
         <motion.div
-          onClick={() => !loading && setSelectedWp(wallpaperOfTheDay)}
+          onClick={() => !loading && onOpenModal(wallpaperOfTheDay)}
           className="w-full md:w-7/12 h-[50vh] md:h-[65vh] relative group cursor-pointer hover-trigger"
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -165,11 +224,6 @@ function Hero() {
           </a>
         </div>
       </motion.div>
-
-      <WallpaperModal
-        selectedWp={selectedWp}
-        onClose={() => setSelectedWp(null)}
-      />
     </section>
   );
 }
@@ -451,7 +505,7 @@ export default function App() {
             exit={{ opacity: 0 }}
             className="flex flex-col h-full bg-void-black"
           >
-            <Gallery view="desktop" />
+            <Gallery view="desktop" onOpenModal={navigateToWallpaper} />
           </motion.div>
         );
       case "#phone":
@@ -463,7 +517,7 @@ export default function App() {
             exit={{ opacity: 0 }}
             className="flex flex-col h-full bg-void-black"
           >
-            <Gallery view="phone" />
+            <Gallery view="phone" onOpenModal={navigateToWallpaper} />
           </motion.div>
         );
       default:
@@ -475,10 +529,10 @@ export default function App() {
             exit={{ opacity: 0 }}
             className="flex flex-col h-full"
           >
-            <Hero />
+            <Hero onOpenModal={navigateToWallpaper} />
             <Marquee />
-            <LatestUploads />
-            <Gallery />
+            <LatestUploads onOpenModal={navigateToWallpaper} />
+            <Gallery onOpenModal={navigateToWallpaper} />
             <Manifesto />
           </motion.div>
         );
@@ -496,6 +550,8 @@ export default function App() {
       <AnimatePresence mode="wait">
         {isLoading && <Loader onComplete={() => setIsLoading(false)} />}
       </AnimatePresence>
+
+      <WallpaperRouteManager />
 
       {!isLoading && (
         <>

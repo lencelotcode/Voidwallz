@@ -4,8 +4,11 @@ import { useWallpapers } from "../hooks/useWallpapers";
 import { Wallpaper } from "../types";
 import WallpaperModal from "./WallpaperModal";
 
-export default function LatestUploads() {
-  const [selectedWp, setSelectedWp] = useState<Wallpaper | null>(null);
+export default function LatestUploads({
+  onOpenModal,
+}: {
+  onOpenModal: (wp: Wallpaper) => void;
+}) {
   const { desktopWallpapers, mobileWallpapers, loading } = useWallpapers();
 
   // Combine, sort by date, and take top 1
@@ -47,7 +50,7 @@ export default function LatestUploads() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-50px" }}
             transition={{ duration: 0.6, delay: i * 0.1 }}
-            onClick={() => setSelectedWp(wp)}
+            onClick={() => onOpenModal(wp)}
             className={`relative flex flex-col items-center justify-center overflow-hidden group cursor-pointer hover-trigger bg-void-black ${
               wp.device === "desktop"
                 ? "h-[400px] md:h-[500px]"
@@ -97,11 +100,6 @@ export default function LatestUploads() {
           </motion.div>
         ))}
       </div>
-
-      <WallpaperModal
-        selectedWp={selectedWp}
-        onClose={() => setSelectedWp(null)}
-      />
     </section>
   );
 }
