@@ -8,7 +8,7 @@ export default function LatestUploads() {
   const [selectedWp, setSelectedWp] = useState<Wallpaper | null>(null);
   const { desktopWallpapers, mobileWallpapers, loading } = useWallpapers();
 
-  // Combine, sort by date, and take top 4
+  // Combine, sort by date, and take top 1
   const allWallpapers = [...desktopWallpapers, ...mobileWallpapers];
   const latestWallpapers = allWallpapers
     .sort((a, b) => {
@@ -16,7 +16,7 @@ export default function LatestUploads() {
       const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
       return dateB - dateA;
     })
-    .slice(0, 4);
+    .slice(0, 1);
 
   if (loading || latestWallpapers.length === 0) return null;
 
@@ -25,10 +25,10 @@ export default function LatestUploads() {
       <div className="px-10 mb-12 flex flex-col md:flex-row justify-between items-end gap-6">
         <div>
           <span className="text-[10px] opacity-30 uppercase tracking-[0.3em] mb-4 block font-mono">
-            New Arrivals
+            New Arrival
           </span>
           <h2 className="text-4xl md:text-5xl font-serif italic font-light tracking-tighter leading-tight">
-            Latest Uploads
+            Latest Upload
           </h2>
         </div>
         <a
@@ -39,7 +39,7 @@ export default function LatestUploads() {
         </a>
       </div>
 
-      <div className="grid md:grid-cols-4 grid-cols-1 gap-px bg-white/5 border-y border-white/5">
+      <div className="w-full bg-white/5 border-y border-white/5">
         {latestWallpapers.map((wp, i) => (
           <motion.div
             key={`latest-${wp.id}`}
