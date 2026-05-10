@@ -30,7 +30,7 @@ const fallbackWallpaperOfTheDay: Wallpaper = {
 
 function Hero() {
   const [selectedWp, setSelectedWp] = useState<Wallpaper | null>(null);
-  const { desktopWallpapers, mobileWallpapers } = useWallpapers();
+  const { desktopWallpapers, mobileWallpapers, loading } = useWallpapers();
 
   // Dynamically select the newest wallpaper (first in the list since it's sorted by created_at desc)
   const dynamicWp = desktopWallpapers[0] || mobileWallpapers[0];
@@ -77,7 +77,7 @@ function Hero() {
         </div>
 
         <motion.div
-          onClick={() => setSelectedWp(wallpaperOfTheDay)}
+          onClick={() => !loading && setSelectedWp(wallpaperOfTheDay)}
           className="w-full md:w-7/12 h-[50vh] md:h-[65vh] relative group cursor-pointer hover-trigger"
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -88,31 +88,39 @@ function Hero() {
           }}
         >
           <div className="w-full h-full border border-white/10 p-2 relative overflow-hidden bg-white/5">
-            <img
-              src={wallpaperOfTheDay.previewUrl}
-              alt={wallpaperOfTheDay.title}
-              className="w-full h-full object-cover filter brightness-75 group-hover:scale-105 group-hover:brightness-90 transition-all duration-1000 ease-out"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
+            {loading ? (
+              <div className="w-full h-full bg-void-black/30 animate-pulse flex items-center justify-center">
+                <div className="w-full h-full bg-black/20 animate-shimmer" />
+              </div>
+            ) : (
+              <>
+                <img
+                  src={wallpaperOfTheDay.previewUrl}
+                  alt={wallpaperOfTheDay.title}
+                  className="w-full h-full object-cover filter brightness-75 group-hover:scale-105 group-hover:brightness-90 transition-all duration-1000 ease-out"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
 
-            <div className="absolute bottom-6 left-6 right-6 flex flex-col md:flex-row justify-between md:items-end gap-4">
-              <div>
-                <span className="text-[10px] opacity-70 uppercase tracking-widest font-mono mb-2 block text-white drop-shadow-md">
-                  {wallpaperOfTheDay.category}
-                </span>
-                <h3 className="text-2xl font-serif italic tracking-wide text-white drop-shadow-md">
-                  {wallpaperOfTheDay.title}
-                </h3>
-              </div>
-              <div className="flex gap-3">
-                <span className="text-[10px] border border-white/20 px-2 py-1 bg-black/40 backdrop-blur-md rounded font-mono text-white">
-                  {wallpaperOfTheDay.serial}
-                </span>
-                <span className="text-[10px] bg-white text-black px-2 py-1 rounded font-bold shadow-[0_0_15px_rgba(255,255,255,0.3)]">
-                  {wallpaperOfTheDay.format}
-                </span>
-              </div>
-            </div>
+                <div className="absolute bottom-6 left-6 right-6 flex flex-col md:flex-row justify-between md:items-end gap-4">
+                  <div>
+                    <span className="text-[10px] opacity-70 uppercase tracking-widest font-mono mb-2 block text-white drop-shadow-md">
+                      {wallpaperOfTheDay.category}
+                    </span>
+                    <h3 className="text-2xl font-serif italic tracking-wide text-white drop-shadow-md">
+                      {wallpaperOfTheDay.title}
+                    </h3>
+                  </div>
+                  <div className="flex gap-3">
+                    <span className="text-[10px] border border-white/20 px-2 py-1 bg-black/40 backdrop-blur-md rounded font-mono text-white">
+                      {wallpaperOfTheDay.serial}
+                    </span>
+                    <span className="text-[10px] bg-white text-black px-2 py-1 rounded font-bold shadow-[0_0_15px_rgba(255,255,255,0.3)]">
+                      {wallpaperOfTheDay.format}
+                    </span>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </motion.div>
       </div>
