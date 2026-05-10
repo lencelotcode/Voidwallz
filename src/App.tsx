@@ -554,11 +554,15 @@ export default function App() {
       <WallpaperRouteManager />
 
       {!isLoading && (
-        <>
+        <motion.div
+          initial={{ opacity: 0, filter: "blur(10px)" }}
+          animate={{ opacity: 1, filter: "blur(0px)" }}
+          transition={{ duration: 1.2, ease: [0.21, 0.47, 0.32, 0.98] }}
+        >
           <Navbar />
           <AnimatePresence mode="wait">{renderContent()}</AnimatePresence>
           <Footer />
-        </>
+        </motion.div>
       )}
     </div>
   );
