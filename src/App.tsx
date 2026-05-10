@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
 import Cursor from "./components/Cursor";
 import Gallery from "./components/Gallery";
+import LatestUploads from "./components/LatestUploads";
 import Loader from "./components/Loader";
 import Navbar from "./components/Navbar";
 import WallpaperModal from "./components/WallpaperModal";
@@ -476,6 +477,7 @@ export default function App() {
           >
             <Hero />
             <Marquee />
+            <LatestUploads />
             <Gallery />
             <Manifesto />
           </motion.div>

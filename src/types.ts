@@ -8,4 +8,5 @@ export interface Wallpaper {
   previewUrl: string;
   originalUrl: string;
   device: "desktop" | "mobile";
+  createdAt?: string;
 }

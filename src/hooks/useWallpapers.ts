@@ -42,6 +42,7 @@ const fallbackDesktop: Wallpaper[] = [
       "https://images.unsplash.com/photo-1604871000636-074fa5117945?auto=format&fit=crop&q=80&w=1600&h=900",
     device: "desktop",
     downloads: 0,
+    createdAt: new Date().toISOString(),
   },
   {
     id: 2,
@@ -55,6 +56,7 @@ const fallbackDesktop: Wallpaper[] = [
       "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&q=80&w=1600&h=900",
     device: "desktop",
     downloads: 0,
+    createdAt: new Date().toISOString(),
   },
   {
     id: 3,
@@ -68,6 +70,7 @@ const fallbackDesktop: Wallpaper[] = [
       "https://images.unsplash.com/photo-1518818419601-72c8673f5852?auto=format&fit=crop&q=80&w=1600&h=900",
     device: "desktop",
     downloads: 0,
+    createdAt: new Date().toISOString(),
   },
   {
     id: 4,
@@ -81,6 +84,7 @@ const fallbackDesktop: Wallpaper[] = [
       "https://images.unsplash.com/photo-1634055627253-15df1f63fcb3?auto=format&fit=crop&q=80&w=1600&h=900",
     device: "desktop",
     downloads: 0,
+    createdAt: new Date().toISOString(),
   },
 ];
 
@@ -97,6 +101,7 @@ const fallbackMobile: Wallpaper[] = [
       "https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?auto=format&fit=crop&q=80&w=600&h=1200",
     device: "mobile",
     downloads: 0,
+    createdAt: new Date().toISOString(),
   },
   {
     id: 6,
@@ -110,6 +115,7 @@ const fallbackMobile: Wallpaper[] = [
       "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=600&h=1200",
     device: "mobile",
     downloads: 0,
+    createdAt: new Date().toISOString(),
   },
   {
     id: 7,
@@ -123,6 +129,7 @@ const fallbackMobile: Wallpaper[] = [
       "https://images.unsplash.com/photo-1506443432602-ac2fcd6f54e0?auto=format&fit=crop&q=80&w=600&h=1200",
     device: "mobile",
     downloads: 0,
+    createdAt: new Date().toISOString(),
   },
   {
     id: 8,
@@ -136,6 +143,7 @@ const fallbackMobile: Wallpaper[] = [
       "https://images.unsplash.com/photo-1557672172-298e090bd0f1?auto=format&fit=crop&q=80&w=600&h=1200",
     device: "mobile",
     downloads: 0,
+    createdAt: new Date().toISOString(),
   },
 ];
 
@@ -231,6 +239,7 @@ function mapFileToWallpaper(
     previewUrl,
     originalUrl,
     device: folder,
+    createdAt: file.created_at,
   };
 }
 
