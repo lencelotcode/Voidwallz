@@ -10,7 +10,9 @@ export default function WallpaperModal({
   selectedWp: Wallpaper | null;
   onClose: () => void;
 }) {
-  const [isDownloading, setIsDownloading] = useState(false);
+  const [downloadStatus, setDownloadStatus] = useState<
+    "idle" | "downloading" | "success" | "error"
+  >("idle");
 
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
@@ -19,7 +21,7 @@ export default function WallpaperModal({
 
     if (selectedWp) {
       document.body.style.overflow = "hidden";
-      setIsDownloading(false);
+      setDownloadStatus("idle");
       window.addEventListener("keydown", handleEsc);
     } else {
       document.body.style.overflow = "";
@@ -32,17 +34,21 @@ export default function WallpaperModal({
   }, [selectedWp, onClose]);
 
   const handleDownload = async () => {
-    setIsDownloading(true);
+    if (downloadStatus === "downloading") return;
+    setDownloadStatus("downloading");
 
     if (!selectedWp?.originalUrl) {
       console.error("No original URL available for download");
-      setIsDownloading(false);
+      setDownloadStatus("error");
       return;
     }
 
     try {
       // Use fetch to download the blob, which avoids browser security blocks on direct cross-origin links
       const response = await fetch(selectedWp.originalUrl);
+
+      if (!response.ok) throw new Error("Network response was not ok");
+
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
 
@@ -63,18 +69,18 @@ export default function WallpaperModal({
       window.URL.revokeObjectURL(url);
 
       // Show success feedback
+      setDownloadStatus("success");
       console.log(`Downloading: ${selectedWp.title} (${selectedWp.format})`);
+
+      // Revert back to idle after 3 seconds
+      setTimeout(() => {
+        setDownloadStatus("idle");
+      }, 3000);
     } catch (error) {
       console.error("Download failed:", error);
-      alert("Failed to download wallpaper. Please try again.");
-      setIsDownloading(false);
-      return;
+      setDownloadStatus("error");
+      setTimeout(() => setDownloadStatus("idle"), 3000);
     }
-
-    setTimeout(() => {
-      setIsDownloading(false);
-      onClose();
-    }, 1500);
   };
 
   if (typeof document === "undefined") return null;
@@ -167,14 +173,24 @@ export default function WallpaperModal({
               </div>
 
               <button
-                className="w-full py-4 bg-white text-black font-bold uppercase tracking-widest text-[10px] hover:bg-white/80 transition-colors hover-trigger flex justify-center items-center gap-2 mt-8 md:mt-0 relative group"
+                className={`w-full py-4 font-bold uppercase tracking-widest text-[10px] transition-all hover-trigger flex justify-center items-center gap-2 mt-8 md:mt-0 relative group ${
+                  downloadStatus === "success"
+                    ? "bg-green-500/20 text-green-400 border border-green-500/50"
+                    : downloadStatus === "error"
+                      ? "bg-red-500/20 text-red-400 border border-red-500/50"
+                      : "bg-white text-black hover:bg-white/80"
+                }`}
                 onClick={handleDownload}
-                disabled={isDownloading}
+                disabled={downloadStatus === "downloading"}
               >
                 <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20">
-                  Download High-Quality Original
+                  {downloadStatus === "success"
+                    ? "Download Complete"
+                    : downloadStatus === "error"
+                      ? "Download Failed"
+                      : "Download High-Quality Original"}
                 </span>
-                {isDownloading ? (
+                {downloadStatus === "downloading" ? (
                   <>
                     <svg
                       className="animate-spin h-3 w-3 text-black"
@@ -197,6 +213,42 @@ export default function WallpaperModal({
                       ></path>
                     </svg>
                     Authorizing...
+                  </>
+                ) : downloadStatus === "success" ? (
+                  <>
+                    <svg
+                      className="w-3 h-3 text-green-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M5 13l4 4L19 7"
+                      ></path>
+                    </svg>
+                    Download Successful
+                  </>
+                ) : downloadStatus === "error" ? (
+                  <>
+                    <svg
+                      className="w-3 h-3 text-red-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M6 18L18 6M6 6l12 12"
+                      ></path>
+                    </svg>
+                    Download Failed
                   </>
                 ) : (
                   `Download High-Quality (${selectedWp.format})`
