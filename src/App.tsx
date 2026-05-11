@@ -6,6 +6,7 @@ import Gallery from "./components/Gallery";
 import LatestUploads from "./components/LatestUploads";
 import Loader from "./components/Loader";
 import Navbar from "./components/Navbar";
+import ReportPage from "./components/ReportPage";
 import WallpaperModal from "./components/WallpaperModal";
 import { Wallpaper } from "./types";
 import { useWallpapers } from "./hooks/useWallpapers";
@@ -407,6 +408,18 @@ function Footer() {
 
           <div className="flex flex-col gap-6">
             <span className="text-[10px] opacity-30 uppercase tracking-[0.2em] font-mono mb-2 block">
+              Support
+            </span>
+            <a
+              href="#report"
+              className="text-sm opacity-60 hover:opacity-100 transition-opacity hover-trigger text-red-400/80 hover:text-red-400"
+            >
+              Report Anomaly
+            </a>
+          </div>
+
+          <div className="flex flex-col gap-6">
+            <span className="text-[10px] opacity-30 uppercase tracking-[0.2em] font-mono mb-2 block">
               Legal
             </span>
             <a
@@ -489,7 +502,32 @@ export default function App() {
   }, []);
 
   const renderContent = () => {
+    const isWallpaperRoute = /^\/(desktop|mobile)\/([^/]+)\/?$/.test(
+      window.location.pathname,
+    );
+
+    // Always render the main view if we are on a wallpaper route so the modal can overlay the gallery.
+    if (isWallpaperRoute || hash === "" || hash === "#main") {
+      return (
+        <motion.div
+          key="main"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="flex flex-col h-full"
+        >
+          <Hero onOpenModal={navigateToWallpaper} />
+          <Marquee />
+          <LatestUploads onOpenModal={navigateToWallpaper} />
+          <Gallery onOpenModal={navigateToWallpaper} />
+          <Manifesto />
+        </motion.div>
+      );
+    }
+
     switch (hash) {
+      case "#report":
+        return <ReportPage key="report" />;
       case "#privacy":
         return <PrivacyPolicy key="privacy" />;
       case "#terms":
