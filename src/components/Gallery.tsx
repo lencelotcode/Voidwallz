@@ -1,8 +1,9 @@
-import { motion } from "motion/react";
-import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "motion/react";
+import { useState, useMemo } from "react";
+import { Search, Heart } from "lucide-react";
 import { Wallpaper } from "../types";
 import { useWallpapers } from "../hooks/useWallpapers";
-import WallpaperModal from "./WallpaperModal";
+import { useFavorites } from "../hooks/useFavorites";
 
 export default function Gallery({
   view = "all",
@@ -19,15 +20,109 @@ export default function Gallery({
     error,
     reload,
   } = useWallpapers();
+  const { isFavorite } = useFavorites();
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
+  // Extract unique categories
+  const categories = useMemo(() => {
+    const all = [...desktopWallpapers, ...mobileWallpapers];
+    const unique = Array.from(new Set(all.map((wp) => wp.category)));
+    return unique.sort();
+  }, [desktopWallpapers, mobileWallpapers]);
+
+  // Filter wallpapers based on search and category
+  const filterWallpapers = (wallpapers: Wallpaper[]) => {
+    return wallpapers.filter((wp) => {
+      const matchesSearch =
+        wp.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        wp.category.toLowerCase().includes(searchQuery.toLowerCase());
+
+      let matchesCategory = true;
+      if (selectedCategory === "Favorites") {
+        matchesCategory = isFavorite(wp.id);
+      } else if (selectedCategory) {
+        matchesCategory = wp.category === selectedCategory;
+      }
+
+      return matchesSearch && matchesCategory;
+    });
+  };
+
   // Determine which wallpapers to display based on view
-  const displayedDesktop = view === "phone" ? [] : desktopWallpapers;
-  const displayedMobile = view === "desktop" ? [] : mobileWallpapers;
+  const displayedDesktop = filterWallpapers(
+    view === "phone" ? [] : desktopWallpapers,
+  );
+  const displayedMobile = filterWallpapers(
+    view === "desktop" ? [] : mobileWallpapers,
+  );
 
   return (
     <section
       id={view === "all" ? "gallery" : undefined}
       className={`border-t border-white/5 bg-void-black relative ${view !== "all" ? "min-h-[100dvh] pt-32 pb-24" : ""}`}
     >
+      {/* Filters & Search */}
+      <div className="sticky top-[73px] z-40 bg-void-black/80 backdrop-blur-md border-b border-white/5 px-6 md:px-10 py-4 flex flex-col md:flex-row justify-between items-center gap-4 transition-all duration-300">
+        {/* Categories */}
+        <div className="flex gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 scrollbar-hide">
+          <button
+            onClick={() => setSelectedCategory(null)}
+            className={`whitespace-nowrap px-3 py-1.5 text-[10px] font-mono uppercase tracking-widest border transition-colors ${
+              selectedCategory === null
+                ? "bg-white text-black border-white"
+                : "bg-transparent text-white/60 border-white/10 hover:border-white/30 hover:text-white"
+            }`}
+          >
+            All
+          </button>
+          <button
+            onClick={() => setSelectedCategory("Favorites")}
+            className={`whitespace-nowrap px-3 py-1.5 text-[10px] font-mono uppercase tracking-widest border transition-colors flex items-center gap-1.5 ${
+              selectedCategory === "Favorites"
+                ? "bg-red-500/10 text-red-400 border-red-500/50"
+                : "bg-transparent text-white/60 border-white/10 hover:border-white/30 hover:text-red-400"
+            }`}
+          >
+            <Heart
+              size={12}
+              fill={selectedCategory === "Favorites" ? "currentColor" : "none"}
+              className={selectedCategory === "Favorites" ? "" : "opacity-70"}
+            />
+            Favorites
+          </button>
+          {categories.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setSelectedCategory(cat)}
+              className={`whitespace-nowrap px-3 py-1.5 text-[10px] font-mono uppercase tracking-widest border transition-colors ${
+                selectedCategory === cat
+                  ? "bg-white text-black border-white"
+                  : "bg-transparent text-white/60 border-white/10 hover:border-white/30 hover:text-white"
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+
+        {/* Search */}
+        <div className="relative w-full md:w-64">
+          <input
+            type="text"
+            placeholder="SEARCH..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full bg-white/5 border border-white/10 px-4 py-2 pl-10 text-xs font-mono uppercase tracking-widest text-white placeholder-white/30 focus:outline-none focus:border-white/30 transition-colors"
+          />
+          <Search
+            size={14}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30"
+          />
+        </div>
+      </div>
+
       {/* Loading State */}
       {loading && (
         <div className="flex items-center justify-center py-32">
@@ -149,6 +244,16 @@ export default function Gallery({
                       {wp.title}
                     </h3>
                   </div>
+
+                  {isFavorite(wp.id) && (
+                    <div className="absolute top-6 right-6 z-30 drop-shadow-md">
+                      <Heart
+                        size={16}
+                        fill="white"
+                        className="text-white opacity-80"
+                      />
+                    </div>
+                  )}
                 </motion.div>
               ))}
             </div>
@@ -212,6 +317,16 @@ export default function Gallery({
                       {wp.title}
                     </h3>
                   </div>
+
+                  {isFavorite(wp.id) && (
+                    <div className="absolute top-6 right-6 z-30 drop-shadow-md">
+                      <Heart
+                        size={16}
+                        fill="white"
+                        className="text-white opacity-80"
+                      />
+                    </div>
+                  )}
                 </motion.div>
               ))}
             </div>

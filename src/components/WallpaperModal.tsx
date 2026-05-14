@@ -1,7 +1,10 @@
 import { AnimatePresence, motion } from "motion/react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { createPortal } from "react-dom";
+import { ChevronLeft, ChevronRight, Heart } from "lucide-react";
 import { Wallpaper } from "../types";
+import { useWallpapers } from "../hooks/useWallpapers";
+import { useFavorites } from "../hooks/useFavorites";
 
 export default function WallpaperModal({
   selectedWp,
@@ -13,25 +16,61 @@ export default function WallpaperModal({
   const [downloadStatus, setDownloadStatus] = useState<
     "idle" | "downloading" | "success" | "error"
   >("idle");
+  const { desktopWallpapers, mobileWallpapers } = useWallpapers();
+  const { toggleFavorite, isFavorite } = useFavorites();
+
+  // Combine wallpapers for navigation
+  const allWallpapers = useMemo(() => {
+    // Keep desktop and mobile separated but in sequence, or just use the current device's list
+    if (!selectedWp) return [];
+    return selectedWp.device === "desktop"
+      ? desktopWallpapers
+      : mobileWallpapers;
+  }, [selectedWp, desktopWallpapers, mobileWallpapers]);
+
+  const currentIndex = useMemo(() => {
+    if (!selectedWp) return -1;
+    return allWallpapers.findIndex((wp) => wp.id === selectedWp.id);
+  }, [selectedWp, allWallpapers]);
+
+  const handleNext = () => {
+    if (currentIndex < allWallpapers.length - 1) {
+      const nextWp = allWallpapers[currentIndex + 1];
+      const slug = nextWp.title.toLowerCase().replace(/\s+/g, "-");
+      window.history.pushState(null, "", `/${nextWp.device}/${slug}/`);
+      window.dispatchEvent(new Event("wallpaper-navigate"));
+    }
+  };
+
+  const handlePrev = () => {
+    if (currentIndex > 0) {
+      const prevWp = allWallpapers[currentIndex - 1];
+      const slug = prevWp.title.toLowerCase().replace(/\s+/g, "-");
+      window.history.pushState(null, "", `/${prevWp.device}/${slug}/`);
+      window.dispatchEvent(new Event("wallpaper-navigate"));
+    }
+  };
 
   useEffect(() => {
-    const handleEsc = (e: KeyboardEvent) => {
+    const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
+      if (e.key === "ArrowRight") handleNext();
+      if (e.key === "ArrowLeft") handlePrev();
     };
 
     if (selectedWp) {
       document.body.style.overflow = "hidden";
       setDownloadStatus("idle");
-      window.addEventListener("keydown", handleEsc);
+      window.addEventListener("keydown", handleKeyDown);
     } else {
       document.body.style.overflow = "";
     }
 
     return () => {
       document.body.style.overflow = "";
-      window.removeEventListener("keydown", handleEsc);
+      window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [selectedWp, onClose]);
+  }, [selectedWp, onClose, currentIndex, allWallpapers]);
 
   const handleDownload = async () => {
     if (downloadStatus === "downloading") return;
@@ -129,6 +168,34 @@ export default function WallpaperModal({
             className="w-full max-w-5xl max-h-[90vh] overflow-y-auto bg-void-black border border-white/10 flex flex-col md:flex-row shadow-2xl relative z-10"
             onClick={(e) => e.stopPropagation()}
           >
+            {/* Navigation Buttons (Desktop) */}
+            <div className="absolute inset-y-0 left-0 w-24 hidden md:flex items-center justify-start z-20 pointer-events-none opacity-0 hover:opacity-100 transition-opacity duration-300">
+              {currentIndex > 0 && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handlePrev();
+                  }}
+                  className="pointer-events-auto p-4 text-white/50 hover:text-white transition-colors"
+                >
+                  <ChevronLeft size={48} strokeWidth={1} />
+                </button>
+              )}
+            </div>
+            <div className="absolute inset-y-0 right-0 w-24 hidden md:flex items-center justify-end z-20 pointer-events-none opacity-0 hover:opacity-100 transition-opacity duration-300">
+              {currentIndex < allWallpapers.length - 1 && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleNext();
+                  }}
+                  className="pointer-events-auto p-4 text-white/50 hover:text-white transition-colors"
+                >
+                  <ChevronRight size={48} strokeWidth={1} />
+                </button>
+              )}
+            </div>
+
             <div className="w-full md:w-3/5 min-h-[50vh] flex items-center justify-center bg-void-black/50 relative overflow-hidden border-b md:border-b-0 md:border-r border-white/10 group p-6 md:p-8">
               <img
                 src={selectedWp.previewUrl}
@@ -140,9 +207,27 @@ export default function WallpaperModal({
 
             <div className="w-full md:w-2/5 p-6 md:p-10 flex flex-col justify-between bg-void-gray/30 backdrop-blur-md">
               <div>
-                <span className="text-[10px] opacity-40 font-mono mb-4 block uppercase tracking-widest">
-                  Metadata
-                </span>
+                <div className="flex justify-between items-start mb-4">
+                  <span className="text-[10px] opacity-40 font-mono block uppercase tracking-widest">
+                    Metadata
+                  </span>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleFavorite(selectedWp.id);
+                    }}
+                    className={`p-2 rounded-full transition-colors ${
+                      isFavorite(selectedWp.id)
+                        ? "bg-red-500/20 text-red-500 hover:bg-red-500/30"
+                        : "bg-white/5 text-white/50 hover:bg-white/10 hover:text-white"
+                    }`}
+                  >
+                    <Heart
+                      size={20}
+                      fill={isFavorite(selectedWp.id) ? "currentColor" : "none"}
+                    />
+                  </button>
+                </div>
                 <h2 className="text-3xl md:text-5xl font-serif italic tracking-tight mb-2 leading-none">
                   {selectedWp.title}
                 </h2>

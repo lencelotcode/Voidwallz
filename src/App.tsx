@@ -1,6 +1,6 @@
 import { Instagram, Twitter } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
-import { useEffect, useState } from "react";
+import { AnimatePresence, motion, useScroll, useTransform } from "motion/react";
+import { useEffect, useState, useRef } from "react";
 import Cursor from "./components/Cursor";
 import Gallery from "./components/Gallery";
 import LatestUploads from "./components/LatestUploads";
@@ -92,6 +92,9 @@ const fallbackWallpaperOfTheDay: Wallpaper = {
 
 function Hero({ onOpenModal }: { onOpenModal: (wp: Wallpaper) => void }) {
   const { desktopWallpapers, mobileWallpapers, loading } = useWallpapers();
+  const { scrollY } = useScroll();
+  const yText = useTransform(scrollY, [0, 1000], [0, 150]);
+  const yImage = useTransform(scrollY, [0, 1000], [0, -100]);
 
   // Dynamically select the newest wallpaper (first in the list since it's sorted by created_at desc)
   const dynamicWp = desktopWallpapers[0] || mobileWallpapers[0];
@@ -104,7 +107,10 @@ function Hero({ onOpenModal }: { onOpenModal: (wp: Wallpaper) => void }) {
       <div className="absolute inset-0 bg-void-black z-0 pointer-events-none" />
 
       <div className="relative z-10 w-full max-w-[1600px] mx-auto flex flex-col md:flex-row items-center justify-between gap-16 pb-24 md:pb-16 mt-8 md:mt-0">
-        <div className="flex flex-col w-full md:w-5/12">
+        <motion.div
+          style={{ y: yText }}
+          className="flex flex-col w-full md:w-5/12"
+        >
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -135,9 +141,10 @@ function Hero({ onOpenModal }: { onOpenModal: (wp: Wallpaper) => void }) {
             Curated minimalist captures designed to disappear into your
             interface. Focus on negative space and subtle gradients.
           </motion.p>
-        </div>
+        </motion.div>
 
         <motion.div
+          style={{ y: yImage }}
           onClick={() => !loading && onOpenModal(wallpaperOfTheDay)}
           className="w-full md:w-7/12 h-[50vh] md:h-[65vh] relative group cursor-pointer hover-trigger"
           initial={{ opacity: 0, scale: 0.95 }}
@@ -249,6 +256,16 @@ function Marquee() {
 }
 
 function Manifesto() {
+  const ref = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start end", "end start"],
+  });
+
+  // Parallax effects
+  const yText = useTransform(scrollYProgress, [0, 1], [50, -50]);
+  const ySteps = useTransform(scrollYProgress, [0, 1], [150, -150]);
+
   const steps = [
     {
       num: "01",
@@ -270,13 +287,17 @@ function Manifesto() {
   return (
     <section
       id="about"
+      ref={ref}
       className="py-32 md:py-48 px-6 md:px-10 border-t border-white/5 bg-void-black relative overflow-hidden"
     >
       {/* Ambient background glow */}
       <div className="absolute top-1/2 left-1/4 w-[400px] h-[400px] bg-white/[0.015] rounded-full blur-[100px] pointer-events-none -translate-y-1/2 mix-blend-screen" />
 
       <div className="max-w-[1400px] mx-auto flex flex-col lg:flex-row gap-20 lg:gap-32 justify-between relative z-10">
-        <div className="lg:w-5/12 flex flex-col justify-start">
+        <motion.div
+          style={{ y: yText }}
+          className="lg:w-5/12 flex flex-col justify-start"
+        >
           <motion.p
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -295,9 +316,12 @@ function Manifesto() {
           >
             How we craft our voids.
           </motion.h2>
-        </div>
+        </motion.div>
 
-        <div className="lg:w-7/12 relative pl-8 md:pl-16">
+        <motion.div
+          style={{ y: ySteps }}
+          className="lg:w-7/12 relative pl-8 md:pl-16"
+        >
           {/* Animated Vertical Line */}
           <motion.div
             initial={{ height: 0 }}
@@ -345,7 +369,7 @@ function Manifesto() {
               </motion.div>
             ))}
           </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   );
