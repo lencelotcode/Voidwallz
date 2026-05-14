@@ -435,7 +435,12 @@ function Footer() {
               Support
             </span>
             <a
-              href="#report"
+              href="/report"
+              onClick={(e) => {
+                e.preventDefault();
+                window.history.pushState(null, "", "/report");
+                window.dispatchEvent(new Event("popstate"));
+              }}
               className="text-sm opacity-60 hover:opacity-100 transition-opacity hover-trigger text-red-400/80 hover:text-red-400"
             >
               Report Anomaly
@@ -447,19 +452,34 @@ function Footer() {
               Legal
             </span>
             <a
-              href="#privacy"
+              href="/privacy"
+              onClick={(e) => {
+                e.preventDefault();
+                window.history.pushState(null, "", "/privacy");
+                window.dispatchEvent(new Event("popstate"));
+              }}
               className="text-sm opacity-60 hover:opacity-100 transition-opacity hover-trigger"
             >
               Privacy Policy
             </a>
             <a
-              href="#terms"
+              href="/terms"
+              onClick={(e) => {
+                e.preventDefault();
+                window.history.pushState(null, "", "/terms");
+                window.dispatchEvent(new Event("popstate"));
+              }}
               className="text-sm opacity-60 hover:opacity-100 transition-opacity hover-trigger"
             >
               Terms of Service
             </a>
             <a
-              href="#license"
+              href="/license"
+              onClick={(e) => {
+                e.preventDefault();
+                window.history.pushState(null, "", "/license");
+                window.dispatchEvent(new Event("popstate"));
+              }}
               className="text-sm opacity-60 hover:opacity-100 transition-opacity hover-trigger"
             >
               License
@@ -515,23 +535,64 @@ function Footer() {
 export default function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [hash, setHash] = useState(window.location.hash);
+  const [path, setPath] = useState(window.location.pathname);
 
   useEffect(() => {
-    const handleHashChange = () => {
+    const handleLocationChange = () => {
       setHash(window.location.hash);
+      setPath(window.location.pathname);
       window.scrollTo(0, 0);
     };
-    window.addEventListener("hashchange", handleHashChange);
-    return () => window.removeEventListener("hashchange", handleHashChange);
+    window.addEventListener("hashchange", handleLocationChange);
+    window.addEventListener("popstate", handleLocationChange);
+    return () => {
+      window.removeEventListener("hashchange", handleLocationChange);
+      window.removeEventListener("popstate", handleLocationChange);
+    };
   }, []);
 
   const renderContent = () => {
-    const isWallpaperRoute = /^\/(desktop|mobile)\/([^/]+)\/?$/.test(
-      window.location.pathname,
-    );
+    const isWallpaperRoute = /^\/(desktop|mobile)\/([^/]+)\/?$/.test(path);
+
+    if (path === "/report" || hash === "#report")
+      return <ReportPage key="report" />;
+    if (path === "/privacy" || hash === "#privacy")
+      return <PrivacyPolicy key="privacy" />;
+    if (path === "/terms" || hash === "#terms")
+      return <TermsOfService key="terms" />;
+    if (path === "/license" || hash === "#license")
+      return <License key="license" />;
+
+    if (hash === "#desktop") {
+      return (
+        <motion.div
+          key="desktop"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="flex flex-col h-full bg-void-black"
+        >
+          <Gallery view="desktop" onOpenModal={navigateToWallpaper} />
+        </motion.div>
+      );
+    }
+
+    if (hash === "#phone") {
+      return (
+        <motion.div
+          key="phone"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="flex flex-col h-full bg-void-black"
+        >
+          <Gallery view="phone" onOpenModal={navigateToWallpaper} />
+        </motion.div>
+      );
+    }
 
     // Always render the main view if we are on a wallpaper route so the modal can overlay the gallery.
-    if (isWallpaperRoute || hash === "" || hash === "#main") {
+    if (isWallpaperRoute || path === "/" || hash === "" || hash === "#main") {
       return (
         <motion.div
           key="main"
@@ -549,56 +610,7 @@ export default function App() {
       );
     }
 
-    switch (hash) {
-      case "#report":
-        return <ReportPage key="report" />;
-      case "#privacy":
-        return <PrivacyPolicy key="privacy" />;
-      case "#terms":
-        return <TermsOfService key="terms" />;
-      case "#license":
-        return <License key="license" />;
-      case "#desktop":
-        return (
-          <motion.div
-            key="desktop"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="flex flex-col h-full bg-void-black"
-          >
-            <Gallery view="desktop" onOpenModal={navigateToWallpaper} />
-          </motion.div>
-        );
-      case "#phone":
-        return (
-          <motion.div
-            key="phone"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="flex flex-col h-full bg-void-black"
-          >
-            <Gallery view="phone" onOpenModal={navigateToWallpaper} />
-          </motion.div>
-        );
-      default:
-        return (
-          <motion.div
-            key="main"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="flex flex-col h-full"
-          >
-            <Hero onOpenModal={navigateToWallpaper} />
-            <Marquee />
-            <LatestUploads onOpenModal={navigateToWallpaper} />
-            <Gallery onOpenModal={navigateToWallpaper} />
-            <Manifesto />
-          </motion.div>
-        );
-    }
+    return null;
   };
 
   return (
