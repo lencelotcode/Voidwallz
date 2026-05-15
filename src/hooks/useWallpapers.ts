@@ -31,7 +31,7 @@ interface UseWallpapersResult {
 // Fallback static data when Supabase is unavailable
 const fallbackDesktop: Wallpaper[] = [
   {
-    id: 1,
+    id: "desktop-vortex-1",
     title: "Vortex I",
     serial: "ID: V-082",
     category: "Minimal / Abstract",
@@ -45,7 +45,7 @@ const fallbackDesktop: Wallpaper[] = [
     createdAt: new Date().toISOString(),
   },
   {
-    id: 2,
+    id: "desktop-angular-drift",
     title: "Angular Drift",
     serial: "ID: V-104",
     category: "Dark / Geometry",
@@ -59,7 +59,7 @@ const fallbackDesktop: Wallpaper[] = [
     createdAt: new Date().toISOString(),
   },
   {
-    id: 3,
+    id: "desktop-nested-void",
     title: "Nested Void",
     serial: "ID: V-211",
     category: "Monochrome / Render",
@@ -73,7 +73,7 @@ const fallbackDesktop: Wallpaper[] = [
     createdAt: new Date().toISOString(),
   },
   {
-    id: 4,
+    id: "desktop-chrome-aesthetic",
     title: "Chrome Aesthetic",
     serial: "ID: V-310",
     category: "3D / Silver",
@@ -90,7 +90,7 @@ const fallbackDesktop: Wallpaper[] = [
 
 const fallbackMobile: Wallpaper[] = [
   {
-    id: 5,
+    id: "mobile-singularity",
     title: "Singularity",
     serial: "ID: V-001",
     category: "Dark / Space",
@@ -104,7 +104,7 @@ const fallbackMobile: Wallpaper[] = [
     createdAt: new Date().toISOString(),
   },
   {
-    id: 6,
+    id: "mobile-obsidian-wave",
     title: "Obsidian Wave",
     serial: "ID: V-999",
     category: "Liquid / Fluid",
@@ -118,7 +118,7 @@ const fallbackMobile: Wallpaper[] = [
     createdAt: new Date().toISOString(),
   },
   {
-    id: 7,
+    id: "mobile-grain-matrix",
     title: "Grain Matrix",
     serial: "ID: V-402",
     category: "Texture / Film",
@@ -132,7 +132,7 @@ const fallbackMobile: Wallpaper[] = [
     createdAt: new Date().toISOString(),
   },
   {
-    id: 8,
+    id: "mobile-void-aura",
     title: "Void Aura",
     serial: "ID: V-505",
     category: "Gradient / Minimal",
@@ -228,7 +228,7 @@ function mapFileToWallpaper(
     Math.floor(Math.random() * 5000);
 
   return {
-    id: index + 1,
+    id: `${folder}-${baseName}`,
     title,
     serial: generateSerial(file.name, index),
     category,
@@ -410,7 +410,7 @@ export function useWallpapers(): UseWallpapersResult {
 /**
  * Hook to get a single wallpaper by ID
  */
-export function useWallpaper(id: number): Wallpaper | null {
+export function useWallpaper(id: string): Wallpaper | null {
   const { desktopWallpapers, mobileWallpapers } = useWallpapers();
   const allWallpapers = [...desktopWallpapers, ...mobileWallpapers];
   return allWallpapers.find((wp) => wp.id === id) || null;

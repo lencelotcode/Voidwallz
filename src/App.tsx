@@ -77,7 +77,7 @@ function WallpaperRouteManager() {
 }
 
 const fallbackWallpaperOfTheDay: Wallpaper = {
-  id: 999,
+  id: "desktop-liquid-void",
   title: "Liquid Void",
   serial: "ID: V-142",
   category: "Wallpaper of the Day",

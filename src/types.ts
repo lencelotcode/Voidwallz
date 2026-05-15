@@ -1,5 +1,5 @@
 export interface Wallpaper {
-  id: number;
+  id: string;
   title: string;
   serial: string;
   category: string;

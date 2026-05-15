@@ -1,10 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 export function useFavorites() {
-  const [favorites, setFavorites] = useState<number[]>([]);
+  const [favorites, setFavorites] = useState<string[]>([]);
 
-  useEffect(() => {
-    // Load favorites from local storage on mount
+  const loadFavorites = useCallback(() => {
     const storedFavorites = localStorage.getItem("voidwallz_favorites");
     if (storedFavorites) {
       try {
@@ -15,7 +14,27 @@ export function useFavorites() {
     }
   }, []);
 
-  const toggleFavorite = (id: number) => {
+  useEffect(() => {
+    loadFavorites();
+
+    // Sync across tabs/instances
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "voidwallz_favorites") {
+        loadFavorites();
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    // Custom event for same-tab sync
+    window.addEventListener("favorites-updated", loadFavorites);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener("favorites-updated", loadFavorites);
+    };
+  }, [loadFavorites]);
+
+  const toggleFavorite = (id: string) => {
     setFavorites((prev) => {
       let newFavorites;
       if (prev.includes(id)) {
@@ -24,11 +43,13 @@ export function useFavorites() {
         newFavorites = [...prev, id];
       }
       localStorage.setItem("voidwallz_favorites", JSON.stringify(newFavorites));
+      // Dispatch custom event for same-tab sync
+      window.dispatchEvent(new Event("favorites-updated"));
       return newFavorites;
     });
   };
 
-  const isFavorite = (id: number) => favorites.includes(id);
+  const isFavorite = (id: string) => favorites.includes(id);
 
   return { favorites, toggleFavorite, isFavorite };
 }
