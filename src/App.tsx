@@ -81,7 +81,11 @@ function WallpaperRouteManager({
   }, [desktopWallpapers, mobileWallpapers, loading]);
 
   const handleClose = () => {
-    window.history.pushState(null, "", window.location.hash || "/");
+    window.history.pushState(
+      null,
+      "",
+      window.location.pathname === "/" ? "/" : window.location.pathname,
+    );
     window.dispatchEvent(new Event("wallpaper-navigate"));
   };
 
@@ -300,7 +304,17 @@ function Hero({
         </div>
         <div className="mt-2 md:mt-0 ml-auto md:ml-0">
           <a
-            href="#gallery"
+            href="/"
+            onClick={(e) => {
+              e.preventDefault();
+              window.history.pushState(null, "", "/");
+              window.dispatchEvent(new Event("popstate"));
+              setTimeout(() => {
+                document
+                  .getElementById("gallery")
+                  ?.scrollIntoView({ behavior: "smooth" });
+              }, 100);
+            }}
             className="text-[10px] uppercase font-bold tracking-widest hover:text-white/50 transition-colors"
           >
             Scroll to explore &darr;
@@ -471,7 +485,8 @@ function Footer() {
               Social
             </span>
             <a
-              href="#"
+              href="/"
+              onClick={(e) => e.preventDefault()}
               className="flex items-center gap-3 text-sm opacity-60 hover:opacity-100 transition-opacity hover-trigger group"
             >
               <Instagram
@@ -481,7 +496,8 @@ function Footer() {
               <span>Instagram</span>
             </a>
             <a
-              href="#"
+              href="/"
+              onClick={(e) => e.preventDefault()}
               className="flex items-center gap-3 text-sm opacity-60 hover:opacity-100 transition-opacity hover-trigger group"
             >
               <Twitter
@@ -676,6 +692,14 @@ function FeaturedCollections({
                 const gallery = document.getElementById("gallery");
                 if (gallery) {
                   gallery.scrollIntoView({ behavior: "smooth" });
+                } else {
+                  window.history.pushState(null, "", "/");
+                  window.dispatchEvent(new Event("popstate"));
+                  setTimeout(() => {
+                    document
+                      .getElementById("gallery")
+                      ?.scrollIntoView({ behavior: "smooth" });
+                  }, 100);
                 }
               }}
             >
@@ -751,7 +775,7 @@ export default function App() {
     if (path === "/license" || hash === "#license")
       return <License key="license" />;
 
-    if (hash === "#desktop") {
+    if (path === "/desktop") {
       return (
         <motion.div
           key="desktop"
@@ -770,7 +794,7 @@ export default function App() {
       );
     }
 
-    if (hash === "#phone") {
+    if (path === "/phone") {
       return (
         <motion.div
           key="phone"
@@ -790,7 +814,7 @@ export default function App() {
     }
 
     // Always render the main view if we are on a wallpaper route so the modal can overlay the gallery.
-    if (isWallpaperRoute || path === "/" || hash === "" || hash === "#main") {
+    if (isWallpaperRoute || path === "/" || path === "" || hash === "#main") {
       return (
         <motion.div
           key="main"

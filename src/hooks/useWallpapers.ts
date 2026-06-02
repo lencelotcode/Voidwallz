@@ -228,8 +228,8 @@ function mapFileToWallpaper(
   const previewUrl = supabase
     ? supabase.storage.from(BUCKET_NAME).getPublicUrl(previewPath, {
         transform: {
-          width: 1920,
-          height: 1080,
+          width: folder === "desktop" ? 1920 : 1080,
+          height: folder === "desktop" ? 1080 : 1920,
           resize: "cover",
           quality: 90,
         },

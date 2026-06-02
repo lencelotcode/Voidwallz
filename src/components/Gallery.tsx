@@ -269,7 +269,8 @@ export default function Gallery({
                         src={wp.previewUrl}
                         placeholder={wp.tinyUrl}
                         alt={wp.title}
-                        className={`w-full h-full ${isOledOptimized ? "oled-image" : ""}`}
+                        className={isOledOptimized ? "oled-image" : ""}
+                        containerClassName="w-full h-full"
                       />
                     </div>
                     <div className="w-12 h-6 md:h-8 bg-gradient-to-b from-gray-800 to-black rounded-b-sm shadow-xl relative z-0 -mt-1" />
@@ -349,7 +350,8 @@ export default function Gallery({
                         src={wp.previewUrl}
                         placeholder={wp.tinyUrl}
                         alt={wp.title}
-                        className={`w-full h-full rounded-[1.5rem] ${isOledOptimized ? "oled-image" : ""}`}
+                        className={isOledOptimized ? "oled-image" : ""}
+                        containerClassName="w-full h-full rounded-[1.5rem]"
                       />
                     </div>
                   </div>

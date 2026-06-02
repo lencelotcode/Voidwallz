@@ -40,7 +40,17 @@ export default function LatestUploads({
           </h2>
         </div>
         <a
-          href="#gallery"
+          href="/"
+          onClick={(e) => {
+            e.preventDefault();
+            window.history.pushState(null, "", "/");
+            window.dispatchEvent(new Event("popstate"));
+            setTimeout(() => {
+              document
+                .getElementById("gallery")
+                ?.scrollIntoView({ behavior: "smooth" });
+            }, 100);
+          }}
           className="text-[10px] font-mono uppercase tracking-widest text-white/50 hover:text-white transition-colors hover-trigger"
         >
           View Full Gallery &rarr;
@@ -77,7 +87,8 @@ export default function LatestUploads({
                       src={wp.previewUrl}
                       placeholder={wp.tinyUrl}
                       alt={wp.title}
-                      className={`w-full h-full ${isOledOptimized ? "oled-image" : ""}`}
+                      className={isOledOptimized ? "oled-image" : ""}
+                      containerClassName="w-full h-full"
                     />
                   </div>
                   <div className="w-12 h-6 md:h-8 bg-gradient-to-b from-gray-800 to-black rounded-b-sm shadow-xl relative z-0 -mt-1" />
@@ -90,7 +101,8 @@ export default function LatestUploads({
                     src={wp.previewUrl}
                     placeholder={wp.tinyUrl}
                     alt={wp.title}
-                    className={`w-full h-full rounded-[1.5rem] ${isOledOptimized ? "oled-image" : ""}`}
+                    className={isOledOptimized ? "oled-image" : ""}
+                    containerClassName="w-full h-full rounded-[1.5rem]"
                   />
                 </div>
               )}

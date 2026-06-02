@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { createPortal } from "react-dom";
@@ -23,11 +23,25 @@ export default function Navbar({
     };
   }, [isOpen]);
 
+  const handleNavigate = (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    path: string,
+  ) => {
+    e.preventDefault();
+    window.history.pushState(null, "", path);
+    window.dispatchEvent(new Event("popstate"));
+    setIsOpen(false);
+  };
+
   return (
     <>
       <nav className="fixed top-0 w-full z-50 px-6 md:px-10 py-4 border-b border-white/5 flex justify-between items-center bg-void-black/80 backdrop-blur-md">
         <div className="w-1/3 flex justify-start items-center">
-          <a href="#" className="flex items-center gap-3 hover-trigger group">
+          <a
+            href="/"
+            onClick={(e) => handleNavigate(e, "/")}
+            className="flex items-center gap-3 hover-trigger group"
+          >
             <img
               src="/logomain.png?v=2"
               alt="Voidwallz Logo"
@@ -41,15 +55,24 @@ export default function Navbar({
         <div className="w-1/3 flex justify-center">
           <nav className="hidden md:flex space-x-8 text-[11px] uppercase tracking-[0.2em] opacity-60">
             <a
-              href="#"
+              href="/"
+              onClick={(e) => handleNavigate(e, "/")}
               className="hover:opacity-100 text-white opacity-100 transition-opacity"
             >
               Home
             </a>
-            <a href="#desktop" className="hover:opacity-100 transition-opacity">
+            <a
+              href="/desktop"
+              onClick={(e) => handleNavigate(e, "/desktop")}
+              className="hover:opacity-100 transition-opacity"
+            >
               Desktop
             </a>
-            <a href="#phone" className="hover:opacity-100 transition-opacity">
+            <a
+              href="/phone"
+              onClick={(e) => handleNavigate(e, "/phone")}
+              className="hover:opacity-100 transition-opacity"
+            >
               Phone
             </a>
           </nav>
@@ -101,22 +124,22 @@ export default function Navbar({
                 </button>
                 <nav className="flex flex-col space-y-8 text-center text-sm uppercase tracking-[0.3em] opacity-80">
                   <a
-                    href="#"
-                    onClick={() => setIsOpen(false)}
+                    href="/"
+                    onClick={(e) => handleNavigate(e, "/")}
                     className="hover:opacity-100 text-white transition-opacity cursor-pointer"
                   >
                     Home
                   </a>
                   <a
-                    href="#desktop"
-                    onClick={() => setIsOpen(false)}
+                    href="/desktop"
+                    onClick={(e) => handleNavigate(e, "/desktop")}
                     className="hover:opacity-100 transition-opacity cursor-pointer"
                   >
                     Desktop
                   </a>
                   <a
-                    href="#phone"
-                    onClick={() => setIsOpen(false)}
+                    href="/phone"
+                    onClick={(e) => handleNavigate(e, "/phone")}
                     className="hover:opacity-100 transition-opacity cursor-pointer"
                   >
                     Phone
