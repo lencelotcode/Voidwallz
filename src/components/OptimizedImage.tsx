@@ -1,15 +1,14 @@
 import { useState, useEffect } from "react";
-import { motion, HTMLMotionProps } from "motion/react";
+import { motion } from "motion/react";
 
-interface OptimizedImageProps extends Omit<
-  HTMLMotionProps<"img">,
-  "src" | "placeholder"
-> {
+interface OptimizedImageProps {
   src: string;
   placeholder: string;
   alt: string;
   className?: string;
   containerClassName?: string;
+  animate?: any;
+  transition?: any;
 }
 
 export default function OptimizedImage({
@@ -18,11 +17,14 @@ export default function OptimizedImage({
   alt,
   className = "",
   containerClassName = "",
-  ...motionProps
+  animate,
+  transition,
 }: OptimizedImageProps) {
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
+    // Reset load state when source changes
+    setIsLoaded(false);
     const img = new Image();
     img.src = src;
     img.onload = () => {
@@ -32,31 +34,31 @@ export default function OptimizedImage({
 
   return (
     <div className={`relative overflow-hidden ${containerClassName}`}>
-      {/* Placeholder - Tiny blurry image */}
+      {/*
+          Placeholder - Tiny blurry image.
+          We use absolute positioning to keep it behind the main image.
+      */}
       <img
         src={placeholder}
         alt={alt}
-        className={`w-full h-full object-cover transition-opacity duration-1000 ${
+        className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${
           isLoaded ? "opacity-0" : "opacity-100"
-        } blur-lg scale-110`}
+        } blur-xl scale-110`}
+        style={{ zIndex: 0 }}
       />
 
       {/* Main Image */}
       <motion.img
-        {...motionProps}
-        initial={{ opacity: 0, ...(motionProps.initial as object) }}
+        initial={{ opacity: 0 }}
         animate={{
           opacity: isLoaded ? 1 : 0,
-          ...(isLoaded ? (motionProps.animate as object) : {}),
+          ...(animate || {}),
         }}
-        transition={{
-          duration: 0.8,
-          ease: "easeOut",
-          ...motionProps.transition,
-        }}
+        transition={transition || { duration: 0.8, ease: "easeOut" }}
         src={src}
         alt={alt}
-        className={`absolute inset-0 w-full h-full object-cover ${className}`}
+        className={`relative w-full h-full object-cover ${className}`}
+        style={{ zIndex: 1 }}
       />
     </div>
   );
