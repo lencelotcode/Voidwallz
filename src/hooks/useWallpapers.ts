@@ -38,6 +38,8 @@ const fallbackDesktop: Wallpaper[] = [
     format: "8K AVIF",
     previewUrl:
       "https://images.unsplash.com/photo-1604871000636-074fa5117945?auto=format&fit=crop&q=80&w=1600&h=900",
+    tinyUrl:
+      "https://images.unsplash.com/photo-1604871000636-074fa5117945?auto=format&fit=crop&q=20&w=50&h=50",
     originalUrl:
       "https://images.unsplash.com/photo-1604871000636-074fa5117945?auto=format&fit=crop&q=80&w=1600&h=900",
     device: "desktop",
@@ -52,6 +54,8 @@ const fallbackDesktop: Wallpaper[] = [
     format: "8K WEBP",
     previewUrl:
       "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&q=80&w=1600&h=900",
+    tinyUrl:
+      "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&q=20&w=50&h=50",
     originalUrl:
       "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&q=80&w=1600&h=900",
     device: "desktop",
@@ -66,6 +70,8 @@ const fallbackDesktop: Wallpaper[] = [
     format: "8K AVIF",
     previewUrl:
       "https://images.unsplash.com/photo-1518818419601-72c8673f5852?auto=format&fit=crop&q=80&w=1600&h=900",
+    tinyUrl:
+      "https://images.unsplash.com/photo-1518818419601-72c8673f5852?auto=format&fit=crop&q=20&w=50&h=50",
     originalUrl:
       "https://images.unsplash.com/photo-1518818419601-72c8673f5852?auto=format&fit=crop&q=80&w=1600&h=900",
     device: "desktop",
@@ -80,6 +86,8 @@ const fallbackDesktop: Wallpaper[] = [
     format: "8K AVIF",
     previewUrl:
       "https://images.unsplash.com/photo-1634055627253-15df1f63fcb3?auto=format&fit=crop&q=80&w=1600&h=900",
+    tinyUrl:
+      "https://images.unsplash.com/photo-1634055627253-15df1f63fcb3?auto=format&fit=crop&q=20&w=50&h=50",
     originalUrl:
       "https://images.unsplash.com/photo-1634055627253-15df1f63fcb3?auto=format&fit=crop&q=80&w=1600&h=900",
     device: "desktop",
@@ -97,6 +105,8 @@ const fallbackMobile: Wallpaper[] = [
     format: "4K MOBILE",
     previewUrl:
       "https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?auto=format&fit=crop&q=80&w=600&h=1200",
+    tinyUrl:
+      "https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?auto=format&fit=crop&q=20&w=50&h=50",
     originalUrl:
       "https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?auto=format&fit=crop&q=80&w=600&h=1200",
     device: "mobile",
@@ -111,6 +121,8 @@ const fallbackMobile: Wallpaper[] = [
     format: "4K MOBILE",
     previewUrl:
       "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=600&h=1200",
+    tinyUrl:
+      "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=20&w=50&h=50",
     originalUrl:
       "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=600&h=1200",
     device: "mobile",
@@ -125,6 +137,8 @@ const fallbackMobile: Wallpaper[] = [
     format: "4K MOBILE",
     previewUrl:
       "https://images.unsplash.com/photo-1506443432602-ac2fcd6f54e0?auto=format&fit=crop&q=80&w=600&h=1200",
+    tinyUrl:
+      "https://images.unsplash.com/photo-1506443432602-ac2fcd6f54e0?auto=format&fit=crop&q=20&w=50&h=50",
     originalUrl:
       "https://images.unsplash.com/photo-1506443432602-ac2fcd6f54e0?auto=format&fit=crop&q=80&w=600&h=1200",
     device: "mobile",
@@ -139,6 +153,8 @@ const fallbackMobile: Wallpaper[] = [
     format: "4K MOBILE",
     previewUrl:
       "https://images.unsplash.com/photo-1557672172-298e090bd0f1?auto=format&fit=crop&q=80&w=600&h=1200",
+    tinyUrl:
+      "https://images.unsplash.com/photo-1557672172-298e090bd0f1?auto=format&fit=crop&q=20&w=50&h=50",
     originalUrl:
       "https://images.unsplash.com/photo-1557672172-298e090bd0f1?auto=format&fit=crop&q=80&w=600&h=1200",
     device: "mobile",
@@ -210,8 +226,25 @@ function mapFileToWallpaper(
       : `${MOBILE_ORIGINALS_FOLDER}/${originalName}`;
 
   const previewUrl = supabase
-    ? supabase.storage.from(BUCKET_NAME).getPublicUrl(previewPath).data
-        .publicUrl
+    ? supabase.storage.from(BUCKET_NAME).getPublicUrl(previewPath, {
+        transform: {
+          width: 1280,
+          height: 720,
+          resize: "cover",
+          quality: 80,
+        },
+      }).data.publicUrl
+    : "";
+
+  const tinyUrl = supabase
+    ? supabase.storage.from(BUCKET_NAME).getPublicUrl(previewPath, {
+        transform: {
+          width: 50,
+          height: 50,
+          resize: "cover",
+          quality: 20,
+        },
+      }).data.publicUrl
     : "";
 
   const originalUrl = supabase
@@ -235,6 +268,7 @@ function mapFileToWallpaper(
     format: displayFormat,
     downloads,
     previewUrl,
+    tinyUrl,
     originalUrl,
     device: folder,
     createdAt: file.created_at,

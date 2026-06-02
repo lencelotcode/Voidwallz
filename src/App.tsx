@@ -9,6 +9,7 @@ import {
 } from "motion/react";
 import React, { useEffect, useState, useRef } from "react";
 import Cursor from "./components/Cursor";
+import OptimizedImage from "./components/OptimizedImage";
 import Gallery from "./components/Gallery";
 import LatestUploads from "./components/LatestUploads";
 import Loader from "./components/Loader";
@@ -102,6 +103,8 @@ const fallbackWallpaperOfTheDay: Wallpaper = {
   downloads: 48920,
   previewUrl:
     "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=1600",
+  tinyUrl:
+    "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=20&w=50&h=50",
   originalUrl:
     "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=100",
   device: "desktop",
@@ -228,7 +231,10 @@ function Hero({
               </div>
             ) : (
               <>
-                <motion.img
+                <OptimizedImage
+                  src={wallpaperOfTheDay.previewUrl}
+                  placeholder={wallpaperOfTheDay.tinyUrl}
+                  alt={wallpaperOfTheDay.title}
                   animate={{
                     scale:
                       1.05 +
@@ -236,9 +242,9 @@ function Hero({
                     x: mousePos.x * -20,
                     y: mousePos.y * -20,
                   }}
-                  src={wallpaperOfTheDay.previewUrl}
-                  alt={wallpaperOfTheDay.title}
-                  className={`w-full h-full object-cover filter brightness-75 group-hover:brightness-90 transition-all duration-300 ease-out ${isOledOptimized ? "oled-image" : ""}`}
+                  transition={{ duration: 0.3, ease: "easeOut" }}
+                  className={`filter brightness-75 group-hover:brightness-90 transition-all duration-300 ease-out ${isOledOptimized ? "oled-image" : ""}`}
+                  containerClassName="w-full h-full"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
 

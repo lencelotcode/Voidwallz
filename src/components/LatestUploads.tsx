@@ -2,6 +2,7 @@ import { motion } from "motion/react";
 import { useState } from "react";
 import { useWallpapers } from "../hooks/useWallpapers";
 import { Wallpaper } from "../types";
+import OptimizedImage from "./OptimizedImage";
 import WallpaperModal from "./WallpaperModal";
 
 export default function LatestUploads({
@@ -72,11 +73,11 @@ export default function LatestUploads({
               {wp.device === "desktop" ? (
                 <>
                   <div className="w-[200px] md:w-[260px] aspect-[16/10] border-[4px] md:border-[6px] border-black rounded-lg relative bg-black shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden ring-1 ring-white/10">
-                    <img
+                    <OptimizedImage
                       src={wp.previewUrl}
-                      loading="lazy"
-                      className={`w-full h-full object-cover ${isOledOptimized ? "oled-image" : ""}`}
+                      placeholder={wp.tinyUrl}
                       alt={wp.title}
+                      className={`w-full h-full ${isOledOptimized ? "oled-image" : ""}`}
                     />
                   </div>
                   <div className="w-12 h-6 md:h-8 bg-gradient-to-b from-gray-800 to-black rounded-b-sm shadow-xl relative z-0 -mt-1" />
@@ -85,11 +86,11 @@ export default function LatestUploads({
               ) : (
                 <div className="w-[160px] aspect-[9/19.5] border-[6px] border-black rounded-[2rem] relative bg-black shadow-[0_20px_50px_rgba(0,0,0,0.5)] ring-1 ring-white/10 flex items-center justify-center">
                   <div className="absolute top-0 left-1/2 -translate-x-1/2 w-14 h-4 bg-black rounded-b-xl z-20" />
-                  <img
+                  <OptimizedImage
                     src={wp.previewUrl}
-                    loading="lazy"
-                    className={`w-full h-full object-cover rounded-[1.5rem] ${isOledOptimized ? "oled-image" : ""}`}
+                    placeholder={wp.tinyUrl}
                     alt={wp.title}
+                    className={`w-full h-full rounded-[1.5rem] ${isOledOptimized ? "oled-image" : ""}`}
                   />
                 </div>
               )}

@@ -9,6 +9,7 @@ import {
   Smartphone,
   Download,
 } from "lucide-react";
+import OptimizedImage from "./OptimizedImage";
 import { Wallpaper } from "../types";
 import { useWallpapers } from "../hooks/useWallpapers";
 import { useFavorites } from "../hooks/useFavorites";
@@ -176,8 +177,8 @@ export default function WallpaperModal({
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 0.4 }}
                 key={`bg-${selectedWp.id}`}
-                className="absolute inset-0 bg-cover bg-center scale-110 blur-3xl pointer-events-none"
-                style={{ backgroundImage: `url(${selectedWp.previewUrl})` }}
+                className="absolute inset-0 bg-cover bg-center scale-110 blur-3xl pointer-events-none transition-all duration-1000"
+                style={{ backgroundImage: `url(${selectedWp.tinyUrl})` }}
               />
 
               {/* Main Image in a "Device Frame" */}
@@ -201,11 +202,12 @@ export default function WallpaperModal({
                     <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[30%] h-5 bg-black rounded-b-2xl z-20" />
                   )}
 
-                  <img
+                  <OptimizedImage
                     src={selectedWp.previewUrl}
-                    loading="lazy"
+                    placeholder={selectedWp.tinyUrl}
                     alt={selectedWp.title}
-                    className={`w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 ${isOledOptimized ? "oled-image" : ""}`}
+                    className={`transition-transform duration-700 group-hover:scale-105 ${isOledOptimized ? "oled-image" : ""}`}
+                    containerClassName="w-full h-full"
                   />
 
                   {/* Glass reflection effect */}
