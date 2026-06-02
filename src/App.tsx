@@ -81,11 +81,19 @@ function WallpaperRouteManager({
   }, [desktopWallpapers, mobileWallpapers, loading]);
 
   const handleClose = () => {
-    window.history.pushState(
-      null,
-      "",
-      window.location.pathname === "/" ? "/" : window.location.pathname,
-    );
+    const path = window.location.pathname;
+    const match = path.match(/^\/(desktop|mobile)\/([^/]+)\/?$/);
+
+    if (match) {
+      const device = match[1];
+      // Navigate back to the parent category path
+      window.history.pushState(null, "", `/${device}`);
+    } else {
+      // Default fallback to home
+      window.history.pushState(null, "", "/");
+    }
+
+    window.dispatchEvent(new Event("popstate"));
     window.dispatchEvent(new Event("wallpaper-navigate"));
   };
 
@@ -794,7 +802,7 @@ export default function App() {
       );
     }
 
-    if (path === "/phone") {
+    if (path === "/mobile") {
       return (
         <motion.div
           key="phone"

@@ -69,8 +69,8 @@ export default function Navbar({
               Desktop
             </a>
             <a
-              href="/phone"
-              onClick={(e) => handleNavigate(e, "/phone")}
+              href="/mobile"
+              onClick={(e) => handleNavigate(e, "/mobile")}
               className="hover:opacity-100 transition-opacity"
             >
               Phone
@@ -138,8 +138,8 @@ export default function Navbar({
                     Desktop
                   </a>
                   <a
-                    href="/phone"
-                    onClick={(e) => handleNavigate(e, "/phone")}
+                    href="/mobile"
+                    onClick={(e) => handleNavigate(e, "/mobile")}
                     className="hover:opacity-100 transition-opacity cursor-pointer"
                   >
                     Phone
