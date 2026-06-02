@@ -6,8 +6,12 @@ import WallpaperModal from "./WallpaperModal";
 
 export default function LatestUploads({
   onOpenModal,
+  isOledOptimized = false,
+  onHoverWallpaper,
 }: {
   onOpenModal: (wp: Wallpaper) => void;
+  isOledOptimized?: boolean;
+  onHoverWallpaper?: (url: string | null) => void;
 }) {
   const { desktopWallpapers, mobileWallpapers, loading } = useWallpapers();
 
@@ -51,6 +55,8 @@ export default function LatestUploads({
             viewport={{ once: true, margin: "-50px" }}
             transition={{ duration: 0.6, delay: i * 0.1 }}
             onClick={() => onOpenModal(wp)}
+            onMouseEnter={() => onHoverWallpaper?.(wp.previewUrl)}
+            onMouseLeave={() => onHoverWallpaper?.(null)}
             className={`relative flex flex-col items-center justify-center overflow-hidden group cursor-pointer hover-trigger bg-void-black ${
               wp.device === "desktop"
                 ? "h-[400px] md:h-[500px]"
@@ -69,7 +75,7 @@ export default function LatestUploads({
                     <img
                       src={wp.previewUrl}
                       loading="lazy"
-                      className="w-full h-full object-cover"
+                      className={`w-full h-full object-cover ${isOledOptimized ? "oled-image" : ""}`}
                       alt={wp.title}
                     />
                   </div>
@@ -82,7 +88,7 @@ export default function LatestUploads({
                   <img
                     src={wp.previewUrl}
                     loading="lazy"
-                    className="w-full h-full object-cover rounded-[1.5rem]"
+                    className={`w-full h-full object-cover rounded-[1.5rem] ${isOledOptimized ? "oled-image" : ""}`}
                     alt={wp.title}
                   />
                 </div>

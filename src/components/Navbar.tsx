@@ -3,7 +3,13 @@ import { Menu, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { createPortal } from "react-dom";
 
-export default function Navbar() {
+export default function Navbar({
+  isOledOptimized,
+  setIsOledOptimized,
+}: {
+  isOledOptimized?: boolean;
+  setIsOledOptimized?: (val: boolean) => void;
+}) {
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
@@ -48,15 +54,33 @@ export default function Navbar() {
             </a>
           </nav>
         </div>
-        <div className="w-1/3 flex justify-end md:hidden">
-          <button
-            onClick={() => setIsOpen(true)}
-            className="text-white opacity-90 hover:opacity-100 p-2 -mr-2 cursor-pointer"
-          >
-            <Menu size={24} />
-          </button>
+
+        <div className="w-1/3 flex justify-end items-center gap-4">
+          {setIsOledOptimized && (
+            <button
+              onClick={() => setIsOledOptimized(!isOledOptimized)}
+              className={`hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full border text-[10px] font-mono uppercase tracking-widest transition-all duration-300 ${
+                isOledOptimized
+                  ? "bg-white text-black border-white shadow-[0_0_15px_rgba(255,255,255,0.3)]"
+                  : "bg-transparent text-white/40 border-white/10 hover:border-white/30 hover:text-white"
+              }`}
+            >
+              <div
+                className={`w-2 h-2 rounded-full ${isOledOptimized ? "bg-black animate-pulse" : "bg-white/20"}`}
+              />
+              OLED Mode
+            </button>
+          )}
+
+          <div className="md:hidden">
+            <button
+              onClick={() => setIsOpen(true)}
+              className="text-white opacity-90 hover:opacity-100 p-2 -mr-2 cursor-pointer"
+            >
+              <Menu size={24} />
+            </button>
+          </div>
         </div>
-        <div className="hidden w-1/3 justify-end md:flex"></div>
       </nav>
 
       {typeof document !== "undefined" &&
@@ -97,6 +121,21 @@ export default function Navbar() {
                   >
                     Phone
                   </a>
+                  {setIsOledOptimized && (
+                    <button
+                      onClick={() => {
+                        setIsOledOptimized(!isOledOptimized);
+                        setIsOpen(false);
+                      }}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-full border text-[10px] font-mono uppercase tracking-widest transition-all duration-300 mx-auto ${
+                        isOledOptimized
+                          ? "bg-white text-black border-white"
+                          : "bg-transparent text-white/40 border-white/10"
+                      }`}
+                    >
+                      OLED Mode: {isOledOptimized ? "ON" : "OFF"}
+                    </button>
+                  )}
                 </nav>
               </motion.div>
             )}

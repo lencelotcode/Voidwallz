@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "motion/react";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { Search, Heart } from "lucide-react";
 import { Wallpaper } from "../types";
 import { useWallpapers } from "../hooks/useWallpapers";
@@ -8,9 +8,13 @@ import { useFavorites } from "../hooks/useFavorites";
 export default function Gallery({
   view = "all",
   onOpenModal,
+  isOledOptimized = false,
+  onHoverWallpaper,
 }: {
   view?: "all" | "desktop" | "phone";
   onOpenModal: (wp: Wallpaper) => void;
+  isOledOptimized?: boolean;
+  onHoverWallpaper?: (url: string | null) => void;
 }) {
   const {
     desktopWallpapers,
@@ -25,12 +29,33 @@ export default function Gallery({
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
+  // Infinite scroll state
+  const [visibleCount, setVisibleCount] = useState(12);
+  const observerRef = useRef<HTMLDivElement>(null);
+
   // Extract unique categories
   const categories = useMemo(() => {
     const all = [...desktopWallpapers, ...mobileWallpapers];
     const unique = Array.from(new Set(all.map((wp) => wp.category)));
     return unique.sort();
   }, [desktopWallpapers, mobileWallpapers]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setVisibleCount((prev) => prev + 12);
+        }
+      },
+      { threshold: 0.1 },
+    );
+
+    if (observerRef.current) {
+      observer.observe(observerRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [loading]);
 
   // Filter wallpapers based on search and category
   const filterWallpapers = (wallpapers: Wallpaper[]) => {
@@ -51,12 +76,19 @@ export default function Gallery({
   };
 
   // Determine which wallpapers to display based on view
-  const displayedDesktop = filterWallpapers(
+  const filteredDesktop = filterWallpapers(
     view === "phone" ? [] : desktopWallpapers,
   );
-  const displayedMobile = filterWallpapers(
+  const filteredMobile = filterWallpapers(
     view === "desktop" ? [] : mobileWallpapers,
   );
+
+  const displayedDesktop = filteredDesktop.slice(0, visibleCount);
+  const displayedMobile = filteredMobile.slice(0, visibleCount);
+
+  const hasMore =
+    visibleCount < filteredDesktop.length ||
+    visibleCount < filteredMobile.length;
 
   return (
     <section
@@ -178,7 +210,12 @@ export default function Gallery({
       {/* Desktop Section */}
       {!loading && (view === "all" || view === "desktop") && (
         <>
-          <div className="py-24 px-10 flex flex-col items-center justify-center border-b border-white/5 bg-void-black text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="py-24 px-10 flex flex-col items-center justify-center border-b border-white/5 bg-void-black text-center"
+          >
             <h2 className="text-4xl md:text-5xl font-sans font-bold tracking-tighter uppercase mb-4">
               SOME 🖥️ DESKTOP WALLPAPERS_
             </h2>
@@ -205,7 +242,7 @@ export default function Gallery({
                 </div>
               </div>
             )}
-          </div>
+          </motion.div>
           {displayedDesktop.length > 0 ? (
             <div className="grid md:grid-cols-4 grid-cols-1 gap-px bg-white/5">
               {displayedDesktop.map((wp, i) => (
@@ -216,6 +253,8 @@ export default function Gallery({
                   viewport={{ once: true, margin: "-50px" }}
                   transition={{ duration: 0.6, delay: i * 0.1 }}
                   onClick={() => onOpenModal(wp)}
+                  onMouseEnter={() => onHoverWallpaper?.(wp.previewUrl)}
+                  onMouseLeave={() => onHoverWallpaper?.(null)}
                   className="relative flex flex-col items-center justify-center h-[400px] md:h-[500px] overflow-hidden group cursor-pointer hover-trigger bg-void-black"
                 >
                   <div
@@ -228,7 +267,7 @@ export default function Gallery({
                       <img
                         src={wp.previewUrl}
                         loading="lazy"
-                        className="w-full h-full object-cover"
+                        className={`w-full h-full object-cover ${isOledOptimized ? "oled-image" : ""}`}
                         alt={wp.title}
                       />
                     </div>
@@ -270,7 +309,10 @@ export default function Gallery({
       {/* Phone Section */}
       {!loading && (view === "all" || view === "phone") && (
         <>
-          <div
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
             className={`py-24 px-10 flex flex-col items-center justify-center border-y border-white/5 bg-void-black text-center ${view === "all" ? "mt-px" : ""}`}
           >
             <h2 className="text-4xl md:text-5xl font-sans font-bold tracking-tighter uppercase mb-4">
@@ -279,7 +321,7 @@ export default function Gallery({
             <span className="text-sm font-mono uppercase tracking-widest opacity-40">
               OLED Optimized For iOS / Android
             </span>
-          </div>
+          </motion.div>
           {displayedMobile.length > 0 ? (
             <div className="grid md:grid-cols-4 grid-cols-1 gap-px bg-white/5">
               {displayedMobile.map((wp, i) => (
@@ -290,6 +332,8 @@ export default function Gallery({
                   viewport={{ once: true, margin: "-50px" }}
                   transition={{ duration: 0.6, delay: i * 0.1 }}
                   onClick={() => onOpenModal(wp)}
+                  onMouseEnter={() => onHoverWallpaper?.(wp.previewUrl)}
+                  onMouseLeave={() => onHoverWallpaper?.(null)}
                   className="relative flex flex-col items-center justify-center h-[500px] md:h-[600px] overflow-hidden group cursor-pointer hover-trigger bg-void-black"
                 >
                   <div
@@ -303,7 +347,7 @@ export default function Gallery({
                       <img
                         src={wp.previewUrl}
                         loading="lazy"
-                        className="w-full h-full object-cover rounded-[1.5rem]"
+                        className={`w-full h-full object-cover rounded-[1.5rem] ${isOledOptimized ? "oled-image" : ""}`}
                         alt={wp.title}
                       />
                     </div>
@@ -339,6 +383,16 @@ export default function Gallery({
           )}
         </>
       )}
+
+      {/* Loading Sentinel for Infinite Scroll */}
+      <div
+        ref={observerRef}
+        className="h-20 w-full flex items-center justify-center"
+      >
+        {hasMore && (
+          <div className="w-6 h-6 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+        )}
+      </div>
     </section>
   );
 }

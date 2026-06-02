@@ -1,6 +1,13 @@
 import { Instagram, Twitter } from "lucide-react";
-import { AnimatePresence, motion, useScroll, useTransform } from "motion/react";
-import { useEffect, useState, useRef } from "react";
+import {
+  AnimatePresence,
+  motion,
+  useScroll,
+  useTransform,
+  useMotionValue,
+  useSpring,
+} from "motion/react";
+import React, { useEffect, useState, useRef } from "react";
 import Cursor from "./components/Cursor";
 import Gallery from "./components/Gallery";
 import LatestUploads from "./components/LatestUploads";
@@ -22,7 +29,11 @@ export const navigateToWallpaper = (wp: Wallpaper) => {
   window.dispatchEvent(new Event("wallpaper-navigate"));
 };
 
-function WallpaperRouteManager() {
+function WallpaperRouteManager({
+  isOledOptimized,
+}: {
+  isOledOptimized: boolean;
+}) {
   const { desktopWallpapers, mobileWallpapers, loading } = useWallpapers();
   const [selectedWp, setSelectedWp] = useState<Wallpaper | null>(null);
 
@@ -73,7 +84,13 @@ function WallpaperRouteManager() {
     window.dispatchEvent(new Event("wallpaper-navigate"));
   };
 
-  return <WallpaperModal selectedWp={selectedWp} onClose={handleClose} />;
+  return (
+    <WallpaperModal
+      selectedWp={selectedWp}
+      onClose={handleClose}
+      isOledOptimized={isOledOptimized}
+    />
+  );
 }
 
 const fallbackWallpaperOfTheDay: Wallpaper = {
@@ -90,21 +107,61 @@ const fallbackWallpaperOfTheDay: Wallpaper = {
   device: "desktop",
 };
 
-function Hero({ onOpenModal }: { onOpenModal: (wp: Wallpaper) => void }) {
+function Hero({
+  onOpenModal,
+  isOledOptimized,
+}: {
+  onOpenModal: (wp: Wallpaper) => void;
+  isOledOptimized: boolean;
+}) {
   const { desktopWallpapers, mobileWallpapers, loading } = useWallpapers();
   const { scrollY } = useScroll();
   const yText = useTransform(scrollY, [0, 1000], [0, 150]);
   const yImage = useTransform(scrollY, [0, 1000], [0, -100]);
 
-  // Dynamically select the newest wallpaper (first in the list since it's sorted by created_at desc)
+  // Mouse parallax state
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const heroRef = useRef<HTMLDivElement>(null);
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!heroRef.current) return;
+    const { left, top, width, height } =
+      heroRef.current.getBoundingClientRect();
+    const x = (e.clientX - left) / width - 0.5;
+    const y = (e.clientY - top) / height - 0.5;
+    setMousePos({ x, y });
+  };
+
+  const handleMouseLeave = () => {
+    setMousePos({ x: 0, y: 0 });
+  };
+
+  // Dynamically select the newest wallpaper
   const dynamicWp = desktopWallpapers[0] || mobileWallpapers[0];
   const wallpaperOfTheDay = dynamicWp
     ? { ...dynamicWp, category: "Wallpaper of the Day" }
     : fallbackWallpaperOfTheDay;
 
+  const titleLines = ["The Ethereal", "Monochrome"];
+
   return (
-    <section className="relative min-h-screen flex flex-col justify-center px-10 pt-32 pb-16 overflow-hidden border-b border-white/5">
+    <section
+      ref={heroRef}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      className="relative min-h-screen flex flex-col justify-center px-10 pt-32 pb-16 overflow-hidden border-b border-white/5"
+    >
       <div className="absolute inset-0 bg-void-black z-0 pointer-events-none" />
+
+      {/* Interactive background elements */}
+      <motion.div
+        animate={{
+          x: mousePos.x * 50,
+          y: mousePos.y * 50,
+        }}
+        transition={{ type: "spring", damping: 30, stiffness: 50 }}
+        className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-white/[0.01] rounded-full blur-[120px] pointer-events-none"
+      />
 
       <div className="relative z-10 w-full max-w-[1600px] mx-auto flex flex-col md:flex-row items-center justify-between gap-16 pb-24 md:pb-16 mt-8 md:mt-0">
         <motion.div
@@ -122,21 +179,29 @@ function Hero({ onOpenModal }: { onOpenModal: (wp: Wallpaper) => void }) {
             </span>
           </motion.div>
 
-          <motion.h1
-            className="text-6xl md:text-7xl lg:text-[6rem] leading-[1.1] font-serif italic font-light tracking-tighter"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.3 }}
-          >
-            The Ethereal <br />
-            Monochrome
-          </motion.h1>
+          <div className="overflow-hidden">
+            {titleLines.map((line, i) => (
+              <motion.h1
+                key={i}
+                className="text-6xl md:text-7xl lg:text-[6rem] leading-[1.1] font-serif italic font-light tracking-tighter"
+                initial={{ y: "100%", opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{
+                  duration: 1.2,
+                  delay: 0.3 + i * 0.1,
+                  ease: [0.21, 0.47, 0.32, 0.98],
+                }}
+              >
+                {line}
+              </motion.h1>
+            ))}
+          </div>
 
           <motion.p
             className="text-sm md:text-base opacity-50 max-w-md mt-8 leading-relaxed"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
+            transition={{ duration: 0.8, delay: 0.5 }}
           >
             Curated minimalist captures designed to disappear into your
             interface. Focus on negative space and subtle gradients.
@@ -145,27 +210,35 @@ function Hero({ onOpenModal }: { onOpenModal: (wp: Wallpaper) => void }) {
 
         <motion.div
           style={{ y: yImage }}
-          onClick={() => !loading && onOpenModal(wallpaperOfTheDay)}
-          className="w-full md:w-7/12 h-[50vh] md:h-[65vh] relative group cursor-pointer hover-trigger"
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{
-            duration: 1.2,
-            delay: 0.5,
-            ease: [0.21, 0.47, 0.32, 0.98],
+          animate={{
+            rotateX: mousePos.y * -10,
+            rotateY: mousePos.x * 10,
+            opacity: 1,
+            scale: 1,
           }}
+          transition={{ type: "spring", damping: 20, stiffness: 40 }}
+          onClick={() => !loading && onOpenModal(wallpaperOfTheDay)}
+          className="w-full md:w-7/12 h-[50vh] md:h-[65vh] relative group cursor-pointer hover-trigger perspective-1000"
+          initial={{ opacity: 0, scale: 0.95 }}
         >
-          <div className="w-full h-full border border-white/10 p-2 relative overflow-hidden bg-white/5">
+          <div className="w-full h-full border border-white/10 p-2 relative overflow-hidden bg-white/5 shadow-2xl">
             {loading ? (
               <div className="w-full h-full bg-void-black/30 animate-pulse flex items-center justify-center">
                 <div className="w-full h-full bg-black/20 animate-shimmer" />
               </div>
             ) : (
               <>
-                <img
+                <motion.img
+                  animate={{
+                    scale:
+                      1.05 +
+                      (Math.abs(mousePos.x) + Math.abs(mousePos.y)) * 0.05,
+                    x: mousePos.x * -20,
+                    y: mousePos.y * -20,
+                  }}
                   src={wallpaperOfTheDay.previewUrl}
                   alt={wallpaperOfTheDay.title}
-                  className="w-full h-full object-cover filter brightness-75 group-hover:scale-105 group-hover:brightness-90 transition-all duration-1000 ease-out"
+                  className={`w-full h-full object-cover filter brightness-75 group-hover:brightness-90 transition-all duration-300 ease-out ${isOledOptimized ? "oled-image" : ""}`}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
 
@@ -194,13 +267,9 @@ function Hero({ onOpenModal }: { onOpenModal: (wp: Wallpaper) => void }) {
       </div>
 
       <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{
-          duration: 1.2,
-          delay: 0.6,
-          ease: [0.21, 0.47, 0.32, 0.98],
-        }}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 1.2, delay: 0.8 }}
         className="absolute bottom-8 left-10 right-10 flex flex-col md:flex-row justify-between items-start md:items-end border-t border-white/5 pt-4 z-20"
       >
         <div className="flex gap-8 md:gap-12 w-full md:w-auto overflow-x-auto pb-4 md:pb-0">
@@ -245,13 +314,18 @@ function Marquee() {
     "SINGULARITY",
   ];
   return (
-    <div className="py-4 border-y border-white/5 bg-void-black marquee-container">
+    <motion.div
+      initial={{ opacity: 0 }}
+      whileInView={{ opacity: 1 }}
+      viewport={{ once: true }}
+      className="py-4 border-y border-white/5 bg-void-black marquee-container"
+    >
       <div className="marquee-content flex items-center gap-16 font-serif italic text-3xl opacity-20">
         {[...words, ...words, ...words].map((word, i) => (
           <span key={i}>{word}</span>
         ))}
       </div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -532,10 +606,109 @@ function Footer() {
   );
 }
 
+function FeaturedCollections({
+  onOpenModal,
+}: {
+  onOpenModal: (wp: Wallpaper) => void;
+}) {
+  const { desktopWallpapers, mobileWallpapers } = useWallpapers();
+
+  const collections = [
+    {
+      title: "Ethereal Voids",
+      desc: "Deep monochrome explorations of negative space.",
+      tag: "Minimal",
+      image:
+        desktopWallpapers.find((w) => w.category.includes("Minimal"))
+          ?.previewUrl || desktopWallpapers[0]?.previewUrl,
+    },
+    {
+      title: "Obsidian Flows",
+      desc: "Liquid textures and dark atmospheric waves.",
+      tag: "Liquid",
+      image:
+        mobileWallpapers.find((w) => w.category.includes("Liquid"))
+          ?.previewUrl || mobileWallpapers[0]?.previewUrl,
+    },
+    {
+      title: "Geometric Order",
+      desc: "Structured patterns for focused interfaces.",
+      tag: "Geometry",
+      image:
+        desktopWallpapers.find((w) => w.category.includes("Geometry"))
+          ?.previewUrl || desktopWallpapers[1]?.previewUrl,
+    },
+  ];
+
+  return (
+    <section className="py-24 px-10 border-t border-white/5 bg-void-black">
+      <div className="max-w-[1600px] mx-auto">
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true }}
+          className="flex flex-col mb-16"
+        >
+          <span className="text-[10px] opacity-30 uppercase tracking-[0.3em] mb-4">
+            Curated Series
+          </span>
+          <h2 className="text-4xl md:text-5xl font-serif italic tracking-tighter">
+            Featured Collections
+          </h2>
+        </motion.div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {collections.map((col, i) => (
+            <motion.div
+              key={col.title}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.2, duration: 0.8 }}
+              className="group cursor-pointer relative aspect-[4/5] overflow-hidden border border-white/10"
+              onClick={() => {
+                const gallery = document.getElementById("gallery");
+                if (gallery) {
+                  gallery.scrollIntoView({ behavior: "smooth" });
+                }
+              }}
+            >
+              <img
+                src={col.image}
+                className="w-full h-full object-cover opacity-40 group-hover:opacity-60 group-hover:scale-105 transition-all duration-700"
+                alt={col.title}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-void-black via-transparent to-transparent" />
+              <div className="absolute bottom-8 left-8 right-8">
+                <span className="text-[10px] font-mono text-white/40 uppercase tracking-widest mb-2 block">
+                  {col.tag}
+                </span>
+                <h3 className="text-2xl font-serif italic mb-2">{col.title}</h3>
+                <p className="text-xs opacity-50 leading-relaxed max-w-[20ch]">
+                  {col.desc}
+                </p>
+                <div className="mt-6 w-10 h-px bg-white/20 group-hover:w-20 transition-all duration-500" />
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [hash, setHash] = useState(window.location.hash);
   const [path, setPath] = useState(window.location.pathname);
+  const [isOledOptimized, setIsOledOptimized] = useState(false);
+  const [ambientImage, setAmbientImage] = useState<string | null>(null);
+
+  // Spotlight state
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  const spotlightX = useSpring(mouseX, { damping: 50, stiffness: 200 });
+  const spotlightY = useSpring(mouseY, { damping: 50, stiffness: 200 });
 
   useEffect(() => {
     const handleLocationChange = () => {
@@ -543,13 +716,22 @@ export default function App() {
       setPath(window.location.pathname);
       window.scrollTo(0, 0);
     };
+
+    const handleMouseMove = (e: MouseEvent) => {
+      mouseX.set(e.clientX);
+      mouseY.set(e.clientY);
+    };
+
     window.addEventListener("hashchange", handleLocationChange);
     window.addEventListener("popstate", handleLocationChange);
+    window.addEventListener("mousemove", handleMouseMove);
+
     return () => {
       window.removeEventListener("hashchange", handleLocationChange);
       window.removeEventListener("popstate", handleLocationChange);
+      window.removeEventListener("mousemove", handleMouseMove);
     };
-  }, []);
+  }, [mouseX, mouseY]);
 
   const renderContent = () => {
     const isWallpaperRoute = /^\/(desktop|mobile)\/([^/]+)\/?$/.test(path);
@@ -572,7 +754,12 @@ export default function App() {
           exit={{ opacity: 0 }}
           className="flex flex-col h-full bg-void-black"
         >
-          <Gallery view="desktop" onOpenModal={navigateToWallpaper} />
+          <Gallery
+            view="desktop"
+            onOpenModal={navigateToWallpaper}
+            isOledOptimized={isOledOptimized}
+            onHoverWallpaper={setAmbientImage}
+          />
         </motion.div>
       );
     }
@@ -586,7 +773,12 @@ export default function App() {
           exit={{ opacity: 0 }}
           className="flex flex-col h-full bg-void-black"
         >
-          <Gallery view="phone" onOpenModal={navigateToWallpaper} />
+          <Gallery
+            view="phone"
+            onOpenModal={navigateToWallpaper}
+            isOledOptimized={isOledOptimized}
+            onHoverWallpaper={setAmbientImage}
+          />
         </motion.div>
       );
     }
@@ -601,10 +793,22 @@ export default function App() {
           exit={{ opacity: 0 }}
           className="flex flex-col h-full"
         >
-          <Hero onOpenModal={navigateToWallpaper} />
+          <Hero
+            onOpenModal={navigateToWallpaper}
+            isOledOptimized={isOledOptimized}
+          />
           <Marquee />
-          <LatestUploads onOpenModal={navigateToWallpaper} />
-          <Gallery onOpenModal={navigateToWallpaper} />
+          <FeaturedCollections onOpenModal={navigateToWallpaper} />
+          <LatestUploads
+            onOpenModal={navigateToWallpaper}
+            isOledOptimized={isOledOptimized}
+            onHoverWallpaper={setAmbientImage}
+          />
+          <Gallery
+            onOpenModal={navigateToWallpaper}
+            isOledOptimized={isOledOptimized}
+            onHoverWallpaper={setAmbientImage}
+          />
           <Manifesto />
         </motion.div>
       );
@@ -614,7 +818,29 @@ export default function App() {
   };
 
   return (
-    <div className="no-cursor bg-void-black min-h-screen text-void-light overflow-x-hidden selection:bg-white selection:text-black relative">
+    <div
+      className={`no-cursor bg-void-black min-h-screen text-void-light overflow-x-hidden selection:bg-white selection:text-black relative ${isOledOptimized ? "oled-mode" : ""}`}
+    >
+      {/* Global Ambient Glow */}
+      <AnimatePresence>
+        {ambientImage && !isOledOptimized && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 0.15 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1 }}
+            className="fixed inset-0 z-0 pointer-events-none bg-cover bg-center blur-[150px]"
+            style={{ backgroundImage: `url(${ambientImage})` }}
+          />
+        )}
+      </AnimatePresence>
+
+      <div className="film-grain" />
+      <motion.div
+        className="spotlight"
+        style={{ left: spotlightX, top: spotlightY }}
+      />
+
       <div className="hidden md:block">
         <Cursor />
       </div>
@@ -625,7 +851,7 @@ export default function App() {
         {isLoading && <Loader onComplete={() => setIsLoading(false)} />}
       </AnimatePresence>
 
-      <WallpaperRouteManager />
+      <WallpaperRouteManager isOledOptimized={isOledOptimized} />
 
       {!isLoading && (
         <motion.div
@@ -633,7 +859,10 @@ export default function App() {
           animate={{ opacity: 1, filter: "blur(0px)" }}
           transition={{ duration: 1.2, ease: [0.21, 0.47, 0.32, 0.98] }}
         >
-          <Navbar />
+          <Navbar
+            isOledOptimized={isOledOptimized}
+            setIsOledOptimized={setIsOledOptimized}
+          />
           <AnimatePresence mode="wait">{renderContent()}</AnimatePresence>
           <Footer />
         </motion.div>
