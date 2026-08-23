@@ -271,8 +271,8 @@ export default function WallpaperModal({
                     className="flex items-center justify-center w-full"
                   >
                     {selectedWp.device === "desktop" ? (
-                      /* Apple Studio Display Pro Mockup (Clean Scaled Aspect Ratio) */
-                      <div className="relative flex flex-col items-center w-full max-w-[460px] sm:max-w-[500px]">
+                      /* Apple Studio Display Pro Mockup - Balanced Aspect Ratio with generous arrow clearance */
+                      <div className="relative flex flex-col items-center w-full max-w-[370px] sm:max-w-[420px] md:max-w-[435px]">
                         <div className="w-full aspect-[16/10] rounded-xl border-[3.5px] border-[#222] bg-black shadow-[0_25px_60px_rgba(0,0,0,0.9)] relative overflow-hidden ring-1 ring-white/15">
                           <div className="absolute top-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-[#333] rounded-full ring-1 ring-white/10 z-30 pointer-events-none" />
                           <OptimizedImage
@@ -287,12 +287,12 @@ export default function WallpaperModal({
                           <div className="absolute inset-0 bg-gradient-to-tr from-white/[0.08] via-transparent to-transparent pointer-events-none z-20" />
                         </div>
                         {/* Slim Pedestal */}
-                        <div className="w-14 h-4 bg-gradient-to-b from-[#222] to-[#141414] rounded-b-sm shadow-md ring-1 ring-white/10" />
-                        <div className="w-28 h-1 bg-[#282828] rounded-full shadow-lg ring-1 ring-white/10" />
+                        <div className="w-14 h-3.5 bg-gradient-to-b from-[#222] to-[#141414] rounded-b-sm shadow-md ring-1 ring-white/10" />
+                        <div className="w-24 sm:w-28 h-1 bg-[#282828] rounded-full shadow-lg ring-1 ring-white/10" />
                       </div>
                     ) : (
                       /* Titanium Pro iPhone Mockup (Ultra-Thin Bezel - Clean Display) */
-                      <div className="relative w-[170px] sm:w-[200px] md:w-[220px] aspect-[9/19.5] rounded-[2.5rem] border-[3.5px] border-[#222] bg-black shadow-[0_30px_80px_rgba(0,0,0,0.9)] ring-1 ring-white/20 flex items-center justify-center overflow-hidden">
+                      <div className="relative w-[160px] sm:w-[190px] md:w-[210px] aspect-[9/19.5] rounded-[2.5rem] border-[3.5px] border-[#222] bg-black shadow-[0_30px_80px_rgba(0,0,0,0.9)] ring-1 ring-white/20 flex items-center justify-center overflow-hidden">
                         {/* Dynamic Island */}
                         <div className="absolute top-2.5 left-1/2 -translate-x-1/2 w-14 h-3 bg-black rounded-full z-30 ring-1 ring-white/10 flex items-center justify-end px-1.5 pointer-events-none">
                           <div className="w-1.5 h-1.5 rounded-full bg-[#080808] ring-1 ring-blue-900/30" />
@@ -317,7 +317,7 @@ export default function WallpaperModal({
                     )}
                   </motion.div>
                 ) : (
-                  /* Clean Full Art Canvas Mode - 100% Uncropped */
+                  /* Clean Full Art Canvas Mode - 100% Uncropped with Margin for Arrows */
                   <motion.div
                     initial={{ opacity: 0, scale: 0.96 }}
                     animate={{ opacity: 1, scale: 1 }}
@@ -325,7 +325,7 @@ export default function WallpaperModal({
                     key={`canvas-${selectedWp.id}`}
                     className="w-full h-full relative flex items-center justify-center p-2"
                   >
-                    <div className="relative w-full h-full max-h-[340px] sm:max-h-[460px] md:max-h-[520px] flex items-center justify-center">
+                    <div className="relative w-[85%] max-w-[420px] h-full max-h-[320px] sm:max-h-[440px] md:max-h-[480px] flex items-center justify-center">
                       <OptimizedImage
                         src={selectedWp.previewUrl}
                         placeholder={selectedWp.tinyUrl}
@@ -345,18 +345,18 @@ export default function WallpaperModal({
                 onClick={handlePrev}
                 disabled={currentIndex === 0}
                 aria-label="Previous Wallpaper"
-                className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 p-2.5 sm:p-3 rounded-full bg-black/60 hover:bg-black/90 backdrop-blur-md border border-white/15 text-white/80 hover:text-white transition-all shadow-xl hover:scale-105 active:scale-95 disabled:opacity-0 disabled:pointer-events-none z-30 cursor-pointer"
+                className="absolute left-2.5 sm:left-4 top-1/2 -translate-y-1/2 p-2.5 sm:p-3 rounded-full bg-black/70 hover:bg-black/95 backdrop-blur-md border border-white/20 text-white/80 hover:text-white transition-all shadow-xl hover:scale-105 active:scale-95 disabled:opacity-0 disabled:pointer-events-none z-30 cursor-pointer"
               >
-                <ChevronLeft size={20} strokeWidth={2} />
+                <ChevronLeft size={18} strokeWidth={2} />
               </button>
 
               <button
                 onClick={handleNext}
                 disabled={currentIndex === allRelevantWallpapers.length - 1}
                 aria-label="Next Wallpaper"
-                className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 p-2.5 sm:p-3 rounded-full bg-black/60 hover:bg-black/90 backdrop-blur-md border border-white/15 text-white/80 hover:text-white transition-all shadow-xl hover:scale-105 active:scale-95 disabled:opacity-0 disabled:pointer-events-none z-30 cursor-pointer"
+                className="absolute right-2.5 sm:right-4 top-1/2 -translate-y-1/2 p-2.5 sm:p-3 rounded-full bg-black/70 hover:bg-black/95 backdrop-blur-md border border-white/20 text-white/80 hover:text-white transition-all shadow-xl hover:scale-105 active:scale-95 disabled:opacity-0 disabled:pointer-events-none z-30 cursor-pointer"
               >
-                <ChevronRight size={20} strokeWidth={2} />
+                <ChevronRight size={18} strokeWidth={2} />
               </button>
             </div>
 
