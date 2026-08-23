@@ -322,20 +322,5 @@
     }
 }
 
-/* Atmospheric Spotlight */
-.spotlight {
-    position: fixed;
-    width: 800px;
-    height: 800px;
-    background: radial-gradient(
-        circle,
-        rgba(255, 255, 255, 0.035) 0%,
-        transparent 70%
-    );
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 1;
-    transform: translate(-50%, -50%);
-    mix-blend-mode: plus-lighter;
-}
+
 

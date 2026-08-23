@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../lib/supabase";
 import type { Wallpaper } from "../types";
+import { getBaseDownloads, getBaseLikes } from "./useWallpaperStats";
 
 export const BUCKET_NAME = "wallpapers";
 export const DESKTOP_PREVIEWS_FOLDER = "desktop/previews";
@@ -235,21 +236,20 @@ function mapFileToWallpaper(
 
   // Determine if it's mobile format
   const displayFormat = folder === "mobile" ? `${format} MOBILE` : format;
+  const id = `${folder}-${baseName}`;
 
-  // Generate downloads based on file size (simulate popularity)
-  const baseDownloads = folder === "mobile" ? 15000 : 8000;
-  const fileSize = file.metadata?.size || 50000;
-  const downloads =
-    Math.floor((fileSize / 50000) * baseDownloads) +
-    Math.floor(Math.random() * 5000);
+  // Deterministic realistic baseline metrics
+  const downloads = getBaseDownloads(id, folder);
+  const likes = getBaseLikes(id);
 
   return {
-    id: `${folder}-${baseName}`,
+    id,
     title,
     serial: generateSerial(file.name, index),
     category,
     format: displayFormat,
     downloads,
+    likes,
     previewUrl: previewPublicUrl,
     tinyUrl: previewPublicUrl,
     originalUrl: originalPublicUrl || previewPublicUrl,

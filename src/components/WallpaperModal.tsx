@@ -15,7 +15,7 @@ import {
 import OptimizedImage from "./OptimizedImage";
 import { Wallpaper } from "../types";
 import { useWallpapers } from "../hooks/useWallpapers";
-import { useFavorites } from "../hooks/useFavorites";
+import { useWallpaperStats } from "../hooks/useWallpaperStats";
 
 export default function WallpaperModal({
   selectedWp,
@@ -31,7 +31,8 @@ export default function WallpaperModal({
   >("idle");
   const [previewMode, setPreviewMode] = useState<"frame" | "canvas">("frame");
   const { desktopWallpapers, mobileWallpapers } = useWallpapers();
-  const { toggleFavorite, isFavorite } = useFavorites();
+  const { toggleFavorite, isFavorite, recordDownload, getDownloads, getLikes } =
+    useWallpaperStats();
 
   const allRelevantWallpapers = useMemo(() => {
     if (!selectedWp) return [];
@@ -159,6 +160,7 @@ export default function WallpaperModal({
         document.body.removeChild(a);
       }
 
+      recordDownload(selectedWp.id);
       setDownloadStatus("success");
       setTimeout(() => setDownloadStatus("idle"), 3000);
     } catch (error) {
@@ -208,29 +210,38 @@ export default function WallpaperModal({
 
               {/* TOP BAR: Clean Integrated View Switcher & Close Controls */}
               <div className="absolute top-0 inset-x-0 p-3 sm:p-4 flex items-center justify-between z-40 bg-gradient-to-b from-black/80 via-black/30 to-transparent pointer-events-none">
-                {/* Left: View Mode Switcher */}
-                <div className="flex items-center gap-1 p-1 bg-black/80 backdrop-blur-md rounded-full border border-white/10 pointer-events-auto shadow-xl">
-                  <button
-                    onClick={() => setPreviewMode("frame")}
-                    className={`px-3 py-1 text-[9px] font-mono uppercase tracking-widest rounded-full transition-all ${
-                      previewMode === "frame"
-                        ? "bg-white text-black font-bold shadow-md"
-                        : "text-white/60 hover:text-white"
-                    }`}
-                  >
-                    Display
-                  </button>
-                  <button
-                    onClick={() => setPreviewMode("canvas")}
-                    className={`px-3 py-1 text-[9px] font-mono uppercase tracking-widest rounded-full transition-all ${
-                      previewMode === "canvas"
-                        ? "bg-white text-black font-bold shadow-md"
-                        : "text-white/60 hover:text-white"
-                    }`}
-                  >
-                    Full Art
-                  </button>
-                </div>
+                {/* Left: View Mode Switcher (Desktop Only) */}
+                {selectedWp.device === "desktop" ? (
+                  <div className="flex items-center gap-1 p-1 bg-black/80 backdrop-blur-md rounded-full border border-white/10 pointer-events-auto shadow-xl">
+                    <button
+                      onClick={() => setPreviewMode("frame")}
+                      className={`px-3 py-1 text-[9px] font-mono uppercase tracking-widest rounded-full transition-all ${
+                        previewMode === "frame"
+                          ? "bg-white text-black font-bold shadow-md"
+                          : "text-white/60 hover:text-white"
+                      }`}
+                    >
+                      Display
+                    </button>
+                    <button
+                      onClick={() => setPreviewMode("canvas")}
+                      className={`px-3 py-1 text-[9px] font-mono uppercase tracking-widest rounded-full transition-all ${
+                        previewMode === "canvas"
+                          ? "bg-white text-black font-bold shadow-md"
+                          : "text-white/60 hover:text-white"
+                      }`}
+                    >
+                      Full Art
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 p-1.5 px-3 bg-black/80 backdrop-blur-md rounded-full border border-white/10 pointer-events-auto shadow-xl">
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
+                    <span className="text-[9px] font-mono text-white/80 uppercase tracking-widest">
+                      PORTRAIT DISPLAY
+                    </span>
+                  </div>
+                )}
 
                 {/* Right: Spec Badge + Integrated Close Button */}
                 <div className="flex items-center gap-2 pointer-events-auto">
@@ -251,7 +262,7 @@ export default function WallpaperModal({
 
               {/* Stage Center Display */}
               <div className="relative z-10 w-full h-full p-4 pt-16 pb-6 sm:p-8 sm:pt-20 sm:pb-8 flex items-center justify-center">
-                {previewMode === "frame" ? (
+                {previewMode === "frame" || selectedWp.device === "mobile" ? (
                   <motion.div
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
@@ -280,21 +291,11 @@ export default function WallpaperModal({
                         <div className="w-28 h-1 bg-[#282828] rounded-full shadow-lg ring-1 ring-white/10" />
                       </div>
                     ) : (
-                      /* Titanium Pro iPhone Mockup (Ultra-Thin Bezel + iOS Lockscreen Clock) */
+                      /* Titanium Pro iPhone Mockup (Ultra-Thin Bezel - Clean Display) */
                       <div className="relative w-[170px] sm:w-[200px] md:w-[220px] aspect-[9/19.5] rounded-[2.5rem] border-[3.5px] border-[#222] bg-black shadow-[0_30px_80px_rgba(0,0,0,0.9)] ring-1 ring-white/20 flex items-center justify-center overflow-hidden">
                         {/* Dynamic Island */}
-                        <div className="absolute top-2.5 left-1/2 -translate-x-1/2 w-14 h-3 bg-black rounded-full z-30 ring-1 ring-white/10 flex items-center justify-end px-1.5">
+                        <div className="absolute top-2.5 left-1/2 -translate-x-1/2 w-14 h-3 bg-black rounded-full z-30 ring-1 ring-white/10 flex items-center justify-end px-1.5 pointer-events-none">
                           <div className="w-1.5 h-1.5 rounded-full bg-[#080808] ring-1 ring-blue-900/30" />
-                        </div>
-
-                        {/* iOS Lockscreen Clock & Date */}
-                        <div className="absolute top-8 inset-x-0 flex flex-col items-center pointer-events-none z-20 text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)] select-none">
-                          <span className="text-[8px] font-sans font-medium tracking-wider text-white/80 uppercase">
-                            Sunday, August 23
-                          </span>
-                          <span className="text-3xl sm:text-4xl font-sans font-bold tracking-tight text-white mt-0.5">
-                            12:45
-                          </span>
                         </div>
 
                         {/* Bottom Home Indicator */}
@@ -316,29 +317,23 @@ export default function WallpaperModal({
                     )}
                   </motion.div>
                 ) : (
-                  /* Clean Full Art Canvas Mode */
+                  /* Clean Full Art Canvas Mode - 100% Uncropped */
                   <motion.div
                     initial={{ opacity: 0, scale: 0.96 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.3 }}
                     key={`canvas-${selectedWp.id}`}
-                    className="w-full h-full max-h-[62vh] relative flex items-center justify-center"
+                    className="w-full h-full relative flex items-center justify-center p-2"
                   >
-                    <div
-                      className={`relative overflow-hidden ring-1 ring-white/15 shadow-[0_30px_70px_rgba(0,0,0,0.9)] flex items-center justify-center ${
-                        selectedWp.device === "mobile"
-                          ? "h-[90%] aspect-[9/16] rounded-2xl"
-                          : "w-[92%] aspect-[16/10] rounded-xl"
-                      }`}
-                    >
+                    <div className="relative w-full h-full max-h-[340px] sm:max-h-[460px] md:max-h-[520px] flex items-center justify-center">
                       <OptimizedImage
                         src={selectedWp.previewUrl}
                         placeholder={selectedWp.tinyUrl}
                         fallbackSrc={selectedWp.fallbackUrl || selectedWp.previewUrl}
                         alt={selectedWp.title}
                         priority={true}
-                        className={`w-full h-full object-cover ${isOledOptimized ? "oled-image" : ""}`}
-                        containerClassName="w-full h-full"
+                        className={`max-w-full max-h-full w-auto h-auto object-contain rounded-xl shadow-[0_20px_60px_rgba(0,0,0,0.9)] ring-1 ring-white/15 ${isOledOptimized ? "oled-image" : ""}`}
+                        containerClassName="flex items-center justify-center w-full h-full"
                       />
                     </div>
                   </motion.div>
@@ -379,20 +374,23 @@ export default function WallpaperModal({
                     </h2>
                   </div>
 
-                  {/* Favorite Button */}
+                  {/* Favorite / Like Button with Live Counter */}
                   <button
                     onClick={() => toggleFavorite(selectedWp.id)}
-                    className={`p-2.5 rounded-full border transition-all cursor-pointer ${
+                    className={`flex items-center gap-1.5 py-1.5 px-3 rounded-full border transition-all cursor-pointer ${
                       isFavorite(selectedWp.id)
-                        ? "bg-red-500/20 text-red-400 border-red-500/40"
-                        : "bg-white/5 text-white/50 border-white/10 hover:text-white hover:border-white/30"
+                        ? "bg-red-500/20 text-red-400 border-red-500/40 shadow-[0_0_15px_rgba(239,68,68,0.2)]"
+                        : "bg-white/5 text-white/60 border-white/10 hover:text-white hover:border-white/30"
                     }`}
-                    title="Toggle Favorite"
+                    title="Like Wallpaper"
                   >
                     <Heart
-                      size={18}
+                      size={14}
                       fill={isFavorite(selectedWp.id) ? "currentColor" : "none"}
                     />
+                    <span className="font-mono text-[10px] tracking-wider font-semibold">
+                      {getLikes(selectedWp.id).toLocaleString()}
+                    </span>
                   </button>
                 </div>
 
@@ -400,7 +398,7 @@ export default function WallpaperModal({
                 <div className="border-t border-white/10 pt-4 mb-4">
                   <span className="text-[9px] opacity-40 font-mono uppercase tracking-[0.2em] block mb-2.5 flex items-center gap-1.5">
                     <Info size={11} />
-                    Specifications
+                    Live Specifications
                   </span>
                   <div className="grid grid-cols-2 gap-2 text-[11px] font-mono">
                     <div className="bg-white/[0.03] p-2.5 rounded-lg border border-white/5">
@@ -412,15 +410,15 @@ export default function WallpaperModal({
                       <span className="text-white/90 truncate block">{selectedWp.format || "8K MASTER"}</span>
                     </div>
                     <div className="bg-white/[0.03] p-2.5 rounded-lg border border-white/5">
-                      <span className="text-[8px] text-white/40 uppercase block">Downloads</span>
-                      <span className="text-white/90 truncate block">
-                        {selectedWp.downloads?.toLocaleString() || "10,273"}
+                      <span className="text-[8px] text-white/40 uppercase block">Total Downloads</span>
+                      <span className="text-white/90 truncate block font-bold">
+                        {getDownloads(selectedWp.id, selectedWp.device).toLocaleString()}
                       </span>
                     </div>
                     <div className="bg-white/[0.03] p-2.5 rounded-lg border border-white/5">
-                      <span className="text-[8px] text-white/40 uppercase block">Release</span>
-                      <span className="text-white/90 truncate block">
-                        {new Date(selectedWp.createdAt || Date.now()).getFullYear()}
+                      <span className="text-[8px] text-white/40 uppercase block">Appreciations</span>
+                      <span className="text-white/90 truncate block font-bold text-red-300/90">
+                        {getLikes(selectedWp.id).toLocaleString()} Likes
                       </span>
                     </div>
                   </div>

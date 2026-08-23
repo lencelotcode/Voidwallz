@@ -17,13 +17,15 @@ export default function Loader({ onComplete }: { onComplete: () => void }) {
       setProgress((prev) => {
         if (prev >= 100) {
           clearInterval(timer);
-          setTimeout(onComplete, 800); // Wait a bit after reaching 100%
+          try {
+            sessionStorage.setItem("voidwallz_loaded", "true");
+          } catch {}
+          setTimeout(onComplete, 200);
           return 100;
         }
-        // Randomize speed slightly
-        return prev + Math.floor(Math.random() * 3) + 1;
+        return prev + 6;
       });
-    }, 30);
+    }, 16);
 
     return () => clearInterval(timer);
   }, [onComplete]);

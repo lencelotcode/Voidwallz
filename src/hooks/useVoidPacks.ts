@@ -6,468 +6,89 @@ export const PACKS_BUCKET_NAME = "wallpapers";
 export const DESKTOP_PACKS_FOLDER = "packs/desktop";
 export const MOBILE_PACKS_FOLDER = "packs/mobile";
 
-export const VOID_PACKS_DATA: VoidPack[] = [
-  // --- DESKTOP SUITES ---
-  {
-    id: "pack-desktop-obsidian-matrix",
-    title: "OBSIDIAN MATRIX",
-    serial: "PACK: VP-01",
-    tagline: "Dark architectural voids & metallic geometric structures.",
-    category: "Dark / Geometry",
-    device: "desktop",
-    format: "8K MASTER SUITE",
-    downloads: 84300,
-    createdAt: "2026-08-15T10:00:00Z",
-    featuredImage: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&q=95&w=2880",
-    items: [
-      {
-        id: "om-01",
-        title: "Angular Drift I",
-        serial: "ID: VP-01-A",
-        category: "Dark / Geometry",
-        format: "8K AVIF",
-        downloads: 18200,
-        previewUrl: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&q=95&w=2880",
-        tinyUrl: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&q=20&w=50&h=50",
-        originalUrl: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&q=100&w=3840",
-        device: "desktop",
-      },
-      {
-        id: "om-02",
-        title: "Monolith Horizon",
-        serial: "ID: VP-01-B",
-        category: "Dark / Geometry",
-        format: "8K AVIF",
-        downloads: 21400,
-        previewUrl: "https://images.unsplash.com/photo-1518818419601-72c8673f5852?auto=format&fit=crop&q=95&w=2880",
-        tinyUrl: "https://images.unsplash.com/photo-1518818419601-72c8673f5852?auto=format&fit=crop&q=20&w=50&h=50",
-        originalUrl: "https://images.unsplash.com/photo-1518818419601-72c8673f5852?auto=format&fit=crop&q=100&w=3840",
-        device: "desktop",
-      },
-      {
-        id: "om-03",
-        title: "Chrome Aesthetic II",
-        serial: "ID: VP-01-C",
-        category: "3D / Silver",
-        format: "8K WEBP",
-        downloads: 15300,
-        previewUrl: "https://images.unsplash.com/photo-1634055627253-15df1f63fcb3?auto=format&fit=crop&q=95&w=2880",
-        tinyUrl: "https://images.unsplash.com/photo-1634055627253-15df1f63fcb3?auto=format&fit=crop&q=20&w=50&h=50",
-        originalUrl: "https://images.unsplash.com/photo-1634055627253-15df1f63fcb3?auto=format&fit=crop&q=100&w=3840",
-        device: "desktop",
-      },
-      {
-        id: "om-04",
-        title: "Subsurface Ray",
-        serial: "ID: VP-01-D",
-        category: "Dark / Render",
-        format: "8K AVIF",
-        downloads: 14800,
-        previewUrl: "https://images.unsplash.com/photo-1604871000636-074fa5117945?auto=format&fit=crop&q=95&w=2880",
-        tinyUrl: "https://images.unsplash.com/photo-1604871000636-074fa5117945?auto=format&fit=crop&q=20&w=50&h=50",
-        originalUrl: "https://images.unsplash.com/photo-1604871000636-074fa5117945?auto=format&fit=crop&q=100&w=3840",
-        device: "desktop",
-      },
-      {
-        id: "om-05",
-        title: "Void Lattice",
-        serial: "ID: VP-01-E",
-        category: "Dark / Geometry",
-        format: "8K AVIF",
-        downloads: 14600,
-        previewUrl: "https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?auto=format&fit=crop&q=95&w=2880",
-        tinyUrl: "https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?auto=format&fit=crop&q=20&w=50&h=50",
-        originalUrl: "https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?auto=format&fit=crop&q=100&w=3840",
-        device: "desktop",
-      },
-    ],
-  },
-  {
-    id: "pack-desktop-liquid-ether",
-    title: "LIQUID ETHER",
-    serial: "PACK: VP-02",
-    tagline: "Dynamic fluid physics, refractive glass & atmospheric chrome swells.",
-    category: "Liquid / Fluid",
-    device: "desktop",
-    format: "8K MASTER SUITE",
-    downloads: 96200,
-    createdAt: "2026-08-18T14:30:00Z",
-    featuredImage: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=95&w=2880",
-    items: [
-      {
-        id: "le-01",
-        title: "Liquid Void Primary",
-        serial: "ID: VP-02-A",
-        category: "Liquid / Fluid",
-        format: "8K AVIF",
-        downloads: 24100,
-        previewUrl: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=95&w=2880",
-        tinyUrl: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=20&w=50&h=50",
-        originalUrl: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=100&w=3840",
-        device: "desktop",
-      },
-      {
-        id: "le-02",
-        title: "Prismatic Wave",
-        serial: "ID: VP-02-B",
-        category: "Fluid / Gradient",
-        format: "8K AVIF",
-        downloads: 19800,
-        previewUrl: "https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?auto=format&fit=crop&q=95&w=2880",
-        tinyUrl: "https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?auto=format&fit=crop&q=20&w=50&h=50",
-        originalUrl: "https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?auto=format&fit=crop&q=100&w=3840",
-        device: "desktop",
-      },
-      {
-        id: "le-03",
-        title: "Mercury Crest",
-        serial: "ID: VP-02-C",
-        category: "3D / Silver",
-        format: "8K AVIF",
-        downloads: 17400,
-        previewUrl: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=95&w=2880",
-        tinyUrl: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=20&w=50&h=50",
-        originalUrl: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=100&w=3840",
-        device: "desktop",
-      },
-      {
-        id: "le-04",
-        title: "Neon Mirage",
-        serial: "ID: VP-02-D",
-        category: "Fluid / Glow",
-        format: "8K AVIF",
-        downloads: 18900,
-        previewUrl: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&q=95&w=2880",
-        tinyUrl: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&q=20&w=50&h=50",
-        originalUrl: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&q=100&w=3840",
-        device: "desktop",
-      },
-      {
-        id: "le-05",
-        title: "Deep Current",
-        serial: "ID: VP-02-E",
-        category: "Minimal / Flow",
-        format: "8K AVIF",
-        downloads: 16000,
-        previewUrl: "https://images.unsplash.com/photo-1604871000636-074fa5117945?auto=format&fit=crop&q=95&w=2880",
-        tinyUrl: "https://images.unsplash.com/photo-1604871000636-074fa5117945?auto=format&fit=crop&q=20&w=50&h=50",
-        originalUrl: "https://images.unsplash.com/photo-1604871000636-074fa5117945?auto=format&fit=crop&q=100&w=3840",
-        device: "desktop",
-      },
-    ],
-  },
-  {
-    id: "pack-desktop-cyber-abyss",
-    title: "CYBER ABYSS",
-    serial: "PACK: VP-03",
-    tagline: "Synthetic luminescent horizons, wireframe vectors & dystopian neon.",
-    category: "Cyber / Synth",
-    device: "desktop",
-    format: "8K MASTER SUITE",
-    downloads: 71900,
-    createdAt: "2026-08-20T11:20:00Z",
-    featuredImage: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&q=95&w=2880",
-    items: [
-      {
-        id: "ca-01",
-        title: "Neon Nexus",
-        serial: "ID: VP-03-A",
-        category: "Cyber / Synth",
-        format: "8K AVIF",
-        downloads: 19400,
-        previewUrl: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&q=95&w=2880",
-        tinyUrl: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&q=20&w=50&h=50",
-        originalUrl: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&q=100&w=3840",
-        device: "desktop",
-      },
-      {
-        id: "ca-02",
-        title: "Vector Grid V",
-        serial: "ID: VP-03-B",
-        category: "Cyber / Neon",
-        format: "8K AVIF",
-        downloads: 13900,
-        previewUrl: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&q=95&w=2880",
-        tinyUrl: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&q=20&w=50&h=50",
-        originalUrl: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&q=100&w=3840",
-        device: "desktop",
-      },
-      {
-        id: "ca-03",
-        title: "Pulse Ray",
-        serial: "ID: VP-03-C",
-        category: "Cyber / Glow",
-        format: "8K AVIF",
-        downloads: 12500,
-        previewUrl: "https://images.unsplash.com/photo-1634055627253-15df1f63fcb3?auto=format&fit=crop&q=95&w=2880",
-        tinyUrl: "https://images.unsplash.com/photo-1634055627253-15df1f63fcb3?auto=format&fit=crop&q=20&w=50&h=50",
-        originalUrl: "https://images.unsplash.com/photo-1634055627253-15df1f63fcb3?auto=format&fit=crop&q=100&w=3840",
-        device: "desktop",
-      },
-      {
-        id: "ca-04",
-        title: "Circuit Void",
-        serial: "ID: VP-03-D",
-        category: "Cyber / Dark",
-        format: "8K AVIF",
-        downloads: 14100,
-        previewUrl: "https://images.unsplash.com/photo-1518818419601-72c8673f5852?auto=format&fit=crop&q=95&w=2880",
-        tinyUrl: "https://images.unsplash.com/photo-1518818419601-72c8673f5852?auto=format&fit=crop&q=20&w=50&h=50",
-        originalUrl: "https://images.unsplash.com/photo-1518818419601-72c8673f5852?auto=format&fit=crop&q=100&w=3840",
-        device: "desktop",
-      },
-      {
-        id: "ca-05",
-        title: "Zero Matrix",
-        serial: "ID: VP-03-E",
-        category: "Cyber / Abstract",
-        format: "8K AVIF",
-        downloads: 12000,
-        previewUrl: "https://images.unsplash.com/photo-1604871000636-074fa5117945?auto=format&fit=crop&q=95&w=2880",
-        tinyUrl: "https://images.unsplash.com/photo-1604871000636-074fa5117945?auto=format&fit=crop&q=20&w=50&h=50",
-        originalUrl: "https://images.unsplash.com/photo-1604871000636-074fa5117945?auto=format&fit=crop&q=100&w=3840",
-        device: "desktop",
-      },
-    ],
-  },
+export const VOID_PACKS_DATA: VoidPack[] = [];
 
-  // --- PHONE DECKS ---
-  {
-    id: "pack-mobile-singularity-deck",
-    title: "SINGULARITY DECK",
-    serial: "PACK: VP-M01",
-    tagline: "High-contrast OLED deep space vectors with astronomical singularity cores.",
-    category: "Space / OLED",
-    device: "mobile",
-    format: "4K RETINA DECK",
-    downloads: 112000,
-    createdAt: "2026-08-16T12:00:00Z",
-    featuredImage: "https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?auto=format&fit=crop&q=95&w=1440&h=2560",
-    items: [
-      {
-        id: "sd-01",
-        title: "Singularity Core",
-        serial: "ID: VP-M01-A",
-        category: "Space / OLED",
-        format: "4K MOBILE",
-        downloads: 32000,
-        previewUrl: "https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?auto=format&fit=crop&q=95&w=1440&h=2560",
-        tinyUrl: "https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?auto=format&fit=crop&q=20&w=50&h=89",
-        originalUrl: "https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?auto=format&fit=crop&q=100&w=2160&h=3840",
-        device: "mobile",
-      },
-      {
-        id: "sd-02",
-        title: "Event Horizon",
-        serial: "ID: VP-M01-B",
-        category: "Dark / Cosmos",
-        format: "4K MOBILE",
-        downloads: 24100,
-        previewUrl: "https://images.unsplash.com/photo-1506443432602-ac2fcd6f54e0?auto=format&fit=crop&q=95&w=1440&h=2560",
-        tinyUrl: "https://images.unsplash.com/photo-1506443432602-ac2fcd6f54e0?auto=format&fit=crop&q=20&w=50&h=89",
-        originalUrl: "https://images.unsplash.com/photo-1506443432602-ac2fcd6f54e0?auto=format&fit=crop&q=100&w=2160&h=3840",
-        device: "mobile",
-      },
-      {
-        id: "sd-03",
-        title: "Void Aura",
-        serial: "ID: VP-M01-C",
-        category: "Gradient / Minimal",
-        format: "4K MOBILE",
-        downloads: 19800,
-        previewUrl: "https://images.unsplash.com/photo-1557672172-298e090bd0f1?auto=format&fit=crop&q=95&w=1440&h=2560",
-        tinyUrl: "https://images.unsplash.com/photo-1557672172-298e090bd0f1?auto=format&fit=crop&q=20&w=50&h=89",
-        originalUrl: "https://images.unsplash.com/photo-1557672172-298e090bd0f1?auto=format&fit=crop&q=100&w=2160&h=3840",
-        device: "mobile",
-      },
-      {
-        id: "sd-04",
-        title: "Obsidian Wave Vertical",
-        serial: "ID: VP-M01-D",
-        category: "Liquid / Fluid",
-        format: "4K MOBILE",
-        downloads: 21300,
-        previewUrl: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=95&w=1440&h=2560",
-        tinyUrl: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=20&w=50&h=89",
-        originalUrl: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=100&w=2160&h=3840",
-        device: "mobile",
-      },
-      {
-        id: "sd-05",
-        title: "Grain Matrix Pro",
-        serial: "ID: VP-M01-E",
-        category: "Texture / Film",
-        format: "4K MOBILE",
-        downloads: 14800,
-        previewUrl: "https://images.unsplash.com/photo-1518818419601-72c8673f5852?auto=format&fit=crop&q=95&w=1440&h=2560",
-        tinyUrl: "https://images.unsplash.com/photo-1518818419601-72c8673f5852?auto=format&fit=crop&q=20&w=50&h=89",
-        originalUrl: "https://images.unsplash.com/photo-1518818419601-72c8673f5852?auto=format&fit=crop&q=100&w=2160&h=3840",
-        device: "mobile",
-      },
-    ],
-  },
-  {
-    id: "pack-mobile-chroma-noir",
-    title: "CHROMA NOIR",
-    serial: "PACK: VP-M02",
-    tagline: "Vibrant neon accents colliding with impenetrable pure black backgrounds.",
-    category: "Noir / Chroma",
-    device: "mobile",
-    format: "4K RETINA DECK",
-    downloads: 89400,
-    createdAt: "2026-08-19T16:15:00Z",
-    featuredImage: "https://images.unsplash.com/photo-1557672172-298e090bd0f1?auto=format&fit=crop&q=95&w=1440&h=2560",
-    items: [
-      {
-        id: "cn-01",
-        title: "Chromatic Wave",
-        serial: "ID: VP-M02-A",
-        category: "Noir / Chroma",
-        format: "4K MOBILE",
-        downloads: 26100,
-        previewUrl: "https://images.unsplash.com/photo-1557672172-298e090bd0f1?auto=format&fit=crop&q=95&w=1440&h=2560",
-        tinyUrl: "https://images.unsplash.com/photo-1557672172-298e090bd0f1?auto=format&fit=crop&q=20&w=50&h=89",
-        originalUrl: "https://images.unsplash.com/photo-1557672172-298e090bd0f1?auto=format&fit=crop&q=100&w=2160&h=3840",
-        device: "mobile",
-      },
-      {
-        id: "cn-02",
-        title: "Spectral Flow",
-        serial: "ID: VP-M02-B",
-        category: "Liquid / Fluid",
-        format: "4K MOBILE",
-        downloads: 20300,
-        previewUrl: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=95&w=1440&h=2560",
-        tinyUrl: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=20&w=50&h=89",
-        originalUrl: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=100&w=2160&h=3840",
-        device: "mobile",
-      },
-      {
-        id: "cn-03",
-        title: "Cosmic Filament",
-        serial: "ID: VP-M02-C",
-        category: "Space / Glow",
-        format: "4K MOBILE",
-        downloads: 17400,
-        previewUrl: "https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?auto=format&fit=crop&q=95&w=1440&h=2560",
-        tinyUrl: "https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?auto=format&fit=crop&q=20&w=50&h=89",
-        originalUrl: "https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?auto=format&fit=crop&q=100&w=2160&h=3840",
-        device: "mobile",
-      },
-      {
-        id: "cn-04",
-        title: "Prism Void",
-        serial: "ID: VP-M02-D",
-        category: "Abstract / Dark",
-        format: "4K MOBILE",
-        downloads: 14200,
-        previewUrl: "https://images.unsplash.com/photo-1506443432602-ac2fcd6f54e0?auto=format&fit=crop&q=95&w=1440&h=2560",
-        tinyUrl: "https://images.unsplash.com/photo-1506443432602-ac2fcd6f54e0?auto=format&fit=crop&q=20&w=50&h=89",
-        originalUrl: "https://images.unsplash.com/photo-1506443432602-ac2fcd6f54e0?auto=format&fit=crop&q=100&w=2160&h=3840",
-        device: "mobile",
-      },
-      {
-        id: "cn-05",
-        title: "Titanium Ray",
-        serial: "ID: VP-M02-E",
-        category: "3D / Silver",
-        format: "4K MOBILE",
-        downloads: 11400,
-        previewUrl: "https://images.unsplash.com/photo-1634055627253-15df1f63fcb3?auto=format&fit=crop&q=95&w=1440&h=2560",
-        tinyUrl: "https://images.unsplash.com/photo-1634055627253-15df1f63fcb3?auto=format&fit=crop&q=20&w=50&h=89",
-        originalUrl: "https://images.unsplash.com/photo-1634055627253-15df1f63fcb3?auto=format&fit=crop&q=100&w=2160&h=3840",
-        device: "mobile",
-      },
-    ],
-  },
-  {
-    id: "pack-mobile-cyber-grid",
-    title: "NEO CYBERPUNK",
-    serial: "PACK: VP-M03",
-    tagline: "Blade runner neon grids, holographic noise & futuristic Tokyo horizons.",
-    category: "Cyber / Synth",
-    device: "mobile",
-    format: "4K RETINA DECK",
-    downloads: 98100,
-    createdAt: "2026-08-21T09:40:00Z",
-    featuredImage: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&q=95&w=1440&h=2560",
-    items: [
-      {
-        id: "cg-01",
-        title: "Neon Skyline",
-        serial: "ID: VP-M03-A",
-        category: "Cyber / Synth",
-        format: "4K MOBILE",
-        downloads: 29800,
-        previewUrl: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&q=95&w=1440&h=2560",
-        tinyUrl: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&q=20&w=50&h=89",
-        originalUrl: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&q=100&w=2160&h=3840",
-        device: "mobile",
-      },
-      {
-        id: "cg-02",
-        title: "Holo Grid Vector",
-        serial: "ID: VP-M03-B",
-        category: "Cyber / Glow",
-        format: "4K MOBILE",
-        downloads: 21400,
-        previewUrl: "https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?auto=format&fit=crop&q=95&w=1440&h=2560",
-        tinyUrl: "https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?auto=format&fit=crop&q=20&w=50&h=89",
-        originalUrl: "https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?auto=format&fit=crop&q=100&w=2160&h=3840",
-        device: "mobile",
-      },
-      {
-        id: "cg-03",
-        title: "Acid Stream",
-        serial: "ID: VP-M03-C",
-        category: "Cyber / Neon",
-        format: "4K MOBILE",
-        downloads: 16700,
-        previewUrl: "https://images.unsplash.com/photo-1557672172-298e090bd0f1?auto=format&fit=crop&q=95&w=1440&h=2560",
-        tinyUrl: "https://images.unsplash.com/photo-1557672172-298e090bd0f1?auto=format&fit=crop&q=20&w=50&h=89",
-        originalUrl: "https://images.unsplash.com/photo-1557672172-298e090bd0f1?auto=format&fit=crop&q=100&w=2160&h=3840",
-        device: "mobile",
-      },
-      {
-        id: "cg-04",
-        title: "Dark Synth V",
-        serial: "ID: VP-M03-D",
-        category: "Dark / Retro",
-        format: "4K MOBILE",
-        downloads: 15900,
-        previewUrl: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=95&w=1440&h=2560",
-        tinyUrl: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=20&w=50&h=89",
-        originalUrl: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=100&w=2160&h=3840",
-        device: "mobile",
-      },
-      {
-        id: "cg-05",
-        title: "Glitch Aura",
-        serial: "ID: VP-M03-E",
-        category: "Abstract / Cyber",
-        format: "4K MOBILE",
-        downloads: 14300,
-        previewUrl: "https://images.unsplash.com/photo-1506443432602-ac2fcd6f54e0?auto=format&fit=crop&q=95&w=1440&h=2560",
-        tinyUrl: "https://images.unsplash.com/photo-1506443432602-ac2fcd6f54e0?auto=format&fit=crop&q=20&w=50&h=89",
-        originalUrl: "https://images.unsplash.com/photo-1506443432602-ac2fcd6f54e0?auto=format&fit=crop&q=100&w=2160&h=3840",
-        device: "mobile",
-      },
-    ],
-  },
-];
+const CACHE_STORAGE_KEY = "voidwallz_cached_packs_v3";
+
+function getStoredPacks(): VoidPack[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem(CACHE_STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed;
+      }
+    }
+  } catch (e) {
+    console.warn("Error reading pack cache:", e);
+  }
+  return [];
+}
+
+function setStoredPacks(packs: VoidPack[]) {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(CACHE_STORAGE_KEY, JSON.stringify(packs));
+  } catch (e) {
+    console.warn("Error saving pack cache:", e);
+  }
+}
+
+function arePacksEqual(a: VoidPack[], b: VoidPack[]): boolean {
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) {
+    if (a[i].id !== b[i].id || a[i].items?.length !== b[i].items?.length) {
+      return false;
+    }
+  }
+  return true;
+}
+
+// Module-level in-memory cache initialized synchronously from localStorage
+let cachedPacks: VoidPack[] = typeof window !== "undefined" ? getStoredPacks() : [];
+let isFetchingPacks = false;
+const listeners: Array<(packs: VoidPack[]) => void> = [];
+
+function broadcastPacks(newPacks: VoidPack[]) {
+  if (arePacksEqual(cachedPacks, newPacks)) {
+    // Zero changes, skip re-renders to prevent any visual glitch
+    return;
+  }
+  cachedPacks = newPacks;
+  setStoredPacks(newPacks);
+  listeners.forEach((fn) => fn(newPacks));
+}
 
 export function useVoidPacks() {
-  const [packs, setPacks] = useState<VoidPack[]>(VOID_PACKS_DATA);
-  const [loading, setLoading] = useState(false);
+  const [packs, setPacks] = useState<VoidPack[]>(cachedPacks);
+  const [loading, setLoading] = useState<boolean>(cachedPacks.length === 0);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // If cache updated in another listener, sync state immediately
+    if (packs !== cachedPacks) {
+      setPacks(cachedPacks);
+      setLoading(false);
+    }
+
+    const listener = (newPacks: VoidPack[]) => {
+      setPacks(newPacks);
+      setLoading(false);
+    };
+    listeners.push(listener);
+
     async function fetchPacksFromSupabase() {
-      if (!supabase) return;
+      if (!supabase) {
+        setLoading(false);
+        return;
+      }
+
+      if (isFetchingPacks) return;
+      isFetchingPacks = true;
 
       try {
-        setLoading(true);
-        // 1. Check if there is a 'void_packs' table
+        // 1. Check if there is a 'void_packs' table in Supabase database
         const { data: dbPacks, error: dbError } = await supabase
           .from("void_packs")
           .select("*")
@@ -487,25 +108,23 @@ export function useVoidPacks() {
             featuredImage: row.featured_image || row.items?.[0]?.previewUrl,
             items: row.items || [],
           }));
-          setPacks(mapped);
-          setLoading(false);
+          broadcastPacks(mapped);
           return;
         }
 
-        // 2. Zero-Hassle Smart Storage Loader (Supports both direct files & subfolders)
+        // 2. Smart Storage Loader (Supports direct files & subfolders)
         const storagePacks: VoidPack[] = [];
 
-        // Process Desktop Packs
+        // Process Desktop Packs from storage
         const { data: desktopEntries } = await supabase.storage
           .from(PACKS_BUCKET_NAME)
           .list(DESKTOP_PACKS_FOLDER);
 
         if (desktopEntries && desktopEntries.length > 0) {
-          // Check if entries are subfolders or direct files
           const subfolders = desktopEntries.filter((e) => !e.name.includes("."));
           const directFiles = desktopEntries.filter((e) => e.name.includes(".") && !e.name.startsWith("."));
 
-          // Handle subfolders if any exist
+          // Handle subfolders
           for (const folder of subfolders) {
             const { data: files } = await supabase.storage
               .from(PACKS_BUCKET_NAME)
@@ -549,7 +168,7 @@ export function useVoidPacks() {
             }
           }
 
-          // Handle direct files with common prefix (e.g. Cyberpunk_1.png, Cyberpunk_2.png)
+          // Handle direct files with common prefix
           if (directFiles.length > 0) {
             const groups: Record<string, typeof directFiles> = {};
             for (const f of directFiles) {
@@ -595,7 +214,7 @@ export function useVoidPacks() {
           }
         }
 
-        // Process Mobile Packs
+        // Process Mobile Packs from storage
         const { data: mobileEntries } = await supabase.storage
           .from(PACKS_BUCKET_NAME)
           .list(MOBILE_PACKS_FOLDER);
@@ -692,18 +311,22 @@ export function useVoidPacks() {
           }
         }
 
-        if (storagePacks.length > 0) {
-          setPacks(storagePacks);
-        }
+        broadcastPacks(storagePacks);
       } catch (err: any) {
-        console.warn("Supabase void pack fetch error, fallback active:", err);
+        console.warn("Supabase void pack fetch error:", err);
         setError(err.message);
       } finally {
+        isFetchingPacks = false;
         setLoading(false);
       }
     }
 
     fetchPacksFromSupabase();
+
+    return () => {
+      const idx = listeners.indexOf(listener);
+      if (idx !== -1) listeners.splice(idx, 1);
+    };
   }, []);
 
   const desktopPacks = useMemo(() => packs.filter((p) => p.device === "desktop"), [packs]);

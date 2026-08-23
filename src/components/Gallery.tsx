@@ -4,7 +4,7 @@ import { Search, Heart, Download, ArrowUpRight } from "lucide-react";
 import OptimizedImage from "./OptimizedImage";
 import { Wallpaper } from "../types";
 import { useWallpapers } from "../hooks/useWallpapers";
-import { useFavorites } from "../hooks/useFavorites";
+import { useWallpaperStats } from "../hooks/useWallpaperStats";
 
 export default function Gallery({
   view = "all",
@@ -25,7 +25,8 @@ export default function Gallery({
     error,
     reload,
   } = useWallpapers();
-  const { toggleFavorite, isFavorite } = useFavorites();
+  const { toggleFavorite, isFavorite, recordDownload, getLikes } =
+    useWallpaperStats();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -64,6 +65,7 @@ export default function Gallery({
           a.click();
           document.body.removeChild(a);
           window.URL.revokeObjectURL(url);
+          recordDownload(wp.id);
           return;
         }
       } catch {}
@@ -76,6 +78,7 @@ export default function Gallery({
       document.body.appendChild(direct);
       direct.click();
       document.body.removeChild(direct);
+      recordDownload(wp.id);
     } catch (err) {
       console.error("Quick download failed:", err);
     }

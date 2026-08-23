@@ -4,11 +4,8 @@ import { createPortal } from "react-dom";
 import {
   ChevronLeft,
   ChevronRight,
-  Download,
-  FolderArchive,
   Layers,
   Sparkles,
-  Check,
   Monitor,
   Smartphone,
   X,
@@ -26,31 +23,29 @@ export default function PackModal({
   onClose: () => void;
   isOledOptimized?: boolean;
 }) {
-  const [activeIndex, setActiveIndex] = useState(0);
+  const [activeIndex, setActiveIndex] = useState<number>(0);
   const [previewMode, setPreviewMode] = useState<"frame" | "canvas">("frame");
-  const [packDownloadStatus, setPackDownloadStatus] = useState<
-    "idle" | "downloading" | "success" | "error"
-  >("idle");
-  const [singleDownloadStatus, setSingleDownloadStatus] = useState<
-    "idle" | "downloading" | "success" | "error"
-  >("idle");
+
+  useEffect(() => {
+    setActiveIndex(0);
+    setPreviewMode("frame");
+  }, [selectedPack]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
       if (e.key === "ArrowRight" && selectedPack) {
-        setActiveIndex((prev) => (prev < selectedPack.items.length - 1 ? prev + 1 : 0));
+        setActiveIndex((prev) => (prev + 1) % selectedPack.items.length);
       }
       if (e.key === "ArrowLeft" && selectedPack) {
-        setActiveIndex((prev) => (prev > 0 ? prev - 1 : selectedPack.items.length - 1));
+        setActiveIndex((prev) =>
+          prev === 0 ? selectedPack.items.length - 1 : prev - 1,
+        );
       }
     };
 
     if (selectedPack) {
       document.body.style.overflow = "hidden";
-      setActiveIndex(0);
-      setPackDownloadStatus("idle");
-      setSingleDownloadStatus("idle");
       window.addEventListener("keydown", handleKeyDown);
     } else {
       document.body.style.overflow = "";
@@ -65,101 +60,6 @@ export default function PackModal({
   if (!selectedPack || typeof document === "undefined") return null;
 
   const currentWp = selectedPack.items[activeIndex] || selectedPack.items[0];
-
-  const handleDownloadSingle = async () => {
-    if (singleDownloadStatus === "downloading" || !currentWp) return;
-    setSingleDownloadStatus("downloading");
-
-    const url = currentWp.originalUrl || currentWp.previewUrl;
-    const filename = `${selectedPack.title.replace(/\s+/g, "_")}_Part${activeIndex + 1}_${currentWp.title.replace(/\s+/g, "_")}.png`;
-
-    try {
-      const res = await fetch(url, { mode: "cors" });
-      if (res.ok) {
-        const blob = await res.blob();
-        const blobUrl = window.URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = blobUrl;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        window.URL.revokeObjectURL(blobUrl);
-      } else {
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = filename;
-        a.target = "_blank";
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-      }
-      setSingleDownloadStatus("success");
-      setTimeout(() => setSingleDownloadStatus("idle"), 3000);
-    } catch {
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = filename;
-      a.target = "_blank";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      setSingleDownloadStatus("success");
-      setTimeout(() => setSingleDownloadStatus("idle"), 3000);
-    }
-  };
-
-  const handleDownloadAll = async () => {
-    if (packDownloadStatus === "downloading") return;
-    setPackDownloadStatus("downloading");
-
-    try {
-      for (let i = 0; i < selectedPack.items.length; i++) {
-        const item = selectedPack.items[i];
-        const url = item.originalUrl || item.previewUrl;
-        const filename = `${selectedPack.title.replace(/\s+/g, "_")}_Asset_0${i + 1}_${item.title.replace(/\s+/g, "_")}.png`;
-
-        try {
-          const res = await fetch(url, { mode: "cors" });
-          if (res.ok) {
-            const blob = await res.blob();
-            const blobUrl = window.URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = blobUrl;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(blobUrl);
-          } else {
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = filename;
-            a.target = "_blank";
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-          }
-        } catch {
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = filename;
-          a.target = "_blank";
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-        }
-
-        await new Promise((resolve) => setTimeout(resolve, 350));
-      }
-
-      setPackDownloadStatus("success");
-      setTimeout(() => setPackDownloadStatus("idle"), 4000);
-    } catch {
-      setPackDownloadStatus("error");
-      setTimeout(() => setPackDownloadStatus("idle"), 3000);
-    }
-  };
 
   return createPortal(
     <AnimatePresence>
@@ -186,7 +86,7 @@ export default function PackModal({
           onClick={(e) => e.stopPropagation()}
         >
           {/* LEFT: Visual Stage Section */}
-          <div className="w-full md:w-3/5 min-h-[300px] sm:min-h-[380px] md:min-h-[520px] relative flex flex-col items-center justify-center overflow-hidden border-b md:border-b-0 md:border-r border-white/10 group bg-[#040404]">
+          <div className="w-full md:w-3/5 min-h-[260px] sm:min-h-[340px] md:min-h-[480px] relative flex flex-col items-center justify-center overflow-hidden border-b md:border-b-0 md:border-r border-white/10 group bg-[#040404]">
             {/* Ambient Background Glow */}
             <motion.div
               initial={{ opacity: 0 }}
@@ -198,50 +98,34 @@ export default function PackModal({
 
             {/* TOP BAR: Clean Integrated View Switcher & Close Controls */}
             <div className="absolute top-0 inset-x-0 p-3 sm:p-4 flex items-center justify-between z-40 bg-gradient-to-b from-black/80 via-black/30 to-transparent pointer-events-none">
-              {/* Left: View Mode Pills */}
-              <div className="flex items-center gap-1 p-1 bg-black/80 backdrop-blur-md rounded-full border border-white/10 pointer-events-auto shadow-xl">
-                <button
-                  onClick={() => setPreviewMode("frame")}
-                  className={`px-3 py-1 text-[9px] font-mono uppercase tracking-widest rounded-full transition-all ${
-                    previewMode === "frame"
-                      ? "bg-white text-black font-bold shadow-md"
-                      : "text-white/60 hover:text-white"
-                  }`}
-                >
-                  Display
-                </button>
-                <button
-                  onClick={() => setPreviewMode("canvas")}
-                  className={`px-3 py-1 text-[9px] font-mono uppercase tracking-widest rounded-full transition-all ${
-                    previewMode === "canvas"
-                      ? "bg-white text-black font-bold shadow-md"
-                      : "text-white/60 hover:text-white"
-                  }`}
-                >
-                  Full Art
-                </button>
+              {/* Left: Pack Badge */}
+              <div className="flex items-center gap-1.5 p-1 px-2.5 bg-black/80 backdrop-blur-md rounded-full border border-white/10 pointer-events-auto shadow-xl">
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
+                <span className="text-[9px] font-mono text-white/80 uppercase tracking-widest">
+                  {selectedPack.serial}
+                </span>
               </div>
 
               {/* Right: Part Indicator & Close Button */}
               <div className="flex items-center gap-2 pointer-events-auto">
-                <span className="spec-badge text-[9px] font-mono px-3 py-1.5 rounded-full text-white/90 tracking-widest flex items-center gap-1.5 bg-black/80 backdrop-blur-md border border-white/10 shadow-xl">
+                <span className="spec-badge text-[9px] font-mono px-2.5 py-1 rounded-full text-white/90 tracking-widest flex items-center gap-1 bg-black/80 backdrop-blur-md border border-white/10 shadow-xl">
                   <Layers size={10} />
-                  PART {activeIndex + 1} OF {selectedPack.items.length}
+                  0{activeIndex + 1} / 0{selectedPack.items.length}
                 </span>
 
                 <button
                   onClick={onClose}
-                  className="w-8 h-8 rounded-full bg-black/80 backdrop-blur-md border border-white/15 flex items-center justify-center text-white/80 hover:text-white hover:border-white/40 active:scale-95 transition-all shadow-xl cursor-pointer"
+                  className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-black/80 backdrop-blur-md border border-white/15 flex items-center justify-center text-white/80 hover:text-white hover:border-white/40 active:scale-95 transition-all shadow-xl cursor-pointer"
                   title="Close Modal"
                 >
-                  <X size={15} />
+                  <X size={14} />
                 </button>
               </div>
             </div>
 
             {/* Stage Center Display */}
-            <div className="relative z-10 w-full h-full p-4 pt-16 pb-6 sm:p-8 sm:pt-20 sm:pb-8 flex items-center justify-center">
-              {previewMode === "frame" ? (
+            <div className="relative z-10 w-full h-full p-4 pt-12 pb-4 sm:p-6 sm:pt-14 sm:pb-6 flex items-center justify-center">
+              {previewMode === "frame" || selectedPack.device === "mobile" ? (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
@@ -250,9 +134,9 @@ export default function PackModal({
                   className="flex items-center justify-center w-full"
                 >
                   {selectedPack.device === "desktop" ? (
-                    /* Studio Display Mockup (Clean Scaled Aspect Ratio) */
-                    <div className="relative flex flex-col items-center w-full max-w-[460px] sm:max-w-[500px]">
-                      <div className="w-full aspect-[16/10] rounded-xl border-[3.5px] border-[#222] bg-black shadow-[0_25px_60px_rgba(0,0,0,0.9)] relative overflow-hidden ring-1 ring-white/15">
+                    /* Studio Display Mockup - Spacious & Balanced */
+                    <div className="relative flex flex-col items-center w-full max-w-[270px] sm:max-w-[380px] md:max-w-[440px]">
+                      <div className="w-full aspect-[16/10] rounded-lg sm:rounded-xl border-[3px] sm:border-[3.5px] border-[#222] bg-black shadow-[0_20px_50px_rgba(0,0,0,0.9)] relative overflow-hidden ring-1 ring-white/15">
                         <div className="absolute top-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-[#333] rounded-full ring-1 ring-white/10 z-30 pointer-events-none" />
                         <OptimizedImage
                           src={currentWp.previewUrl}
@@ -266,29 +150,19 @@ export default function PackModal({
                         <div className="absolute inset-0 bg-gradient-to-tr from-white/[0.08] via-transparent to-transparent pointer-events-none z-20" />
                       </div>
                       {/* Slim Pedestal */}
-                      <div className="w-14 h-4 bg-gradient-to-b from-[#222] to-[#141414] rounded-b-sm shadow-md ring-1 ring-white/10" />
-                      <div className="w-28 h-1 bg-[#282828] rounded-full shadow-lg ring-1 ring-white/10" />
+                      <div className="w-12 sm:w-14 h-2.5 sm:h-3.5 bg-gradient-to-b from-[#222] to-[#141414] rounded-b-sm shadow-md ring-1 ring-white/10" />
+                      <div className="w-20 sm:w-28 h-1 bg-[#282828] rounded-full shadow-lg ring-1 ring-white/10" />
                     </div>
                   ) : (
-                    /* Titanium Pro iPhone Mockup (Ultra-Thin Bezel + iOS Lockscreen Clock) */
-                    <div className="relative w-[170px] sm:w-[200px] md:w-[220px] aspect-[9/19.5] rounded-[2.5rem] border-[3.5px] border-[#222] bg-black shadow-[0_30px_80px_rgba(0,0,0,0.9)] ring-1 ring-white/20 flex items-center justify-center overflow-hidden">
+                    /* Titanium Pro iPhone Mockup - Clean Proportions */
+                    <div className="relative w-[140px] sm:w-[175px] md:w-[200px] aspect-[9/19.5] rounded-[2.2rem] border-[3px] sm:border-[3.5px] border-[#222] bg-black shadow-[0_25px_60px_rgba(0,0,0,0.9)] ring-1 ring-white/20 flex items-center justify-center overflow-hidden">
                       {/* Dynamic Island */}
-                      <div className="absolute top-2.5 left-1/2 -translate-x-1/2 w-14 h-3 bg-black rounded-full z-30 ring-1 ring-white/10 flex items-center justify-end px-1.5">
+                      <div className="absolute top-2 left-1/2 -translate-x-1/2 w-12 h-2.5 bg-black rounded-full z-30 ring-1 ring-white/10 flex items-center justify-end px-1 pointer-events-none">
                         <div className="w-1.5 h-1.5 rounded-full bg-[#080808] ring-1 ring-blue-900/30" />
                       </div>
 
-                      {/* iOS Lockscreen Clock & Date */}
-                      <div className="absolute top-8 inset-x-0 flex flex-col items-center pointer-events-none z-20 text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)] select-none">
-                        <span className="text-[8px] font-sans font-medium tracking-wider text-white/80 uppercase">
-                          Sunday, August 23
-                        </span>
-                        <span className="text-3xl sm:text-4xl font-sans font-bold tracking-tight text-white mt-0.5">
-                          12:45
-                        </span>
-                      </div>
-
                       {/* Bottom Home Indicator */}
-                      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-20 h-1 bg-white/70 rounded-full z-20 pointer-events-none" />
+                      <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-16 h-1 bg-white/70 rounded-full z-20 pointer-events-none" />
 
                       {/* Wallpaper Image */}
                       <OptimizedImage
@@ -298,31 +172,31 @@ export default function PackModal({
                         alt={currentWp.title}
                         priority={true}
                         className={`w-full h-full object-cover ${isOledOptimized ? "oled-image" : ""}`}
-                        containerClassName="w-full h-full rounded-[2.2rem]"
+                        containerClassName="w-full h-full rounded-[1.9rem]"
                       />
                       {/* Glass Reflection */}
-                      <div className="absolute inset-0 bg-gradient-to-tr from-white/[0.08] via-transparent to-transparent pointer-events-none z-20 rounded-[2.2rem]" />
+                      <div className="absolute inset-0 bg-gradient-to-tr from-white/[0.08] via-transparent to-transparent pointer-events-none z-20 rounded-[1.9rem]" />
                     </div>
                   )}
                 </motion.div>
               ) : (
-                /* Clean Full Art Mode */
+                /* Clean Full Art Canvas Mode */
                 <motion.div
                   initial={{ opacity: 0, scale: 0.96 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.3 }}
                   key={`canvas-${currentWp.id}`}
-                  className="w-full h-full max-h-[60vh] relative flex items-center justify-center"
+                  className="w-full h-full relative flex items-center justify-center p-2"
                 >
-                  <div className="relative w-full h-full max-w-[90%] max-h-[90%] rounded-xl overflow-hidden flex items-center justify-center">
+                  <div className="relative w-full h-full max-h-[300px] sm:max-h-[420px] md:max-h-[480px] flex items-center justify-center">
                     <OptimizedImage
                       src={currentWp.previewUrl}
                       placeholder={currentWp.tinyUrl}
                       fallbackSrc={currentWp.fallbackUrl || currentWp.previewUrl}
                       alt={currentWp.title}
                       priority={true}
-                      className={`w-full h-full object-contain ${isOledOptimized ? "oled-image" : ""}`}
-                      containerClassName="w-full h-full"
+                      className={`max-w-full max-h-full w-auto h-auto object-contain rounded-xl shadow-[0_20px_60px_rgba(0,0,0,0.9)] ring-1 ring-white/15 ${isOledOptimized ? "oled-image" : ""}`}
+                      containerClassName="flex items-center justify-center w-full h-full"
                     />
                   </div>
                 </motion.div>
@@ -337,9 +211,9 @@ export default function PackModal({
                 )
               }
               aria-label="Previous Wallpaper"
-              className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 p-2.5 sm:p-3 rounded-full bg-black/60 hover:bg-black/90 backdrop-blur-md border border-white/15 text-white/80 hover:text-white transition-all shadow-xl hover:scale-105 active:scale-95 z-30 cursor-pointer"
+              className="absolute left-1.5 sm:left-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/60 hover:bg-black/90 backdrop-blur-md border border-white/15 text-white/80 hover:text-white transition-all shadow-xl hover:scale-105 active:scale-95 z-30 cursor-pointer"
             >
-              <ChevronLeft size={20} strokeWidth={2} />
+              <ChevronLeft size={16} strokeWidth={2} />
             </button>
 
             <button
@@ -349,35 +223,27 @@ export default function PackModal({
                 )
               }
               aria-label="Next Wallpaper"
-              className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 p-2.5 sm:p-3 rounded-full bg-black/60 hover:bg-black/90 backdrop-blur-md border border-white/15 text-white/80 hover:text-white transition-all shadow-xl hover:scale-105 active:scale-95 z-30 cursor-pointer"
+              className="absolute right-1.5 sm:right-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/60 hover:bg-black/90 backdrop-blur-md border border-white/15 text-white/80 hover:text-white transition-all shadow-xl hover:scale-105 active:scale-95 z-30 cursor-pointer"
             >
-              <ChevronRight size={20} strokeWidth={2} />
+              <ChevronRight size={16} strokeWidth={2} />
             </button>
           </div>
 
           {/* RIGHT: Pack Details & Action Panel */}
-          <div className="w-full md:w-2/5 p-5 sm:p-6 md:p-8 flex flex-col justify-between bg-[#0b0b0b]">
+          <div className="w-full md:w-2/5 p-4 sm:p-6 md:p-7 flex flex-col justify-between bg-[#0b0b0b] space-y-4">
             <div>
               {/* Header Badges */}
-              <div className="flex items-center gap-2 mb-2">
-                <span className="spec-badge text-[9px] font-mono px-2.5 py-0.5 rounded text-white/70 uppercase">
-                  {selectedPack.serial}
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="font-mono text-[9px] text-white/40 uppercase tracking-widest">
+                  {selectedPack.category} // {selectedPack.device === "desktop" ? "DESKTOP" : "PHONE"}
                 </span>
-                <span className="text-[10px] font-mono text-white/40 uppercase tracking-wider flex items-center gap-1">
-                  {selectedPack.device === "desktop" ? (
-                    <>
-                      <Monitor size={10} /> DESKTOP SUITE
-                    </>
-                  ) : (
-                    <>
-                      <Smartphone size={10} /> PHONE DECK
-                    </>
-                  )}
+                <span className="text-[9px] font-mono text-white/50">
+                  {selectedPack.format}
                 </span>
               </div>
 
               {/* Bold Modern Sans Title */}
-              <h2 className="text-2xl sm:text-3xl font-sans font-bold uppercase tracking-tight text-white mb-1.5">
+              <h2 className="text-xl sm:text-2xl font-sans font-bold uppercase tracking-tight text-white mb-1">
                 {selectedPack.title}
               </h2>
               <p className="text-xs text-white/60 leading-relaxed font-sans line-clamp-2">
@@ -385,27 +251,27 @@ export default function PackModal({
               </p>
 
               {/* Capsule Thumbnails Deck */}
-              <div className="mt-5 mb-4">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-[10px] opacity-50 font-mono uppercase tracking-widest flex items-center gap-1.5">
-                    <Sparkles size={11} />
-                    Included Assets ({selectedPack.items.length})
+              <div className="mt-3.5 mb-3">
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-[9px] opacity-50 font-mono uppercase tracking-widest flex items-center gap-1">
+                    <Sparkles size={10} />
+                    Included Wallpapers
                   </span>
-                  <span className="text-[10px] font-mono text-white/60">
-                    0{activeIndex + 1} / 0{selectedPack.items.length}
+                  <span className="text-[10px] font-mono text-white/80 font-semibold truncate max-w-[140px]">
+                    {currentWp.title}
                   </span>
                 </div>
 
-                <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
+                <div className="grid grid-cols-4 sm:grid-cols-5 gap-1.5">
                   {selectedPack.items.map((item, idx) => (
                     <button
                       key={item.id}
                       onClick={() => setActiveIndex(idx)}
-                      className={`relative rounded-lg overflow-hidden border transition-all duration-200 group/thumb ${
+                      className={`relative rounded-md overflow-hidden border transition-all duration-200 group/thumb cursor-pointer ${
                         selectedPack.device === "mobile" ? "aspect-[9/16]" : "aspect-[16/10]"
                       } ${
                         activeIndex === idx
-                          ? "border-white shadow-[0_0_12px_rgba(255,255,255,0.4)] ring-1 ring-white/50 scale-105"
+                          ? "border-white shadow-[0_0_10px_rgba(255,255,255,0.4)] ring-1 ring-white/60 scale-105"
                           : "border-white/10 opacity-50 hover:opacity-90 hover:border-white/30"
                       }`}
                     >
@@ -421,55 +287,42 @@ export default function PackModal({
                     </button>
                   ))}
                 </div>
-
-                {/* Current Item Name Pill */}
-                <div className="text-[11px] font-mono text-white/80 mt-2 py-1.5 px-2 bg-white/5 rounded border border-white/5 flex justify-between items-center">
-                  <span className="truncate max-w-[200px]">
-                    Viewing: <strong className="text-white">{currentWp.title}</strong>
-                  </span>
-                  <span className="text-white/40 text-[10px]">{currentWp.format}</span>
-                </div>
               </div>
 
-              {/* Compact Specifications Grid */}
-              <div className="border-t border-white/10 pt-4 mb-4">
-                <span className="text-[9px] opacity-40 font-mono uppercase tracking-[0.2em] block mb-2.5">
-                  Specifications
-                </span>
-                <div className="grid grid-cols-2 gap-2 text-[11px] font-mono">
-                  <div className="bg-white/[0.03] p-2 rounded border border-white/5">
-                    <span className="text-[8px] text-white/40 uppercase block">Category</span>
-                    <span className="text-white/90 truncate block">{selectedPack.category}</span>
-                  </div>
-                  <div className="bg-white/[0.03] p-2 rounded border border-white/5">
-                    <span className="text-[8px] text-white/40 uppercase block">Format</span>
-                    <span className="text-white/90 truncate block">{selectedPack.format}</span>
-                  </div>
+              {/* Compact 2x2 Specifications Grid */}
+              <div className="border-t border-white/10 pt-3 mb-2">
+                <div className="grid grid-cols-2 gap-1.5 text-[10px] font-mono">
                   <div className="bg-white/[0.03] p-2 rounded border border-white/5">
                     <span className="text-[8px] text-white/40 uppercase block">Downloads</span>
-                    <span className="text-white/90 truncate block">{selectedPack.downloads.toLocaleString()}</span>
+                    <span className="text-white/90 font-bold block">{selectedPack.downloads.toLocaleString()}</span>
                   </div>
                   <div className="bg-white/[0.03] p-2 rounded border border-white/5">
-                    <span className="text-[8px] text-white/40 uppercase block">Assets</span>
-                    <span className="text-white/90 truncate block">{selectedPack.items.length} Master Files</span>
+                    <span className="text-[8px] text-white/40 uppercase block">Files</span>
+                    <span className="text-white/90 font-bold block">{selectedPack.items.length} Master Assets</span>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Vault Locked / Dropping Soon Notice */}
-            <div className="pt-2">
-              <div className="p-4 rounded-xl bg-white/[0.04] border border-amber-500/20 flex flex-col items-center text-center gap-2">
-                <div className="flex items-center gap-2 text-amber-300 font-mono text-xs uppercase tracking-wider">
-                  <Lock size={14} className="text-amber-400" />
-                  <span>VAULT LOCKED // DROPPING SOON</span>
+            <div>
+              <div className="py-2.5 px-3.5 rounded-xl bg-white/[0.03] border border-amber-500/25 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 rounded-full bg-amber-500/10 flex items-center justify-center shrink-0">
+                    <Lock size={12} className="text-amber-400" />
+                  </div>
+                  <div className="text-left">
+                    <span className="text-amber-300 font-mono text-[10px] uppercase font-bold tracking-wider block">
+                      VAULT LOCKED // DROPPING SOON
+                    </span>
+                    <span className="text-[9px] text-white/40 font-sans block">
+                      Quality assurance staging in progress
+                    </span>
+                  </div>
                 </div>
-                <p className="text-[11px] text-white/50 font-sans leading-relaxed">
-                  Downloads for this capsule are currently in quality assurance staging. The public drop is releasing very soon!
-                </p>
-                <div className="mt-1 px-3 py-1 bg-white/5 rounded-full border border-white/10 text-[9px] font-mono text-white/40 uppercase tracking-widest">
-                  Status: Pipeline Testing
-                </div>
+                <span className="px-2 py-0.5 bg-amber-500/10 rounded text-[8px] font-mono text-amber-300 uppercase tracking-wider shrink-0 border border-amber-500/20">
+                  Dropping Soon
+                </span>
               </div>
             </div>
           </div>

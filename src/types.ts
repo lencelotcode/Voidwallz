@@ -5,6 +5,7 @@ export interface Wallpaper {
   category: string;
   format: string;
   downloads: number;
+  likes?: number;
   previewUrl: string;
   tinyUrl: string;
   originalUrl: string;

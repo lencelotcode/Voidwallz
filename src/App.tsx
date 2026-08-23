@@ -668,7 +668,13 @@ function Footer() {
 }
 
 export default function App() {
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(() => {
+    if (typeof window !== "undefined") {
+      // Only show full welcome animation on first arrival at root home
+      return window.location.pathname === "/" && !sessionStorage.getItem("voidwallz_loaded");
+    }
+    return false;
+  });
   const [hash, setHash] = useState(window.location.hash);
   const [path, setPath] = useState(window.location.pathname);
   const [atmosphereMode, setAtmosphereMode] = useState<"standard" | "oled" | "crt" | "noir">("standard");
@@ -681,12 +687,6 @@ export default function App() {
     setAtmosphereMode(val ? "oled" : "standard");
   };
 
-  // Spotlight state
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-  const spotlightX = useSpring(mouseX, { damping: 50, stiffness: 200 });
-  const spotlightY = useSpring(mouseY, { damping: 50, stiffness: 200 });
-
   useEffect(() => {
     const handleLocationChange = () => {
       setHash(window.location.hash);
@@ -694,21 +694,14 @@ export default function App() {
       window.scrollTo(0, 0);
     };
 
-    const handleMouseMove = (e: MouseEvent) => {
-      mouseX.set(e.clientX);
-      mouseY.set(e.clientY);
-    };
-
     window.addEventListener("hashchange", handleLocationChange);
     window.addEventListener("popstate", handleLocationChange);
-    window.addEventListener("mousemove", handleMouseMove);
 
     return () => {
       window.removeEventListener("hashchange", handleLocationChange);
       window.removeEventListener("popstate", handleLocationChange);
-      window.removeEventListener("mousemove", handleMouseMove);
     };
-  }, [mouseX, mouseY]);
+  }, []);
 
   const renderContent = () => {
     const isWallpaperRoute = /^\/(desktop|mobile)\/([^/]+)\/?$/.test(path);
@@ -733,7 +726,7 @@ export default function App() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="flex flex-col h-full bg-void-black min-h-[100dvh] pt-20 pb-24"
+          className="flex flex-col h-full bg-void-black min-h-[100dvh]"
         >
           <VoidPacks
             onOpenPack={setSelectedPack}
@@ -838,10 +831,6 @@ export default function App() {
       {atmosphereMode === "noir" && <div className="noir-vignette" />}
 
       <div className="film-grain" />
-      <motion.div
-        className="spotlight"
-        style={{ left: spotlightX, top: spotlightY }}
-      />
 
       <div className="hidden md:block">
         <Cursor />
@@ -862,9 +851,9 @@ export default function App() {
 
       {!isLoading && (
         <motion.div
-          initial={{ opacity: 0, filter: "blur(10px)" }}
-          animate={{ opacity: 1, filter: "blur(0px)" }}
-          transition={{ duration: 1.2, ease: [0.21, 0.47, 0.32, 0.98] }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
         >
           <Navbar
             isOledOptimized={isOledOptimized}

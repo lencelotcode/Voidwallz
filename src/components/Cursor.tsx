@@ -83,7 +83,7 @@ export default function Cursor() {
 
       {/* Morphing Lens Ring & Label */}
       <motion.div
-        className="fixed top-0 left-0 pointer-events-none z-[99998] flex items-center justify-center rounded-full overflow-hidden"
+        className="fixed top-0 left-0 pointer-events-none z-[99998] flex items-center justify-center rounded-full"
         style={{
           x: cursorX,
           y: cursorY,
@@ -91,23 +91,20 @@ export default function Cursor() {
           translateY: "-50%",
         }}
         animate={{
-          width: cursorState.label ? 72 : cursorState.hovered ? 44 : 24,
-          height: cursorState.label ? 28 : cursorState.hovered ? 44 : 24,
+          width: cursorState.label ? 68 : cursorState.hovered ? 38 : 20,
+          height: cursorState.label ? 26 : cursorState.hovered ? 38 : 20,
           borderRadius: cursorState.label ? "9999px" : "50%",
           backgroundColor: cursorState.label
             ? "rgba(255, 255, 255, 0.95)"
-            : cursorState.hovered
-            ? "rgba(255, 255, 255, 0.15)"
             : "transparent",
           borderColor: cursorState.label
             ? "transparent"
             : cursorState.hovered
-            ? "rgba(255, 255, 255, 0.6)"
+            ? "rgba(255, 255, 255, 0.65)"
             : "rgba(255, 255, 255, 0.25)",
           borderWidth: "1px",
-          backdropFilter: cursorState.hovered ? "blur(4px)" : "none",
         }}
-        transition={{ type: "spring", stiffness: 350, damping: 25 }}
+        transition={{ type: "spring", stiffness: 400, damping: 28 }}
       >
         {cursorState.label && (
           <motion.span
