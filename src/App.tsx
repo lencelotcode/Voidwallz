@@ -246,7 +246,9 @@ function Hero({
                 <OptimizedImage
                   src={wallpaperOfTheDay.previewUrl}
                   placeholder={wallpaperOfTheDay.tinyUrl}
+                  fallbackSrc={wallpaperOfTheDay.fallbackUrl || wallpaperOfTheDay.previewUrl}
                   alt={wallpaperOfTheDay.title}
+                  priority={true}
                   animate={{
                     scale:
                       1.05 +
@@ -713,6 +715,8 @@ function FeaturedCollections({
             >
               <img
                 src={col.image}
+                loading="lazy"
+                decoding="async"
                 className="w-full h-full object-cover opacity-40 group-hover:opacity-60 group-hover:scale-105 transition-all duration-700"
                 alt={col.title}
               />

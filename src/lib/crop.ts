@@ -17,26 +17,56 @@ export const DEVICES: DeviceSpec[] = [
 
 export async function cropImageToDevice(
   imageUrl: string,
-  device: DeviceSpec
+  device: DeviceSpec,
+  fallbackUrl?: string
 ): Promise<Blob> {
+  const loadImage = (url: string): Promise<HTMLImageElement> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = () => resolve(img);
+      img.onerror = () => reject(new Error(`Failed to load image from ${url}`));
+      img.src = url;
+    });
+  };
+
+  let img: HTMLImageElement;
+  try {
+    img = await loadImage(imageUrl);
+  } catch (err) {
+    if (fallbackUrl && fallbackUrl !== imageUrl) {
+      try {
+        img = await loadImage(fallbackUrl);
+      } catch (fallbackErr) {
+        throw new Error("Failed to load both primary and fallback wallpaper images for cropping");
+      }
+    } else {
+      throw err;
+    }
+  }
+
   return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.onload = () => {
+    try {
       const canvas = document.createElement("canvas");
       canvas.width = device.width;
       canvas.height = device.height;
-      const ctx = canvas.getContext("2d");
+      const ctx = canvas.getContext("2d", { willReadFrequently: false });
 
       if (!ctx) {
         reject(new Error("Could not get canvas context"));
         return;
       }
 
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = "high";
+
       // Calculate crop (cover mode)
       const targetAspect = device.width / device.height;
       const imageAspect = img.width / img.height;
-      let drawWidth, drawHeight, offsetX, offsetY;
+      let drawWidth: number;
+      let drawHeight: number;
+      let offsetX: number;
+      let offsetY: number;
 
       if (imageAspect > targetAspect) {
         drawHeight = img.height;
@@ -62,15 +92,19 @@ export async function cropImageToDevice(
         device.height
       );
 
-      canvas.toBlob((blob) => {
-        if (blob) {
-          resolve(blob);
-        } else {
-          reject(new Error("Canvas toBlob failed"));
-        }
-      }, "image/png");
-    };
-    img.onerror = () => reject(new Error("Failed to load image"));
-    img.src = imageUrl;
+      canvas.toBlob(
+        (blob) => {
+          if (blob) {
+            resolve(blob);
+          } else {
+            reject(new Error("Canvas toBlob generation failed"));
+          }
+        },
+        "image/png"
+      );
+    } catch (e) {
+      reject(e);
+    }
   });
 }
+

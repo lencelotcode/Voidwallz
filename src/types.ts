@@ -8,6 +8,8 @@ export interface Wallpaper {
   previewUrl: string;
   tinyUrl: string;
   originalUrl: string;
+  fallbackUrl?: string;
   device: "desktop" | "mobile";
   createdAt?: string;
 }
+

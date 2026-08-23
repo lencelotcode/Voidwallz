@@ -211,9 +211,8 @@ function mapFileToWallpaper(
 ): Wallpaper {
   const { title, category, format } = parseFilename(file.name);
 
-  // Determine preview and original paths
+  // Base name without extension
   const baseName = file.name.replace(/\.[^/.]+$/, "");
-  const originalName = `${baseName}.png`; // Originals are .png
 
   const previewPath =
     folder === "desktop"
@@ -222,42 +221,26 @@ function mapFileToWallpaper(
 
   const originalPath =
     folder === "desktop"
-      ? `${DESKTOP_ORIGINALS_FOLDER}/${originalName}`
-      : `${MOBILE_ORIGINALS_FOLDER}/${originalName}`;
+      ? `${DESKTOP_ORIGINALS_FOLDER}/${file.name}`
+      : `${MOBILE_ORIGINALS_FOLDER}/${file.name}`;
 
-  const previewUrl = supabase
-    ? supabase.storage.from(BUCKET_NAME).getPublicUrl(previewPath, {
-        transform: {
-          width: folder === "desktop" ? 1920 : 1080,
-          height: folder === "desktop" ? 1080 : 1920,
-          resize: "cover",
-          quality: 90,
-        },
-      }).data.publicUrl
+  // Direct CDN object public URL - fast, reliable, cached, works on all Supabase tiers
+  const previewPublicUrl = supabase
+    ? supabase.storage.from(BUCKET_NAME).getPublicUrl(previewPath).data.publicUrl
     : "";
 
-  const tinyUrl = supabase
-    ? supabase.storage.from(BUCKET_NAME).getPublicUrl(previewPath, {
-        transform: {
-          width: 50,
-          height: 50,
-          resize: "cover",
-          quality: 20,
-        },
-      }).data.publicUrl
+  const originalPublicUrl = supabase
+    ? supabase.storage.from(BUCKET_NAME).getPublicUrl(originalPath).data.publicUrl
     : "";
 
-  const originalUrl = supabase
-    ? supabase.storage.from(BUCKET_NAME).getPublicUrl(originalPath).data
-        .publicUrl
-    : "";
   // Determine if it's mobile format
   const displayFormat = folder === "mobile" ? `${format} MOBILE` : format;
 
   // Generate downloads based on file size (simulate popularity)
   const baseDownloads = folder === "mobile" ? 15000 : 8000;
+  const fileSize = file.metadata?.size || 50000;
   const downloads =
-    Math.floor((file.metadata.size / 50000) * baseDownloads) +
+    Math.floor((fileSize / 50000) * baseDownloads) +
     Math.floor(Math.random() * 5000);
 
   return {
@@ -267,9 +250,10 @@ function mapFileToWallpaper(
     category,
     format: displayFormat,
     downloads,
-    previewUrl,
-    tinyUrl,
-    originalUrl,
+    previewUrl: previewPublicUrl,
+    tinyUrl: previewPublicUrl,
+    originalUrl: originalPublicUrl || previewPublicUrl,
+    fallbackUrl: previewPublicUrl,
     device: folder,
     createdAt: file.created_at,
   };

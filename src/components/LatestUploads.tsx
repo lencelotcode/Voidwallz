@@ -75,8 +75,8 @@ export default function LatestUploads({
             }`}
           >
             <div
-              className="absolute inset-0 bg-cover bg-center opacity-30 group-hover:opacity-60 transition-opacity duration-700 blur-[50px] scale-150"
-              style={{ backgroundImage: `url(${wp.previewUrl})` }}
+              className="absolute inset-0 bg-cover bg-center opacity-30 group-hover:opacity-60 transition-opacity duration-700 blur-[50px] scale-150 pointer-events-none"
+              style={{ backgroundImage: `url(${wp.tinyUrl || wp.previewUrl})` }}
             />
 
             <div className="relative z-10 flex flex-col items-center transition-transform duration-700 group-hover:scale-[1.05] group-hover:-translate-y-2">
@@ -86,6 +86,7 @@ export default function LatestUploads({
                     <OptimizedImage
                       src={wp.previewUrl}
                       placeholder={wp.tinyUrl}
+                      fallbackSrc={wp.fallbackUrl || wp.previewUrl}
                       alt={wp.title}
                       className={isOledOptimized ? "oled-image" : ""}
                       containerClassName="w-full h-full"
@@ -100,6 +101,7 @@ export default function LatestUploads({
                   <OptimizedImage
                     src={wp.previewUrl}
                     placeholder={wp.tinyUrl}
+                    fallbackSrc={wp.fallbackUrl || wp.previewUrl}
                     alt={wp.title}
                     className={isOledOptimized ? "oled-image" : ""}
                     containerClassName="w-full h-full rounded-[1.5rem]"

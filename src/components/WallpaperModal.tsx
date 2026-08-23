@@ -94,35 +94,96 @@ export default function WallpaperModal({
     if (downloadStatus === "downloading") return;
     setDownloadStatus("downloading");
 
-    if (!selectedWp?.originalUrl) {
+    const primaryUrl = selectedWp?.originalUrl || selectedWp?.previewUrl;
+    const fallbackUrl = selectedWp?.previewUrl || selectedWp?.fallbackUrl;
+
+    if (!primaryUrl) {
       setDownloadStatus("error");
+      setTimeout(() => setDownloadStatus("idle"), 3000);
       return;
     }
 
     try {
-      let blob: Blob;
-      let filename: string;
-
       if (selectedDevice) {
-        blob = await cropImageToDevice(selectedWp.originalUrl, selectedDevice);
-        filename = `${selectedWp.title.replace(/\s+/g, "_")}_${selectedDevice.name.replace(/\s+/g, "_")}.png`;
+        // Device-specific cropped wallpaper
+        const blob = await cropImageToDevice(primaryUrl, selectedDevice, fallbackUrl);
+        const filename = `${selectedWp.title.replace(/\s+/g, "_")}_${selectedDevice.name.replace(/\s+/g, "_")}.png`;
+        const blobUrl = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = blobUrl;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(blobUrl);
       } else {
-        const response = await fetch(selectedWp.originalUrl);
-        if (!response.ok) throw new Error("Network response was not ok");
-        blob = await response.blob();
-        const urlPath = new URL(selectedWp.originalUrl).pathname;
-        const extension = urlPath.split(".").pop() || "png";
-        filename = `${selectedWp.title.replace(/\s+/g, "_")}.${extension}`;
-      }
+        // Original wallpaper download
+        let extension = "png";
+        try {
+          const urlPath = new URL(primaryUrl).pathname;
+          const detectedExt = urlPath.split(".").pop()?.toLowerCase();
+          if (detectedExt && ["jpg", "jpeg", "png", "webp", "avif"].includes(detectedExt)) {
+            extension = detectedExt;
+          }
+        } catch {
+          // Default to png
+        }
 
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
+        const filename = `${selectedWp.title.replace(/\s+/g, "_")}.${extension}`;
+
+        // Attempt direct fetch to trigger native save dialog with exact filename
+        let downloaded = false;
+        try {
+          const res = await fetch(primaryUrl, { mode: "cors" });
+          if (res.ok) {
+            const blob = await res.blob();
+            const blobUrl = window.URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = blobUrl;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(blobUrl);
+            downloaded = true;
+          }
+        } catch (fetchErr) {
+          console.warn("Primary URL fetch failed, trying fallback...", fetchErr);
+        }
+
+        // If primary fetch failed, try fallback preview URL
+        if (!downloaded && fallbackUrl && fallbackUrl !== primaryUrl) {
+          try {
+            const resFallback = await fetch(fallbackUrl, { mode: "cors" });
+            if (resFallback.ok) {
+              const blob = await resFallback.blob();
+              const blobUrl = window.URL.createObjectURL(blob);
+              const link = document.createElement("a");
+              link.href = blobUrl;
+              link.download = filename;
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+              window.URL.revokeObjectURL(blobUrl);
+              downloaded = true;
+            }
+          } catch (fallbackErr) {
+            console.warn("Fallback fetch also failed, initiating direct link trigger", fallbackErr);
+          }
+        }
+
+        // Direct browser stream trigger if CORS blocks blob
+        if (!downloaded) {
+          const directLink = document.createElement("a");
+          directLink.href = primaryUrl;
+          directLink.download = filename;
+          directLink.target = "_blank";
+          directLink.rel = "noopener noreferrer";
+          document.body.appendChild(directLink);
+          directLink.click();
+          document.body.removeChild(directLink);
+        }
+      }
 
       setDownloadStatus("success");
       setTimeout(() => setDownloadStatus("idle"), 3000);
@@ -205,7 +266,9 @@ export default function WallpaperModal({
                   <OptimizedImage
                     src={selectedWp.previewUrl}
                     placeholder={selectedWp.tinyUrl}
+                    fallbackSrc={selectedWp.fallbackUrl || selectedWp.previewUrl}
                     alt={selectedWp.title}
+                    priority={true}
                     className={`transition-transform duration-700 group-hover:scale-105 ${isOledOptimized ? "oled-image" : ""}`}
                     containerClassName="w-full h-full"
                   />
