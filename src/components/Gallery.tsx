@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from "motion/react";
-import { useState, useMemo, useEffect, useRef } from "react";
-import { Search, Heart } from "lucide-react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
+import { Search, Heart, Download, ArrowUpRight } from "lucide-react";
 import OptimizedImage from "./OptimizedImage";
 import { Wallpaper } from "../types";
 import { useWallpapers } from "../hooks/useWallpapers";
@@ -25,7 +25,7 @@ export default function Gallery({
     error,
     reload,
   } = useWallpapers();
-  const { isFavorite } = useFavorites();
+  const { toggleFavorite, isFavorite } = useFavorites();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -33,6 +33,53 @@ export default function Gallery({
   // Infinite scroll state
   const [visibleCount, setVisibleCount] = useState(12);
   const observerRef = useRef<HTMLDivElement>(null);
+
+  // Fast 1-click download from card
+  const handleQuickDownload = async (e: React.MouseEvent, wp: Wallpaper) => {
+    e.stopPropagation();
+    const downloadUrl = wp.originalUrl || wp.previewUrl;
+    if (!downloadUrl) return;
+
+    try {
+      let ext = "png";
+      try {
+        const path = new URL(downloadUrl).pathname;
+        const detected = path.split(".").pop()?.toLowerCase();
+        if (detected && ["jpg", "jpeg", "png", "webp", "avif"].includes(detected)) {
+          ext = detected;
+        }
+      } catch {}
+
+      const filename = `${wp.title.replace(/\s+/g, "_")}.${ext}`;
+
+      try {
+        const res = await fetch(downloadUrl, { mode: "cors" });
+        if (res.ok) {
+          const blob = await res.blob();
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = filename;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          window.URL.revokeObjectURL(url);
+          return;
+        }
+      } catch {}
+
+      const direct = document.createElement("a");
+      direct.href = downloadUrl;
+      direct.download = filename;
+      direct.target = "_blank";
+      direct.rel = "noopener noreferrer";
+      document.body.appendChild(direct);
+      direct.click();
+      document.body.removeChild(direct);
+    } catch (err) {
+      console.error("Quick download failed:", err);
+    }
+  };
 
   // Extract unique categories
   const categories = useMemo(() => {
@@ -158,54 +205,22 @@ export default function Gallery({
 
       {/* Loading State */}
       {loading && (
-        <div className="flex items-center justify-center py-32">
-          <div className="flex flex-col items-center gap-4">
-            <div className="w-12 h-12 border-4 border-white/20 border-t-white rounded-full animate-spin" />
-            <span className="text-sm font-mono uppercase tracking-widest opacity-50">
-              Loading Wallpapers...
+        <div className="flex flex-col items-center justify-center py-40 gap-8">
+          <div className="relative flex items-center justify-center w-16 h-16">
+            <div className="absolute inset-0 rounded-full border-t-2 border-white/80 border-r-2 border-transparent animate-spin" style={{ animationDuration: '1s' }} />
+            <div className="absolute inset-2 rounded-full border-b-2 border-white/40 border-l-2 border-transparent animate-spin" style={{ animationDuration: '1.5s', animationDirection: 'reverse' }} />
+            <div className="absolute inset-4 rounded-full border-t-2 border-white/20 border-r-2 border-transparent animate-spin" style={{ animationDuration: '2s' }} />
+            <div className="w-2 h-2 bg-white rounded-full animate-pulse blur-[1px]" />
+          </div>
+          <div className="flex flex-col items-center gap-2">
+            <span className="text-[11px] font-mono uppercase tracking-[0.3em] text-white/80 animate-pulse">
+              Initializing Protocol
+            </span>
+            <span className="text-[9px] font-mono uppercase tracking-widest text-white/30">
+              Fetching Master Assets...
             </span>
           </div>
         </div>
-      )}
-
-      {/* Skeleton Loading for Desktop */}
-      {loading && (
-        <>
-          <div className="grid md:grid-cols-4 grid-cols-1 gap-px bg-white/5">
-            {Array(8)
-              .fill(0)
-              .map((_, i) => (
-                <div
-                  key={`skeleton-desktop-${i}`}
-                  className="relative flex flex-col items-center justify-center h-[400px] md:h-[500px] overflow-hidden bg-void-black/30 animate-pulse"
-                >
-                  <div className="w-[200px] md:w-[260px] aspect-[16/10] border-[4px] md:border-[6px] border-black/20 rounded-lg bg-black/10 shadow-[0_20px_50px_rgba(0,0,0,0.3)] overflow-hidden ring-1 ring-white/5">
-                    <div className="w-full h-full bg-black/20 animate-shimmer" />
-                  </div>
-                </div>
-              ))}
-          </div>
-        </>
-      )}
-
-      {/* Skeleton Loading for Mobile */}
-      {loading && (
-        <>
-          <div className="grid md:grid-cols-4 grid-cols-1 gap-px bg-white/5">
-            {Array(8)
-              .fill(0)
-              .map((_, i) => (
-                <div
-                  key={`skeleton-mobile-${i}`}
-                  className="relative flex flex-col items-center justify-center h-[500px] md:h-[600px] overflow-hidden bg-void-black/30 animate-pulse"
-                >
-                  <div className="w-[160px] aspect-[9/19.5] border-[6px] border-black/20 rounded-[2rem] bg-black/10 shadow-[0_20px_50px_rgba(0,0,0,0.3)] ring-1 ring-white/5 flex items-center justify-center">
-                    <div className="w-full h-full bg-black/20 animate-shimmer rounded-[1.5rem]" />
-                  </div>
-                </div>
-              ))}
-          </div>
-        </>
       )}
 
       {/* Desktop Section */}
@@ -256,15 +271,57 @@ export default function Gallery({
                   onClick={() => onOpenModal(wp)}
                   onMouseEnter={() => onHoverWallpaper?.(wp.previewUrl)}
                   onMouseLeave={() => onHoverWallpaper?.(null)}
+                  data-cursor="VIEW"
                   className="relative flex flex-col items-center justify-center h-[400px] md:h-[500px] overflow-hidden group cursor-pointer hover-trigger bg-void-black"
                 >
                   <div
-                    className="absolute inset-0 bg-cover bg-center opacity-30 group-hover:opacity-60 transition-opacity duration-700 blur-[50px] scale-150 pointer-events-none"
+                    className="absolute inset-0 bg-cover bg-center opacity-25 group-hover:opacity-50 transition-opacity duration-700 blur-[50px] scale-150 pointer-events-none"
                     style={{ backgroundImage: `url(${wp.tinyUrl || wp.previewUrl})` }}
                   />
 
+                  {/* Spec Badge Top Left */}
+                  <div className="absolute top-5 left-5 z-20 opacity-70 group-hover:opacity-100 transition-opacity">
+                    <span className="spec-badge text-[9px] font-mono px-2.5 py-1 rounded-full text-white/80 tracking-widest">
+                      {wp.format.includes("AVIF") ? "8K RAW" : "8K UHD"}
+                    </span>
+                  </div>
+
+                  {/* Floating Action Top Right */}
+                  <div className="absolute top-5 right-5 z-30 flex items-center justify-end">
+                    {/* Download button slides & expands leftward on card hover */}
+                    <div className="overflow-hidden transition-all duration-300 ease-out max-w-0 opacity-0 group-hover:max-w-[40px] group-hover:opacity-100 group-hover:mr-2">
+                      <button
+                        onClick={(e) => handleQuickDownload(e, wp)}
+                        data-cursor="GET"
+                        title="1-Click Download"
+                        className="w-8 h-8 rounded-full bg-black/50 text-white/70 border border-white/10 hover:border-white/40 hover:text-white hover:scale-110 active:scale-95 backdrop-blur-md transition-all duration-200 flex items-center justify-center"
+                      >
+                        <Download size={13} />
+                      </button>
+                    </div>
+
+                    {/* Favorite Button anchored on right */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleFavorite(wp.id);
+                      }}
+                      data-cursor={isFavorite(wp.id) ? "SAVED" : "SAVE"}
+                      className={`w-8 h-8 rounded-full backdrop-blur-md border transition-all duration-300 flex items-center justify-center ${
+                        isFavorite(wp.id)
+                          ? "bg-red-500/20 text-red-500 border-red-500/40 scale-105"
+                          : "bg-black/50 text-white/60 border-white/10 hover:border-white/30 hover:text-white hover:scale-110 active:scale-95"
+                      }`}
+                    >
+                      <Heart
+                        size={13}
+                        fill={isFavorite(wp.id) ? "currentColor" : "none"}
+                      />
+                    </button>
+                  </div>
+
                   <div className="relative z-10 flex flex-col items-center transition-transform duration-700 group-hover:scale-[1.05] group-hover:-translate-y-2">
-                    <div className="w-[200px] md:w-[260px] aspect-[16/10] border-[4px] md:border-[6px] border-black rounded-lg relative bg-black shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden ring-1 ring-white/10">
+                    <div className="w-[200px] md:w-[260px] aspect-[16/10] border-[4px] md:border-[6px] border-black rounded-lg relative bg-black shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden ring-1 ring-white/10 luxury-border-glow">
                       <OptimizedImage
                         src={wp.previewUrl}
                         placeholder={wp.tinyUrl}
@@ -278,24 +335,17 @@ export default function Gallery({
                     <div className="w-32 h-1 bg-gray-700 mx-auto rounded-t-full shadow-2xl" />
                   </div>
 
-                  <div className="absolute inset-0 z-20 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none bg-black/20 backdrop-blur-sm">
-                    <span className="bg-black text-white text-[10px] px-3 py-1 font-mono uppercase tracking-widest">
+                  <div className="absolute inset-0 z-20 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none bg-black/30 backdrop-blur-sm">
+                    <span className="bg-black text-white text-[10px] px-3 py-1 font-mono uppercase tracking-widest border border-white/10 mb-1">
                       {wp.category}
                     </span>
-                    <h3 className="bg-white text-black text-xl md:text-2xl font-sans font-bold uppercase tracking-wider px-4 py-1 mt-1 text-center max-w-[90%] leading-tight text-stroke-none">
+                    <h3 className="bg-white text-black text-xl md:text-2xl font-sans font-bold uppercase tracking-wider px-4 py-1 text-center max-w-[90%] leading-tight">
                       {wp.title}
                     </h3>
+                    <span className="mt-3 flex items-center gap-1 text-[10px] font-mono text-white/70 tracking-widest uppercase">
+                      Expand View <ArrowUpRight size={12} />
+                    </span>
                   </div>
-
-                  {isFavorite(wp.id) && (
-                    <div className="absolute top-6 right-6 z-30 drop-shadow-md">
-                      <Heart
-                        size={16}
-                        fill="white"
-                        className="text-white opacity-80"
-                      />
-                    </div>
-                  )}
                 </motion.div>
               ))}
             </div>
@@ -337,15 +387,57 @@ export default function Gallery({
                   onClick={() => onOpenModal(wp)}
                   onMouseEnter={() => onHoverWallpaper?.(wp.previewUrl)}
                   onMouseLeave={() => onHoverWallpaper?.(null)}
+                  data-cursor="VIEW"
                   className="relative flex flex-col items-center justify-center h-[500px] md:h-[600px] overflow-hidden group cursor-pointer hover-trigger bg-void-black"
                 >
                   <div
-                    className="absolute inset-0 bg-cover bg-center opacity-30 group-hover:opacity-60 transition-opacity duration-700 blur-[50px] scale-150 pointer-events-none"
+                    className="absolute inset-0 bg-cover bg-center opacity-25 group-hover:opacity-50 transition-opacity duration-700 blur-[50px] scale-150 pointer-events-none"
                     style={{ backgroundImage: `url(${wp.tinyUrl || wp.previewUrl})` }}
                   />
 
+                  {/* Spec Badge Top Left */}
+                  <div className="absolute top-5 left-5 z-20 opacity-70 group-hover:opacity-100 transition-opacity">
+                    <span className="spec-badge text-[9px] font-mono px-2.5 py-1 rounded-full text-white/80 tracking-widest">
+                      OLED 4K
+                    </span>
+                  </div>
+
+                  {/* Floating Action Top Right */}
+                  <div className="absolute top-5 right-5 z-30 flex items-center justify-end">
+                    {/* Download button slides & expands leftward on card hover */}
+                    <div className="overflow-hidden transition-all duration-300 ease-out max-w-0 opacity-0 group-hover:max-w-[40px] group-hover:opacity-100 group-hover:mr-2">
+                      <button
+                        onClick={(e) => handleQuickDownload(e, wp)}
+                        data-cursor="GET"
+                        title="1-Click Download"
+                        className="w-8 h-8 rounded-full bg-black/50 text-white/70 border border-white/10 hover:border-white/40 hover:text-white hover:scale-110 active:scale-95 backdrop-blur-md transition-all duration-200 flex items-center justify-center"
+                      >
+                        <Download size={13} />
+                      </button>
+                    </div>
+
+                    {/* Favorite Button anchored on right */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleFavorite(wp.id);
+                      }}
+                      data-cursor={isFavorite(wp.id) ? "SAVED" : "SAVE"}
+                      className={`w-8 h-8 rounded-full backdrop-blur-md border transition-all duration-300 flex items-center justify-center ${
+                        isFavorite(wp.id)
+                          ? "bg-red-500/20 text-red-500 border-red-500/40 scale-105"
+                          : "bg-black/50 text-white/60 border-white/10 hover:border-white/30 hover:text-white hover:scale-110 active:scale-95"
+                      }`}
+                    >
+                      <Heart
+                        size={13}
+                        fill={isFavorite(wp.id) ? "currentColor" : "none"}
+                      />
+                    </button>
+                  </div>
+
                   <div className="relative z-10 flex flex-col items-center transition-transform duration-700 group-hover:scale-[1.05] group-hover:-translate-y-2">
-                    <div className="w-[160px] aspect-[9/19.5] border-[6px] border-black rounded-[2rem] relative bg-black shadow-[0_20px_50px_rgba(0,0,0,0.5)] ring-1 ring-white/10 flex items-center justify-center">
+                    <div className="w-[160px] aspect-[9/19.5] border-[6px] border-black rounded-[2rem] relative bg-black shadow-[0_20px_50px_rgba(0,0,0,0.5)] ring-1 ring-white/10 flex items-center justify-center luxury-border-glow">
                       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-14 h-4 bg-black rounded-b-xl z-20" />
                       <OptimizedImage
                         src={wp.previewUrl}
@@ -358,24 +450,17 @@ export default function Gallery({
                     </div>
                   </div>
 
-                  <div className="absolute inset-0 z-20 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none bg-black/20 backdrop-blur-sm">
-                    <span className="bg-black text-white text-[10px] px-3 py-1 font-mono uppercase tracking-widest">
+                  <div className="absolute inset-0 z-20 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none bg-black/30 backdrop-blur-sm">
+                    <span className="bg-black text-white text-[10px] px-3 py-1 font-mono uppercase tracking-widest border border-white/10 mb-1">
                       {wp.category}
                     </span>
-                    <h3 className="bg-white text-black text-xl md:text-2xl font-sans font-bold uppercase tracking-wider px-4 py-1 mt-1 text-center max-w-[90%] leading-tight text-stroke-none">
+                    <h3 className="bg-white text-black text-xl md:text-2xl font-sans font-bold uppercase tracking-wider px-4 py-1 text-center max-w-[90%] leading-tight">
                       {wp.title}
                     </h3>
+                    <span className="mt-3 flex items-center gap-1 text-[10px] font-mono text-white/70 tracking-widest uppercase">
+                      Expand View <ArrowUpRight size={12} />
+                    </span>
                   </div>
-
-                  {isFavorite(wp.id) && (
-                    <div className="absolute top-6 right-6 z-30 drop-shadow-md">
-                      <Heart
-                        size={16}
-                        fill="white"
-                        className="text-white opacity-80"
-                      />
-                    </div>
-                  )}
                 </motion.div>
               ))}
             </div>
@@ -401,3 +486,4 @@ export default function Gallery({
     </section>
   );
 }
+

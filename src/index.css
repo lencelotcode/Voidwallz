@@ -1,9 +1,11 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;700;900&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap');
 
 @theme {
-    --font-sans: "Helvetica Neue", Arial, sans-serif;
-    --font-serif: "Georgia", serif;
-    --font-display: "Georgia", serif;
+    --font-sans: "Outfit", sans-serif;
+    --font-mono: "Space Mono", monospace;
+    --font-serif: "Playfair Display", serif;
+    --font-display: "Playfair Display", serif;
 
     --color-void-black: #050505;
     --color-void-gray: #111111;
@@ -19,6 +21,12 @@
     /* Custom scrollbar */
     ::-webkit-scrollbar {
         width: 6px;
+        height: 0px;
+    }
+    ::-webkit-scrollbar:horizontal {
+        display: none;
+        height: 0px;
+        width: 0px;
     }
     ::-webkit-scrollbar-track {
         background: transparent;
@@ -30,6 +38,21 @@
     ::-webkit-scrollbar-thumb:hover {
         background: #555;
     }
+}
+
+/* Hide scrollbar utility for horizontal scroll containers (Chrome, Safari, Firefox, Edge) */
+.scrollbar-hide::-webkit-scrollbar,
+.no-scrollbar::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    -webkit-appearance: none !important;
+}
+
+.scrollbar-hide,
+.no-scrollbar {
+    -ms-overflow-style: none !important;
+    scrollbar-width: none !important;
 }
 
 .bg-grid-pattern {
@@ -111,18 +134,143 @@
 }
 
 /* OLED Mode Styles */
+.atmosphere-oled,
 .oled-mode {
     --color-void-black: #000000 !important;
     background-color: #000000 !important;
 }
 
 .oled-image {
-    filter: contrast(1.25) brightness(0.9) saturate(1.1);
+    filter: contrast(1.25) brightness(0.95) saturate(1.1);
     transition: filter 0.5s ease;
 }
 
+.atmosphere-oled .bg-void-black,
 .oled-mode .bg-void-black {
     background-color: #000000 !important;
+}
+
+.atmosphere-oled .bg-white\/5,
+.atmosphere-oled .bg-white\/10,
+.atmosphere-oled .bg-void-gray\/30,
+.oled-mode .bg-white\/5,
+.oled-mode .bg-white\/10,
+.oled-mode .bg-void-gray\/30 {
+    background-color: rgba(0, 0, 0, 0.85) !important;
+    backdrop-filter: blur(20px);
+}
+
+/* CRT Retro Scanline Atmosphere */
+.atmosphere-crt {
+    --color-void-black: #080b0c !important;
+    text-shadow: 0 0 2px rgba(255, 255, 255, 0.4);
+}
+
+.atmosphere-crt .crt-scanlines {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 9999;
+    background: linear-gradient(
+        rgba(18, 16, 16, 0) 50%,
+        rgba(0, 0, 0, 0.35) 50%
+    ),
+    linear-gradient(
+        90deg,
+        rgba(255, 0, 0, 0.03),
+        rgba(0, 255, 0, 0.01),
+        rgba(0, 0, 255, 0.03)
+    );
+    background-size: 100% 4px, 6px 100%;
+}
+
+.atmosphere-crt .oled-image,
+.atmosphere-crt img {
+    filter: contrast(1.15) brightness(1.05) saturate(1.15);
+}
+
+/* Film Noir / High-Grain Atmosphere */
+.atmosphere-noir {
+    --color-void-black: #040404 !important;
+}
+
+.atmosphere-noir .film-grain {
+    opacity: 0.09 !important;
+}
+
+.atmosphere-noir .noir-vignette {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 9998;
+    background: radial-gradient(
+        circle at center,
+        transparent 40%,
+        rgba(0, 0, 0, 0.85) 100%
+    );
+}
+
+.atmosphere-noir .oled-image,
+.atmosphere-noir img {
+    filter: contrast(1.3) brightness(0.9) grayscale(20%);
+}
+
+/* Conic Metallic Border Shimmer */
+@keyframes border-rotate {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.luxury-border-glow {
+    position: relative;
+}
+
+.luxury-border-glow::before {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.25) 0%,
+        rgba(255, 255, 255, 0.03) 40%,
+        rgba(255, 255, 255, 0.15) 100%
+    );
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    transition: opacity 0.5s ease;
+}
+
+.luxury-border-glow:hover::before {
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.6) 0%,
+        rgba(255, 255, 255, 0.1) 40%,
+        rgba(255, 255, 255, 0.4) 100%
+    );
+}
+
+/* Glass Spec Badge */
+.spec-badge {
+    background: rgba(10, 10, 10, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.spec-badge:hover {
+    border-color: rgba(255, 255, 255, 0.3);
+    background: rgba(20, 20, 20, 0.85);
+    transform: translateY(-1px);
 }
 
 /* Cinematic Film Grain Overlay */
@@ -137,6 +285,7 @@
     pointer-events: none;
     z-index: 10000;
     animation: grain 8s steps(10) infinite;
+    transition: opacity 0.6s ease;
 }
 
 @keyframes grain {
@@ -180,7 +329,7 @@
     height: 800px;
     background: radial-gradient(
         circle,
-        rgba(255, 255, 255, 0.03) 0%,
+        rgba(255, 255, 255, 0.035) 0%,
         transparent 70%
     );
     border-radius: 50%;
@@ -190,10 +339,3 @@
     mix-blend-mode: plus-lighter;
 }
 
-/* Ensure OLED mode pushes dark grays to black */
-.oled-mode .bg-white\/5,
-.oled-mode .bg-white\/10,
-.oled-mode .bg-void-gray\/30 {
-    background-color: rgba(0, 0, 0, 0.8) !important;
-    backdrop-filter: blur(20px);
-}

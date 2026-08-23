@@ -3,14 +3,21 @@ import { Menu, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { createPortal } from "react-dom";
 
+export type AtmosphereMode = "standard" | "oled" | "crt" | "noir";
+
 export default function Navbar({
   isOledOptimized,
   setIsOledOptimized,
+  atmosphereMode = "standard",
+  setAtmosphereMode,
 }: {
   isOledOptimized?: boolean;
   setIsOledOptimized?: (val: boolean) => void;
+  atmosphereMode?: AtmosphereMode;
+  setAtmosphereMode?: (mode: AtmosphereMode) => void;
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isAtmosphereMenuOpen, setIsAtmosphereMenuOpen] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -23,6 +30,16 @@ export default function Navbar({
     };
   }, [isOpen]);
 
+  const [currentPath, setCurrentPath] = useState(
+    typeof window !== "undefined" ? window.location.pathname : "/",
+  );
+
+  useEffect(() => {
+    const updatePath = () => setCurrentPath(window.location.pathname);
+    window.addEventListener("popstate", updatePath);
+    return () => window.removeEventListener("popstate", updatePath);
+  }, []);
+
   const handleNavigate = (
     e: React.MouseEvent<HTMLAnchorElement>,
     path: string,
@@ -30,7 +47,29 @@ export default function Navbar({
     e.preventDefault();
     window.history.pushState(null, "", path);
     window.dispatchEvent(new Event("popstate"));
+    setCurrentPath(path);
     setIsOpen(false);
+  };
+
+  const atmosphereOptions: { id: AtmosphereMode; label: string; icon: string }[] = [
+    { id: "standard", label: "STANDARD", icon: "✦" },
+    { id: "oled", label: "OLED PURE", icon: "●" },
+    { id: "crt", label: "CRT SCAN", icon: "▤" },
+    { id: "noir", label: "NOIR GRAIN", icon: "◪" },
+  ];
+
+  const currentMode = atmosphereMode || (isOledOptimized ? "oled" : "standard");
+
+  const cycleAtmosphere = () => {
+    if (!setAtmosphereMode) {
+      setIsOledOptimized?.(!isOledOptimized);
+      return;
+    }
+    const order: AtmosphereMode[] = ["standard", "oled", "crt", "noir"];
+    const currentIndex = order.indexOf(currentMode);
+    const nextMode = order[(currentIndex + 1) % order.length];
+    setAtmosphereMode(nextMode);
+    setIsOledOptimized?.(nextMode === "oled");
   };
 
   return (
@@ -41,6 +80,7 @@ export default function Navbar({
             href="/"
             onClick={(e) => handleNavigate(e, "/")}
             className="flex items-center gap-3 hover-trigger group"
+            data-cursor="HOME"
           >
             <img
               src="/logomain.png?v=2"
@@ -53,47 +93,75 @@ export default function Navbar({
           </a>
         </div>
         <div className="w-1/3 flex justify-center">
-          <nav className="hidden md:flex space-x-8 text-[11px] uppercase tracking-[0.2em] opacity-60">
+          <nav className="hidden md:flex space-x-8 text-[11px] uppercase tracking-[0.2em]">
             <a
               href="/"
               onClick={(e) => handleNavigate(e, "/")}
-              className="hover:opacity-100 text-white opacity-100 transition-opacity"
+              className={`hover:opacity-100 transition-opacity ${
+                currentPath === "/" ? "text-white opacity-100 font-bold" : "text-white/50 opacity-60"
+              }`}
             >
               Home
             </a>
             <a
+              href="/packs"
+              onClick={(e) => handleNavigate(e, "/packs")}
+              className={`hover:opacity-100 transition-opacity ${
+                currentPath === "/packs" ? "text-white opacity-100 font-bold" : "text-white/50 opacity-60"
+              }`}
+            >
+              Packs
+            </a>
+            <a
               href="/desktop"
               onClick={(e) => handleNavigate(e, "/desktop")}
-              className="hover:opacity-100 transition-opacity"
+              className={`hover:opacity-100 transition-opacity ${
+                currentPath === "/desktop" ? "text-white opacity-100 font-bold" : "text-white/50 opacity-60"
+              }`}
             >
               Desktop
             </a>
             <a
               href="/mobile"
               onClick={(e) => handleNavigate(e, "/mobile")}
-              className="hover:opacity-100 transition-opacity"
+              className={`hover:opacity-100 transition-opacity ${
+                currentPath === "/mobile" ? "text-white opacity-100 font-bold" : "text-white/50 opacity-60"
+              }`}
             >
               Phone
+            </a>
+            <a
+              href="/updates"
+              onClick={(e) => handleNavigate(e, "/updates")}
+              className={`hover:opacity-100 transition-opacity flex items-center gap-1 ${
+                currentPath === "/updates" ? "text-white opacity-100 font-bold" : "text-white/50 opacity-60"
+              }`}
+            >
+              <span>Logs</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
             </a>
           </nav>
         </div>
 
-        <div className="w-1/3 flex justify-end items-center gap-4">
-          {setIsOledOptimized && (
-            <button
-              onClick={() => setIsOledOptimized(!isOledOptimized)}
-              className={`hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full border text-[10px] font-mono uppercase tracking-widest transition-all duration-300 ${
-                isOledOptimized
-                  ? "bg-white text-black border-white shadow-[0_0_15px_rgba(255,255,255,0.3)]"
-                  : "bg-transparent text-white/40 border-white/10 hover:border-white/30 hover:text-white"
-              }`}
-            >
-              <div
-                className={`w-2 h-2 rounded-full ${isOledOptimized ? "bg-black animate-pulse" : "bg-white/20"}`}
-              />
-              OLED Mode
-            </button>
-          )}
+        <div className="w-1/3 flex justify-end items-center gap-3">
+          {/* Atmosphere Mode Switcher */}
+          <button
+            onClick={cycleAtmosphere}
+            className={`hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full border text-[10px] font-mono uppercase tracking-widest transition-all duration-300 luxury-border-glow ${
+              currentMode !== "standard"
+                ? "bg-white text-black border-white shadow-[0_0_20px_rgba(255,255,255,0.25)]"
+                : "bg-white/5 text-white/60 border-white/10 hover:border-white/30 hover:text-white"
+            }`}
+            title="Click to cycle atmosphere effects (Standard / OLED / CRT / Noir)"
+            data-cursor="FX"
+          >
+            <span className="text-[11px]">
+              {atmosphereOptions.find((a) => a.id === currentMode)?.icon}
+            </span>
+            <span>
+              FX: {atmosphereOptions.find((a) => a.id === currentMode)?.label}
+            </span>
+          </button>
 
           <div className="md:hidden">
             <button
@@ -122,43 +190,79 @@ export default function Navbar({
                 >
                   <X size={32} />
                 </button>
-                <nav className="flex flex-col space-y-8 text-center text-sm uppercase tracking-[0.3em] opacity-80">
+                <nav className="flex flex-col space-y-8 text-center text-sm uppercase tracking-[0.3em]">
                   <a
                     href="/"
                     onClick={(e) => handleNavigate(e, "/")}
-                    className="hover:opacity-100 text-white transition-opacity cursor-pointer"
+                    className={`hover:opacity-100 transition-opacity cursor-pointer ${
+                      currentPath === "/" ? "text-white font-bold" : "text-white/60"
+                    }`}
                   >
                     Home
                   </a>
                   <a
+                    href="/packs"
+                    onClick={(e) => handleNavigate(e, "/packs")}
+                    className={`hover:opacity-100 transition-opacity cursor-pointer ${
+                      currentPath === "/packs" ? "text-white font-bold" : "text-white/60"
+                    }`}
+                  >
+                    Packs
+                  </a>
+                  <a
                     href="/desktop"
                     onClick={(e) => handleNavigate(e, "/desktop")}
-                    className="hover:opacity-100 transition-opacity cursor-pointer"
+                    className={`hover:opacity-100 transition-opacity cursor-pointer ${
+                      currentPath === "/desktop" ? "text-white font-bold" : "text-white/60"
+                    }`}
                   >
                     Desktop
                   </a>
                   <a
                     href="/mobile"
                     onClick={(e) => handleNavigate(e, "/mobile")}
-                    className="hover:opacity-100 transition-opacity cursor-pointer"
+                    className={`hover:opacity-100 transition-opacity cursor-pointer ${
+                      currentPath === "/mobile" ? "text-white font-bold" : "text-white/60"
+                    }`}
                   >
                     Phone
                   </a>
-                  {setIsOledOptimized && (
-                    <button
-                      onClick={() => {
-                        setIsOledOptimized(!isOledOptimized);
-                        setIsOpen(false);
-                      }}
-                      className={`flex items-center gap-2 px-4 py-2 rounded-full border text-[10px] font-mono uppercase tracking-widest transition-all duration-300 mx-auto ${
-                        isOledOptimized
-                          ? "bg-white text-black border-white"
-                          : "bg-transparent text-white/40 border-white/10"
-                      }`}
-                    >
-                      OLED Mode: {isOledOptimized ? "ON" : "OFF"}
-                    </button>
-                  )}
+                  <a
+                    href="/updates"
+                    onClick={(e) => handleNavigate(e, "/updates")}
+                    className={`hover:opacity-100 transition-opacity cursor-pointer flex items-center justify-center gap-2 ${
+                      currentPath === "/updates" ? "text-white font-bold" : "text-white/60"
+                    }`}
+                  >
+                    <span>System Logs</span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+                  </a>
+
+                  {/* Atmosphere selector for mobile */}
+                  <div className="pt-4 flex flex-col items-center gap-2">
+                    <span className="text-[10px] font-mono text-white/40 uppercase tracking-widest">
+                      Atmosphere FX
+                    </span>
+                    <div className="grid grid-cols-2 gap-2">
+                      {atmosphereOptions.map((opt) => (
+                        <button
+                          key={opt.id}
+                          onClick={() => {
+                            setAtmosphereMode?.(opt.id);
+                            setIsOledOptimized?.(opt.id === "oled");
+                            setIsOpen(false);
+                          }}
+                          className={`px-3 py-2 text-[10px] font-mono rounded border uppercase tracking-wider transition-colors ${
+                            currentMode === opt.id
+                              ? "bg-white text-black border-white font-bold"
+                              : "border-white/10 text-white/50"
+                          }`}
+                        >
+                          {opt.icon} {opt.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </nav>
               </motion.div>
             )}

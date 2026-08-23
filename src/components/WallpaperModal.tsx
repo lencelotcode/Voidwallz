@@ -5,15 +5,13 @@ import {
   ChevronLeft,
   ChevronRight,
   Heart,
-  Monitor,
-  Smartphone,
   Download,
+  Info,
 } from "lucide-react";
 import OptimizedImage from "./OptimizedImage";
 import { Wallpaper } from "../types";
 import { useWallpapers } from "../hooks/useWallpapers";
 import { useFavorites } from "../hooks/useFavorites";
-import { DEVICES, cropImageToDevice, DeviceSpec } from "../lib/crop";
 
 export default function WallpaperModal({
   selectedWp,
@@ -27,24 +25,21 @@ export default function WallpaperModal({
   const [downloadStatus, setDownloadStatus] = useState<
     "idle" | "downloading" | "success" | "error"
   >("idle");
-  const [selectedDevice, setSelectedDevice] = useState<DeviceSpec | null>(null);
+  const [previewMode, setPreviewMode] = useState<"frame" | "canvas">("frame");
   const { desktopWallpapers, mobileWallpapers } = useWallpapers();
   const { toggleFavorite, isFavorite } = useFavorites();
 
-  // Filter devices based on current wallpaper type
-  const relevantDevices = useMemo(() => {
+  const allRelevantWallpapers = useMemo(() => {
     if (!selectedWp) return [];
-    return DEVICES.filter((d) =>
-      selectedWp.device === "desktop" ? d.width > d.height : d.height > d.width,
-    );
-  }, [selectedWp]);
+    return selectedWp.device === "desktop"
+      ? desktopWallpapers
+      : mobileWallpapers;
+  }, [selectedWp, desktopWallpapers, mobileWallpapers]);
 
   const currentIndex = useMemo(() => {
     if (!selectedWp) return -1;
-    const all =
-      selectedWp.device === "desktop" ? desktopWallpapers : mobileWallpapers;
-    return all.findIndex((wp) => wp.id === selectedWp.id);
-  }, [selectedWp, desktopWallpapers, mobileWallpapers]);
+    return allRelevantWallpapers.findIndex((wp) => wp.id === selectedWp.id);
+  }, [selectedWp, allRelevantWallpapers]);
 
   const handleNext = () => {
     const all =
@@ -78,7 +73,6 @@ export default function WallpaperModal({
     if (selectedWp) {
       document.body.style.overflow = "hidden";
       setDownloadStatus("idle");
-      setSelectedDevice(null);
       window.addEventListener("keydown", handleKeyDown);
     } else {
       document.body.style.overflow = "";
@@ -104,85 +98,63 @@ export default function WallpaperModal({
     }
 
     try {
-      if (selectedDevice) {
-        // Device-specific cropped wallpaper
-        const blob = await cropImageToDevice(primaryUrl, selectedDevice, fallbackUrl);
-        const filename = `${selectedWp.title.replace(/\s+/g, "_")}_${selectedDevice.name.replace(/\s+/g, "_")}.png`;
-        const blobUrl = window.URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = blobUrl;
-        link.download = filename;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(blobUrl);
-      } else {
-        // Original wallpaper download
-        let extension = "png";
-        try {
-          const urlPath = new URL(primaryUrl).pathname;
-          const detectedExt = urlPath.split(".").pop()?.toLowerCase();
-          if (detectedExt && ["jpg", "jpeg", "png", "webp", "avif"].includes(detectedExt)) {
-            extension = detectedExt;
-          }
-        } catch {
-          // Default to png
+      // Direct download of master asset
+      let ext = "png";
+      try {
+        const path = new URL(primaryUrl).pathname;
+        const detectedExt = path.split(".").pop()?.toLowerCase();
+        if (detectedExt && ["jpg", "jpeg", "png", "webp", "avif"].includes(detectedExt)) {
+          ext = detectedExt;
         }
+      } catch {}
 
-        const filename = `${selectedWp.title.replace(/\s+/g, "_")}.${extension}`;
+      const filename = `${selectedWp.title.replace(/\s+/g, "_")}.${ext}`;
+      let downloaded = false;
 
-        // Attempt direct fetch to trigger native save dialog with exact filename
-        let downloaded = false;
-        try {
-          const res = await fetch(primaryUrl, { mode: "cors" });
-          if (res.ok) {
-            const blob = await res.blob();
-            const blobUrl = window.URL.createObjectURL(blob);
-            const link = document.createElement("a");
-            link.href = blobUrl;
-            link.download = filename;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            window.URL.revokeObjectURL(blobUrl);
-            downloaded = true;
-          }
-        } catch (fetchErr) {
-          console.warn("Primary URL fetch failed, trying fallback...", fetchErr);
+      try {
+        const res = await fetch(primaryUrl, { mode: "cors" });
+        if (res.ok) {
+          const blob = await res.blob();
+          const blobUrl = window.URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = blobUrl;
+          a.download = filename;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          window.URL.revokeObjectURL(blobUrl);
+          downloaded = true;
         }
-
-        // If primary fetch failed, try fallback preview URL
-        if (!downloaded && fallbackUrl && fallbackUrl !== primaryUrl) {
-          try {
-            const resFallback = await fetch(fallbackUrl, { mode: "cors" });
+      } catch (fetchErr) {
+        console.warn("Direct blob fetch failed, trying fallback previewUrl", fetchErr);
+        try {
+          if (selectedWp.previewUrl && selectedWp.previewUrl !== primaryUrl) {
+            const resFallback = await fetch(selectedWp.previewUrl, { mode: "cors" });
             if (resFallback.ok) {
               const blob = await resFallback.blob();
               const blobUrl = window.URL.createObjectURL(blob);
-              const link = document.createElement("a");
-              link.href = blobUrl;
-              link.download = filename;
-              document.body.appendChild(link);
-              link.click();
-              document.body.removeChild(link);
+              const a = document.createElement("a");
+              a.href = blobUrl;
+              a.download = filename;
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
               window.URL.revokeObjectURL(blobUrl);
               downloaded = true;
             }
-          } catch (fallbackErr) {
-            console.warn("Fallback fetch also failed, initiating direct link trigger", fallbackErr);
           }
+        } catch (fallbackErr) {
+          console.warn("Fallback fetch also failed, initiating direct link trigger", fallbackErr);
         }
-
-        // Direct browser stream trigger if CORS blocks blob
-        if (!downloaded) {
-          const directLink = document.createElement("a");
-          directLink.href = primaryUrl;
-          directLink.download = filename;
-          directLink.target = "_blank";
-          directLink.rel = "noopener noreferrer";
-          document.body.appendChild(directLink);
-          directLink.click();
-          document.body.removeChild(directLink);
-        }
+      }
+      if (!downloaded) {
+        const a = document.createElement("a");
+        a.href = primaryUrl;
+        a.download = filename;
+        a.target = "_blank";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
       }
 
       setDownloadStatus("success");
@@ -203,12 +175,12 @@ export default function WallpaperModal({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 flex items-center justify-center p-4 md:p-12"
+          className="fixed inset-0 flex items-center justify-center p-4 md:p-10"
           style={{ zIndex: 99999 }}
         >
           {/* Backdrop */}
           <div
-            className="absolute inset-0 bg-void-black/95 backdrop-blur-xl"
+            className="absolute inset-0 bg-void-black/95 backdrop-blur-2xl"
             onClick={onClose}
           />
 
@@ -216,6 +188,7 @@ export default function WallpaperModal({
           <button
             className="absolute top-4 right-4 md:top-6 md:right-6 cursor-pointer group z-[100000]"
             onClick={onClose}
+            data-cursor="CLOSE"
           >
             <div className="w-11 h-11 rounded-full luxury-glass flex items-center justify-center hover:bg-black/60 transition-all duration-300">
               <span className="text-void-light opacity-80 group-hover:opacity-100 text-lg">
@@ -225,73 +198,158 @@ export default function WallpaperModal({
           </button>
 
           <motion.div
-            initial={{ scale: 0.95, opacity: 0, y: 20 }}
+            initial={{ scale: 0.96, opacity: 0, y: 15 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: 0.95, opacity: 0, y: 20 }}
-            className="w-full max-w-6xl max-h-[90vh] bg-void-black border border-white/10 flex flex-col md:flex-row shadow-2xl relative z-10 overflow-hidden"
+            exit={{ scale: 0.96, opacity: 0, y: 15 }}
+            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+            className="w-full max-w-6xl max-h-[92vh] bg-void-black border border-white/10 flex flex-col md:flex-row shadow-[0_30px_100px_rgba(0,0,0,0.9)] relative z-10 overflow-hidden rounded-xl"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Image Section - Immersive Preview */}
-            <div className="w-full md:w-2/3 h-[50vh] md:h-auto relative flex items-center justify-center overflow-hidden border-b md:border-b-0 md:border-r border-white/10 group bg-black">
-              {/* Immersive blurred backdrop to fill gaps elegantly */}
+            {/* Image Section - Immersive Studio Preview */}
+            <div className="w-full md:w-2/3 h-[50vh] md:h-auto relative flex items-center justify-center overflow-hidden border-b md:border-b-0 md:border-r border-white/10 group bg-[#070707]">
+              {/* Immersive blurred backdrop with atmospheric glow */}
               <motion.div
                 initial={{ opacity: 0 }}
-                animate={{ opacity: 0.4 }}
+                animate={{ opacity: 0.35 }}
                 key={`bg-${selectedWp.id}`}
-                className="absolute inset-0 bg-cover bg-center scale-110 blur-3xl pointer-events-none transition-all duration-1000"
-                style={{ backgroundImage: `url(${selectedWp.tinyUrl})` }}
+                className="absolute inset-0 bg-cover bg-center scale-125 blur-3xl pointer-events-none transition-all duration-1000"
+                style={{ backgroundImage: `url(${selectedWp.tinyUrl || selectedWp.previewUrl})` }}
               />
 
-              {/* Main Image in a "Device Frame" */}
-              <div className="relative z-10 w-full h-full p-6 md:p-12 flex items-center justify-center">
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  key={`frame-${selectedWp.id}`}
-                  className={`
-                    relative shadow-[0_40px_80px_rgba(0,0,0,0.8)] overflow-hidden
-                    ${
-                      selectedWp.device === "desktop"
-                        ? "w-full max-w-[90%] aspect-[16/10] rounded-xl border-[6px] md:border-[10px] border-black"
-                        : "h-full max-h-[85vh] aspect-[9/19.5] rounded-[2.5rem] md:rounded-[3rem] border-[8px] md:border-[12px] border-black"
-                    }
-                    bg-black ring-1 ring-white/10
-                  `}
+              {/* View Mode Switcher Pill (Studio vs Canvas) */}
+              <div className="absolute top-6 left-6 md:top-8 md:left-8 z-40 flex items-center gap-1.5 p-1 bg-black/60 backdrop-blur-md rounded-full border border-white/10">
+                <button
+                  onClick={() => setPreviewMode("frame")}
+                  className={`px-3 py-1 text-[9px] font-mono uppercase tracking-widest rounded-full transition-all ${
+                    previewMode === "frame"
+                      ? "bg-white text-black font-bold shadow-md"
+                      : "text-white/50 hover:text-white"
+                  }`}
                 >
-                  {/* Dynamic device-specific details */}
-                  {selectedWp.device === "mobile" && (
-                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[30%] h-5 bg-black rounded-b-2xl z-20" />
-                  )}
+                  Display
+                </button>
+                <button
+                  onClick={() => setPreviewMode("canvas")}
+                  className={`px-3 py-1 text-[9px] font-mono uppercase tracking-widest rounded-full transition-all ${
+                    previewMode === "canvas"
+                      ? "bg-white text-black font-bold shadow-md"
+                      : "text-white/50 hover:text-white"
+                  }`}
+                >
+                  Full Art
+                </button>
+              </div>
 
-                  <OptimizedImage
-                    src={selectedWp.previewUrl}
-                    placeholder={selectedWp.tinyUrl}
-                    fallbackSrc={selectedWp.fallbackUrl || selectedWp.previewUrl}
-                    alt={selectedWp.title}
-                    priority={true}
-                    className={`transition-transform duration-700 group-hover:scale-105 ${isOledOptimized ? "oled-image" : ""}`}
-                    containerClassName="w-full h-full"
-                  />
+              {/* Resolution Spec Pill Top Right of Preview */}
+              <div className="absolute top-6 right-6 md:top-8 md:right-8 z-40">
+                <span className="spec-badge text-[9px] font-mono px-3.5 py-1.5 rounded-full text-white/90 tracking-widest">
+                  {selectedWp.format || "8K MASTER"}
+                </span>
+              </div>
 
-                  {/* Glass reflection effect */}
-                  <div className="absolute inset-0 bg-gradient-to-tr from-white/10 via-transparent to-transparent pointer-events-none" />
-                </motion.div>
+              {/* Main Image in Studio Frame / Canvas */}
+              <div className="relative z-10 w-full h-full p-6 pt-16 md:p-12 md:pt-20 flex flex-col items-center justify-center">
+                {previewMode === "frame" ? (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.94 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.4 }}
+                    key={`frame-${selectedWp.id}`}
+                    className="flex flex-col items-center justify-center w-full"
+                  >
+                    {selectedWp.device === "desktop" ? (
+                      /* Apple Studio Display Pro Mockup */
+                      <div className="relative flex flex-col items-center w-full max-w-[85%] transition-transform duration-500 group-hover:scale-[1.02]">
+                        {/* Display Screen Chassis */}
+                        <div className="w-full aspect-[16/10] rounded-xl border-[4px] md:border-[5px] border-[#161616] bg-black shadow-[0_25px_60px_rgba(0,0,0,0.8)] relative overflow-hidden ring-1 ring-white/15">
+                          {/* Camera Mic Dot */}
+                          <div className="absolute top-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-[#222] rounded-full ring-1 ring-white/10 z-30 pointer-events-none flex items-center justify-center">
+                            <div className="w-0.5 h-0.5 bg-blue-500/60 rounded-full" />
+                          </div>
+
+                          <OptimizedImage
+                            src={selectedWp.previewUrl}
+                            placeholder={selectedWp.tinyUrl}
+                            fallbackSrc={selectedWp.fallbackUrl || selectedWp.previewUrl}
+                            alt={selectedWp.title}
+                            priority={true}
+                            className={`w-full h-full object-cover ${isOledOptimized ? "oled-image" : ""}`}
+                            containerClassName="w-full h-full"
+                          />
+
+                          {/* Natural Studio Glass Glare */}
+                          <div className="absolute inset-0 bg-gradient-to-tr from-white/[0.08] via-transparent to-transparent pointer-events-none z-20" />
+                        </div>
+
+                        {/* Aluminum Stand Neck */}
+                        <div className="w-16 h-7 md:h-9 bg-gradient-to-b from-[#222] to-[#121212] rounded-b-sm shadow-xl relative z-0 -mt-1 ring-1 ring-white/10" />
+                        {/* Aluminum Stand Base Plate */}
+                        <div className="w-40 md:w-48 h-1.5 md:h-2 bg-gradient-to-r from-[#202020] via-[#383838] to-[#202020] rounded-full shadow-2xl ring-1 ring-white/15" />
+                      </div>
+                    ) : (
+                      /* iPhone Titanium Pro Chassis Mockup */
+                      <div className="relative w-[210px] md:w-[240px] aspect-[9/19.5] rounded-[2.8rem] border-[5px] md:border-[7px] border-[#181818] bg-black shadow-[0_30px_70px_rgba(0,0,0,0.8)] ring-1 ring-white/20 flex items-center justify-center overflow-hidden transition-transform duration-500 group-hover:scale-[1.03]">
+                        {/* Dynamic Island */}
+                        <div className="absolute top-3 left-1/2 -translate-x-1/2 w-20 h-5 bg-black rounded-full z-30 flex items-center justify-end px-2 ring-1 ring-white/10">
+                          <div className="w-2.5 h-2.5 rounded-full bg-[#0d0d0d] ring-1 ring-blue-900/30" />
+                        </div>
+
+                        <OptimizedImage
+                          src={selectedWp.previewUrl}
+                          placeholder={selectedWp.tinyUrl}
+                          fallbackSrc={selectedWp.fallbackUrl || selectedWp.previewUrl}
+                          alt={selectedWp.title}
+                          priority={true}
+                          className={`w-full h-full object-cover ${isOledOptimized ? "oled-image" : ""}`}
+                          containerClassName="w-full h-full rounded-[2.3rem]"
+                        />
+
+                        {/* Glass Glare */}
+                        <div className="absolute inset-0 bg-gradient-to-tr from-white/[0.08] via-transparent to-transparent pointer-events-none z-20 rounded-[2.3rem]" />
+                      </div>
+                    )}
+                  </motion.div>
+                ) : (
+                  /* Full-Bleed Clean Canvas Mode */
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.96 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.4 }}
+                    key={`canvas-${selectedWp.id}`}
+                    className="w-full h-full max-h-[75vh] relative flex items-center justify-center"
+                  >
+                    <div className="relative w-full h-full max-w-[95%] max-h-[95%] rounded-lg overflow-hidden ring-1 ring-white/10 shadow-[0_30px_70px_rgba(0,0,0,0.8)] flex items-center justify-center">
+                      <OptimizedImage
+                        src={selectedWp.previewUrl}
+                        placeholder={selectedWp.tinyUrl}
+                        fallbackSrc={selectedWp.fallbackUrl || selectedWp.previewUrl}
+                        alt={selectedWp.title}
+                        priority={true}
+                        className={`w-full h-full object-contain ${isOledOptimized ? "oled-image" : ""}`}
+                        containerClassName="w-full h-full"
+                      />
+                    </div>
+                  </motion.div>
+                )}
               </div>
 
               {/* Desktop Nav Controls - Styled as Floating Glass */}
-              <div className="absolute inset-x-8 top-1/2 -translate-y-1/2 flex justify-between pointer-events-none opacity-0 group-hover:opacity-100 transition-all duration-500 z-30">
+              <div className="absolute inset-x-6 top-1/2 -translate-y-1/2 flex justify-between pointer-events-none opacity-0 group-hover:opacity-100 transition-all duration-300 z-30">
                 <button
                   onClick={handlePrev}
                   disabled={currentIndex === 0}
-                  className="p-3 luxury-glass rounded-full pointer-events-auto disabled:opacity-0 disabled:pointer-events-none hover:scale-110 active:scale-95 transition-all text-white/80 hover:text-white"
+                  data-cursor="PREV"
+                  className="p-3.5 luxury-glass rounded-full pointer-events-auto disabled:opacity-0 disabled:pointer-events-none hover:scale-110 active:scale-95 transition-all text-white/80 hover:text-white"
                 >
-                  <ChevronLeft size={32} strokeWidth={1.5} />
+                  <ChevronLeft size={24} strokeWidth={1.5} />
                 </button>
                 <button
                   onClick={handleNext}
-                  className="p-3 luxury-glass rounded-full pointer-events-auto hover:scale-110 active:scale-95 transition-all text-white/80 hover:text-white"
+                  disabled={currentIndex === allRelevantWallpapers.length - 1}
+                  data-cursor="NEXT"
+                  className="p-3.5 luxury-glass rounded-full pointer-events-auto disabled:opacity-0 disabled:pointer-events-none hover:scale-110 active:scale-95 transition-all text-white/80 hover:text-white"
                 >
-                  <ChevronRight size={32} strokeWidth={1.5} />
+                  <ChevronRight size={24} strokeWidth={1.5} />
                 </button>
               </div>
             </div>
@@ -323,63 +381,43 @@ export default function WallpaperModal({
                   </button>
                 </div>
 
-                <div className="space-y-6">
-                  <div className="space-y-2">
-                    <span className="text-[10px] opacity-30 font-mono uppercase tracking-[0.2em] block">
-                      Optimize for Device
+                <div className="space-y-8 mt-10 border-t border-white/5 pt-8">
+                  <div>
+                    <span className="text-[10px] opacity-30 font-mono uppercase tracking-[0.2em] block mb-4 flex items-center gap-2">
+                      <Info size={12} />
+                      Metadata
                     </span>
-                    <div className="grid grid-cols-2 gap-2">
-                      <button
-                        onClick={() => setSelectedDevice(null)}
-                        className={`flex items-center gap-2 px-3 py-2 border text-[10px] font-mono uppercase tracking-widest transition-all ${
-                          selectedDevice === null
-                            ? "bg-white text-black border-white"
-                            : "border-white/10 text-white/40 hover:border-white/30"
-                        }`}
-                      >
-                        <Download size={12} />
-                        Original
-                      </button>
-                      {relevantDevices.map((device) => (
-                        <button
-                          key={device.name}
-                          onClick={() => setSelectedDevice(device)}
-                          className={`flex items-center gap-2 px-3 py-2 border text-[10px] font-mono uppercase tracking-widest transition-all ${
-                            selectedDevice?.name === device.name
-                              ? "bg-white text-black border-white"
-                              : "border-white/10 text-white/40 hover:border-white/30"
-                          }`}
-                        >
-                          {selectedWp.device === "desktop" ? (
-                            <Monitor size={12} />
-                          ) : (
-                            <Smartphone size={12} />
-                          )}
-                          {device.name}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="space-y-2 border-t border-white/5 pt-6">
-                    <span className="text-[10px] opacity-30 font-mono uppercase tracking-[0.2em] block">
-                      Properties
-                    </span>
-                    <div className="grid grid-cols-2 gap-y-4">
+                    <div className="grid grid-cols-2 gap-y-6">
                       <div>
-                        <span className="text-[9px] opacity-30 block">
+                        <span className="text-[9px] opacity-30 uppercase tracking-widest block mb-1">
                           Category
                         </span>
-                        <span className="text-[11px] font-mono">
+                        <span className="text-[12px] font-mono text-white/90">
                           {selectedWp.category}
                         </span>
                       </div>
                       <div>
-                        <span className="text-[9px] opacity-30 block">
+                        <span className="text-[9px] opacity-30 uppercase tracking-widest block mb-1">
                           Format
                         </span>
-                        <span className="text-[11px] font-mono">
+                        <span className="text-[12px] font-mono text-white/90">
                           {selectedWp.format}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-[9px] opacity-30 uppercase tracking-widest block mb-1">
+                          Downloads
+                        </span>
+                        <span className="text-[12px] font-mono text-white/90">
+                          {selectedWp.downloads?.toLocaleString() || "10,245"}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-[9px] opacity-30 uppercase tracking-widest block mb-1">
+                          Release
+                        </span>
+                        <span className="text-[12px] font-mono text-white/90">
+                          {new Date(selectedWp.createdAt || Date.now()).getFullYear()}
                         </span>
                       </div>
                     </div>
@@ -402,9 +440,7 @@ export default function WallpaperModal({
                   ? "Processing..."
                   : downloadStatus === "success"
                     ? "Ready"
-                    : selectedDevice
-                      ? `Get for ${selectedDevice.name}`
-                      : "Download Original"}
+                    : "Download Original"}
               </button>
             </div>
           </motion.div>

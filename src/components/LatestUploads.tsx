@@ -68,6 +68,7 @@ export default function LatestUploads({
             onClick={() => onOpenModal(wp)}
             onMouseEnter={() => onHoverWallpaper?.(wp.previewUrl)}
             onMouseLeave={() => onHoverWallpaper?.(null)}
+            data-cursor="VIEW"
             className={`relative flex flex-col items-center justify-center overflow-hidden group cursor-pointer hover-trigger bg-void-black ${
               wp.device === "desktop"
                 ? "h-[400px] md:h-[500px]"
@@ -79,10 +80,17 @@ export default function LatestUploads({
               style={{ backgroundImage: `url(${wp.tinyUrl || wp.previewUrl})` }}
             />
 
+            {/* Spec Badge Top Left */}
+            <div className="absolute top-6 left-8 z-20">
+              <span className="spec-badge text-[9px] font-mono px-3 py-1 rounded-full text-white/80 tracking-widest uppercase">
+                {wp.device === "desktop" ? "8K RAW MASTER" : "OLED MASTER"}
+              </span>
+            </div>
+
             <div className="relative z-10 flex flex-col items-center transition-transform duration-700 group-hover:scale-[1.05] group-hover:-translate-y-2">
               {wp.device === "desktop" ? (
                 <>
-                  <div className="w-[200px] md:w-[260px] aspect-[16/10] border-[4px] md:border-[6px] border-black rounded-lg relative bg-black shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden ring-1 ring-white/10">
+                  <div className="w-[200px] md:w-[260px] aspect-[16/10] border-[4px] md:border-[6px] border-black rounded-lg relative bg-black shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden ring-1 ring-white/10 luxury-border-glow">
                     <OptimizedImage
                       src={wp.previewUrl}
                       placeholder={wp.tinyUrl}
@@ -96,7 +104,7 @@ export default function LatestUploads({
                   <div className="w-32 h-1 bg-gray-700 mx-auto rounded-t-full shadow-2xl" />
                 </>
               ) : (
-                <div className="w-[160px] aspect-[9/19.5] border-[6px] border-black rounded-[2rem] relative bg-black shadow-[0_20px_50px_rgba(0,0,0,0.5)] ring-1 ring-white/10 flex items-center justify-center">
+                <div className="w-[160px] aspect-[9/19.5] border-[6px] border-black rounded-[2rem] relative bg-black shadow-[0_20px_50px_rgba(0,0,0,0.5)] ring-1 ring-white/10 flex items-center justify-center luxury-border-glow">
                   <div className="absolute top-0 left-1/2 -translate-x-1/2 w-14 h-4 bg-black rounded-b-xl z-20" />
                   <OptimizedImage
                     src={wp.previewUrl}
@@ -110,8 +118,8 @@ export default function LatestUploads({
               )}
             </div>
 
-            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none bg-black/20 backdrop-blur-sm">
-              <span className="bg-black text-white text-[10px] px-3 py-1 font-mono uppercase tracking-widest">
+            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none bg-black/30 backdrop-blur-sm">
+              <span className="bg-black text-white text-[10px] px-3 py-1 font-mono uppercase tracking-widest border border-white/10 mb-1">
                 {wp.category}
               </span>
               <h3 className="bg-white text-black text-xl md:text-2xl font-sans font-bold uppercase tracking-wider px-4 py-1 mt-1 text-center max-w-[90%] leading-tight text-stroke-none">

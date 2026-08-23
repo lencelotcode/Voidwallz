@@ -16,7 +16,11 @@ import Loader from "./components/Loader";
 import Navbar from "./components/Navbar";
 import ReportPage from "./components/ReportPage";
 import WallpaperModal from "./components/WallpaperModal";
-import { Wallpaper } from "./types";
+import VoidPacks from "./components/VoidPacks";
+import PackModal from "./components/PackModal";
+import UpdatesPage from "./components/UpdatesPage";
+import AdminPackUpload from "./components/AdminPackUpload";
+import { Wallpaper, VoidPack } from "./types";
 import { useWallpapers } from "./hooks/useWallpapers";
 import {
   PrivacyPolicy,
@@ -233,13 +237,24 @@ function Hero({
           }}
           transition={{ type: "spring", damping: 20, stiffness: 40 }}
           onClick={() => !loading && onOpenModal(wallpaperOfTheDay)}
+          data-cursor="VIEW"
           className="w-full md:w-7/12 h-[50vh] md:h-[65vh] relative group cursor-pointer hover-trigger perspective-1000"
           initial={{ opacity: 0, scale: 0.95 }}
         >
-          <div className="w-full h-full border border-white/10 p-2 relative overflow-hidden bg-white/5 shadow-2xl">
+          <div className="w-full h-full border border-white/10 p-2 relative overflow-hidden bg-white/5 shadow-2xl luxury-border-glow">
             {loading ? (
-              <div className="w-full h-full bg-void-black/30 animate-pulse flex items-center justify-center">
-                <div className="w-full h-full bg-black/20 animate-shimmer" />
+              <div className="w-full h-full bg-[#050505] flex items-center justify-center relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/[0.03] to-transparent animate-pulse" />
+                <div className="relative flex flex-col items-center gap-6">
+                  <div className="relative flex items-center justify-center w-12 h-12">
+                    <div className="absolute inset-0 rounded-full border-t border-white/60 border-r border-transparent animate-spin" style={{ animationDuration: '1.2s' }} />
+                    <div className="absolute inset-[3px] rounded-full border-b border-white/30 border-l border-transparent animate-spin" style={{ animationDuration: '1.8s', animationDirection: 'reverse' }} />
+                    <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+                  </div>
+                  <span className="text-[9px] font-mono uppercase tracking-[0.4em] text-white/50">
+                    Syncing...
+                  </span>
+                </div>
               </div>
             ) : (
               <>
@@ -292,7 +307,7 @@ function Hero({
         transition={{ duration: 1.2, delay: 0.8 }}
         className="absolute bottom-8 left-10 right-10 flex flex-col md:flex-row justify-between items-start md:items-end border-t border-white/5 pt-4 z-20"
       >
-        <div className="flex gap-8 md:gap-12 w-full md:w-auto overflow-x-auto pb-4 md:pb-0">
+        <div className="flex gap-8 md:gap-12 w-full md:w-auto overflow-x-auto pb-4 md:pb-0 scrollbar-hide">
           <div className="flex flex-col whitespace-nowrap">
             <span className="text-[10px] opacity-40 uppercase tracking-widest mb-1">
               Resolution
@@ -541,6 +556,20 @@ function Footer() {
               Support
             </span>
             <a
+              href="/updates"
+              onClick={(e) => {
+                e.preventDefault();
+                window.history.pushState(null, "", "/updates");
+                window.dispatchEvent(new Event("popstate"));
+              }}
+              className="text-sm opacity-60 hover:opacity-100 transition-opacity hover-trigger flex items-center gap-2"
+            >
+              <span>System Logs</span>
+              <span className="text-[8px] font-mono uppercase px-1.5 py-0.5 rounded bg-white text-black font-bold">
+                v2.4.0
+              </span>
+            </a>
+            <a
               href="/report"
               onClick={(e) => {
                 e.preventDefault();
@@ -638,113 +667,19 @@ function Footer() {
   );
 }
 
-function FeaturedCollections({
-  onOpenModal,
-}: {
-  onOpenModal: (wp: Wallpaper) => void;
-}) {
-  const { desktopWallpapers, mobileWallpapers } = useWallpapers();
-
-  const collections = [
-    {
-      title: "Ethereal Voids",
-      desc: "Deep monochrome explorations of negative space.",
-      tag: "Minimal",
-      image:
-        desktopWallpapers.find((w) => w.category.includes("Minimal"))
-          ?.previewUrl || desktopWallpapers[0]?.previewUrl,
-    },
-    {
-      title: "Obsidian Flows",
-      desc: "Liquid textures and dark atmospheric waves.",
-      tag: "Liquid",
-      image:
-        mobileWallpapers.find((w) => w.category.includes("Liquid"))
-          ?.previewUrl || mobileWallpapers[0]?.previewUrl,
-    },
-    {
-      title: "Geometric Order",
-      desc: "Structured patterns for focused interfaces.",
-      tag: "Geometry",
-      image:
-        desktopWallpapers.find((w) => w.category.includes("Geometry"))
-          ?.previewUrl || desktopWallpapers[1]?.previewUrl,
-    },
-  ];
-
-  return (
-    <section className="py-24 px-10 border-t border-white/5 bg-void-black">
-      <div className="max-w-[1600px] mx-auto">
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true }}
-          className="flex flex-col mb-16"
-        >
-          <span className="text-[10px] opacity-30 uppercase tracking-[0.3em] mb-4">
-            Curated Series
-          </span>
-          <h2 className="text-4xl md:text-5xl font-serif italic tracking-tighter">
-            Featured Collections
-          </h2>
-        </motion.div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {collections.map((col, i) => (
-            <motion.div
-              key={col.title}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.2, duration: 0.8 }}
-              className="group cursor-pointer relative aspect-[4/5] overflow-hidden border border-white/10"
-              onClick={() => {
-                const gallery = document.getElementById("gallery");
-                if (gallery) {
-                  gallery.scrollIntoView({ behavior: "smooth" });
-                } else {
-                  window.history.pushState(null, "", "/");
-                  window.dispatchEvent(new Event("popstate"));
-                  setTimeout(() => {
-                    document
-                      .getElementById("gallery")
-                      ?.scrollIntoView({ behavior: "smooth" });
-                  }, 100);
-                }
-              }}
-            >
-              <img
-                src={col.image}
-                loading="lazy"
-                decoding="async"
-                className="w-full h-full object-cover opacity-40 group-hover:opacity-60 group-hover:scale-105 transition-all duration-700"
-                alt={col.title}
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-void-black via-transparent to-transparent" />
-              <div className="absolute bottom-8 left-8 right-8">
-                <span className="text-[10px] font-mono text-white/40 uppercase tracking-widest mb-2 block">
-                  {col.tag}
-                </span>
-                <h3 className="text-2xl font-serif italic mb-2">{col.title}</h3>
-                <p className="text-xs opacity-50 leading-relaxed max-w-[20ch]">
-                  {col.desc}
-                </p>
-                <div className="mt-6 w-10 h-px bg-white/20 group-hover:w-20 transition-all duration-500" />
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
 export default function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [hash, setHash] = useState(window.location.hash);
   const [path, setPath] = useState(window.location.pathname);
-  const [isOledOptimized, setIsOledOptimized] = useState(false);
+  const [atmosphereMode, setAtmosphereMode] = useState<"standard" | "oled" | "crt" | "noir">("standard");
   const [ambientImage, setAmbientImage] = useState<string | null>(null);
+  const [selectedPack, setSelectedPack] = useState<VoidPack | null>(null);
+
+  // Derive isOledOptimized for components that consume it
+  const isOledOptimized = atmosphereMode === "oled";
+  const setIsOledOptimized = (val: boolean) => {
+    setAtmosphereMode(val ? "oled" : "standard");
+  };
 
   // Spotlight state
   const mouseX = useMotionValue(0);
@@ -778,6 +713,10 @@ export default function App() {
   const renderContent = () => {
     const isWallpaperRoute = /^\/(desktop|mobile)\/([^/]+)\/?$/.test(path);
 
+    if (path === "/admin" || path === "/upload-pack" || hash === "#admin")
+      return <AdminPackUpload key="admin" />;
+    if (path === "/updates" || hash === "#updates")
+      return <UpdatesPage key="updates" />;
     if (path === "/report" || hash === "#report")
       return <ReportPage key="report" />;
     if (path === "/privacy" || hash === "#privacy")
@@ -786,6 +725,24 @@ export default function App() {
       return <TermsOfService key="terms" />;
     if (path === "/license" || hash === "#license")
       return <License key="license" />;
+
+    if (path === "/packs") {
+      return (
+        <motion.div
+          key="packs"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="flex flex-col h-full bg-void-black min-h-[100dvh] pt-20 pb-24"
+        >
+          <VoidPacks
+            onOpenPack={setSelectedPack}
+            onHoverWallpaper={setAmbientImage}
+            isDedicatedPage={true}
+          />
+        </motion.div>
+      );
+    }
 
     if (path === "/desktop") {
       return (
@@ -840,7 +797,6 @@ export default function App() {
             isOledOptimized={isOledOptimized}
           />
           <Marquee />
-          <FeaturedCollections onOpenModal={navigateToWallpaper} />
           <LatestUploads
             onOpenModal={navigateToWallpaper}
             isOledOptimized={isOledOptimized}
@@ -861,21 +817,25 @@ export default function App() {
 
   return (
     <div
-      className={`no-cursor bg-void-black min-h-screen text-void-light overflow-x-hidden selection:bg-white selection:text-black relative ${isOledOptimized ? "oled-mode" : ""}`}
+      className={`no-cursor bg-void-black min-h-screen text-void-light overflow-x-hidden selection:bg-white selection:text-black relative atmosphere-${atmosphereMode} ${isOledOptimized ? "oled-mode" : ""}`}
     >
-      {/* Global Ambient Glow */}
+      {/* Global Adaptive Multi-layer Ambient Glow */}
       <AnimatePresence>
         {ambientImage && !isOledOptimized && (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 0.15 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 1 }}
-            className="fixed inset-0 z-0 pointer-events-none bg-cover bg-center blur-[150px]"
+            initial={{ opacity: 0, scale: 1.1 }}
+            animate={{ opacity: atmosphereMode === "noir" ? 0.08 : 0.22, scale: 1 }}
+            exit={{ opacity: 0, scale: 1.1 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="fixed inset-0 z-0 pointer-events-none bg-cover bg-center blur-[160px] scale-125 transition-all duration-700"
             style={{ backgroundImage: `url(${ambientImage})` }}
           />
         )}
       </AnimatePresence>
+
+      {/* Atmospheric Overlays */}
+      {atmosphereMode === "crt" && <div className="crt-scanlines" />}
+      {atmosphereMode === "noir" && <div className="noir-vignette" />}
 
       <div className="film-grain" />
       <motion.div
@@ -894,6 +854,11 @@ export default function App() {
       </AnimatePresence>
 
       <WallpaperRouteManager isOledOptimized={isOledOptimized} />
+      <PackModal
+        selectedPack={selectedPack}
+        onClose={() => setSelectedPack(null)}
+        isOledOptimized={isOledOptimized}
+      />
 
       {!isLoading && (
         <motion.div
@@ -904,6 +869,8 @@ export default function App() {
           <Navbar
             isOledOptimized={isOledOptimized}
             setIsOledOptimized={setIsOledOptimized}
+            atmosphereMode={atmosphereMode}
+            setAtmosphereMode={setAtmosphereMode}
           />
           <AnimatePresence mode="wait">{renderContent()}</AnimatePresence>
           <Footer />

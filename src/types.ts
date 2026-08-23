@@ -13,3 +13,17 @@ export interface Wallpaper {
   createdAt?: string;
 }
 
+export interface VoidPack {
+  id: string;
+  title: string;
+  serial: string;
+  tagline: string;
+  category: string;
+  device: "desktop" | "mobile";
+  format: string;
+  downloads: number;
+  createdAt: string;
+  featuredImage: string;
+  items: Wallpaper[];
+}
+

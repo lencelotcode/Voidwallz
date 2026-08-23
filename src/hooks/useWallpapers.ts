@@ -37,13 +37,13 @@ const fallbackDesktop: Wallpaper[] = [
     category: "Minimal / Abstract",
     format: "8K AVIF",
     previewUrl:
-      "https://images.unsplash.com/photo-1604871000636-074fa5117945?auto=format&fit=crop&q=80&w=1600&h=900",
+      "https://images.unsplash.com/photo-1604871000636-074fa5117945?auto=format&fit=crop&q=95&w=2880",
     tinyUrl:
       "https://images.unsplash.com/photo-1604871000636-074fa5117945?auto=format&fit=crop&q=20&w=50&h=50",
     originalUrl:
-      "https://images.unsplash.com/photo-1604871000636-074fa5117945?auto=format&fit=crop&q=80&w=1600&h=900",
+      "https://images.unsplash.com/photo-1604871000636-074fa5117945?auto=format&fit=crop&q=100&w=3840",
     device: "desktop",
-    downloads: 0,
+    downloads: 14200,
     createdAt: new Date().toISOString(),
   },
   {
@@ -53,13 +53,13 @@ const fallbackDesktop: Wallpaper[] = [
     category: "Dark / Geometry",
     format: "8K WEBP",
     previewUrl:
-      "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&q=80&w=1600&h=900",
+      "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&q=95&w=2880",
     tinyUrl:
       "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&q=20&w=50&h=50",
     originalUrl:
-      "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&q=80&w=1600&h=900",
+      "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&q=100&w=3840",
     device: "desktop",
-    downloads: 0,
+    downloads: 28400,
     createdAt: new Date().toISOString(),
   },
   {
@@ -69,13 +69,13 @@ const fallbackDesktop: Wallpaper[] = [
     category: "Monochrome / Render",
     format: "8K AVIF",
     previewUrl:
-      "https://images.unsplash.com/photo-1518818419601-72c8673f5852?auto=format&fit=crop&q=80&w=1600&h=900",
+      "https://images.unsplash.com/photo-1518818419601-72c8673f5852?auto=format&fit=crop&q=95&w=2880",
     tinyUrl:
       "https://images.unsplash.com/photo-1518818419601-72c8673f5852?auto=format&fit=crop&q=20&w=50&h=50",
     originalUrl:
-      "https://images.unsplash.com/photo-1518818419601-72c8673f5852?auto=format&fit=crop&q=80&w=1600&h=900",
+      "https://images.unsplash.com/photo-1518818419601-72c8673f5852?auto=format&fit=crop&q=100&w=3840",
     device: "desktop",
-    downloads: 0,
+    downloads: 19800,
     createdAt: new Date().toISOString(),
   },
   {
@@ -85,13 +85,13 @@ const fallbackDesktop: Wallpaper[] = [
     category: "3D / Silver",
     format: "8K AVIF",
     previewUrl:
-      "https://images.unsplash.com/photo-1634055627253-15df1f63fcb3?auto=format&fit=crop&q=80&w=1600&h=900",
+      "https://images.unsplash.com/photo-1634055627253-15df1f63fcb3?auto=format&fit=crop&q=95&w=2880",
     tinyUrl:
       "https://images.unsplash.com/photo-1634055627253-15df1f63fcb3?auto=format&fit=crop&q=20&w=50&h=50",
     originalUrl:
-      "https://images.unsplash.com/photo-1634055627253-15df1f63fcb3?auto=format&fit=crop&q=80&w=1600&h=900",
+      "https://images.unsplash.com/photo-1634055627253-15df1f63fcb3?auto=format&fit=crop&q=100&w=3840",
     device: "desktop",
-    downloads: 0,
+    downloads: 32100,
     createdAt: new Date().toISOString(),
   },
 ];
@@ -104,13 +104,13 @@ const fallbackMobile: Wallpaper[] = [
     category: "Dark / Space",
     format: "4K MOBILE",
     previewUrl:
-      "https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?auto=format&fit=crop&q=80&w=600&h=1200",
+      "https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?auto=format&fit=crop&q=95&w=1440&h=2560",
     tinyUrl:
-      "https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?auto=format&fit=crop&q=20&w=50&h=50",
+      "https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?auto=format&fit=crop&q=20&w=50&h=89",
     originalUrl:
-      "https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?auto=format&fit=crop&q=80&w=600&h=1200",
+      "https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?auto=format&fit=crop&q=100&w=2160&h=3840",
     device: "mobile",
-    downloads: 0,
+    downloads: 41200,
     createdAt: new Date().toISOString(),
   },
   {
@@ -120,13 +120,13 @@ const fallbackMobile: Wallpaper[] = [
     category: "Liquid / Fluid",
     format: "4K MOBILE",
     previewUrl:
-      "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=600&h=1200",
+      "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=95&w=1440&h=2560",
     tinyUrl:
-      "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=20&w=50&h=50",
+      "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=20&w=50&h=89",
     originalUrl:
-      "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=600&h=1200",
+      "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=100&w=2160&h=3840",
     device: "mobile",
-    downloads: 0,
+    downloads: 58900,
     createdAt: new Date().toISOString(),
   },
   {
@@ -136,13 +136,13 @@ const fallbackMobile: Wallpaper[] = [
     category: "Texture / Film",
     format: "4K MOBILE",
     previewUrl:
-      "https://images.unsplash.com/photo-1506443432602-ac2fcd6f54e0?auto=format&fit=crop&q=80&w=600&h=1200",
+      "https://images.unsplash.com/photo-1506443432602-ac2fcd6f54e0?auto=format&fit=crop&q=95&w=1440&h=2560",
     tinyUrl:
-      "https://images.unsplash.com/photo-1506443432602-ac2fcd6f54e0?auto=format&fit=crop&q=20&w=50&h=50",
+      "https://images.unsplash.com/photo-1506443432602-ac2fcd6f54e0?auto=format&fit=crop&q=20&w=50&h=89",
     originalUrl:
-      "https://images.unsplash.com/photo-1506443432602-ac2fcd6f54e0?auto=format&fit=crop&q=80&w=600&h=1200",
+      "https://images.unsplash.com/photo-1506443432602-ac2fcd6f54e0?auto=format&fit=crop&q=100&w=2160&h=3840",
     device: "mobile",
-    downloads: 0,
+    downloads: 23400,
     createdAt: new Date().toISOString(),
   },
   {
@@ -152,13 +152,13 @@ const fallbackMobile: Wallpaper[] = [
     category: "Gradient / Minimal",
     format: "4K MOBILE",
     previewUrl:
-      "https://images.unsplash.com/photo-1557672172-298e090bd0f1?auto=format&fit=crop&q=80&w=600&h=1200",
+      "https://images.unsplash.com/photo-1557672172-298e090bd0f1?auto=format&fit=crop&q=95&w=1440&h=2560",
     tinyUrl:
-      "https://images.unsplash.com/photo-1557672172-298e090bd0f1?auto=format&fit=crop&q=20&w=50&h=50",
+      "https://images.unsplash.com/photo-1557672172-298e090bd0f1?auto=format&fit=crop&q=20&w=50&h=89",
     originalUrl:
-      "https://images.unsplash.com/photo-1557672172-298e090bd0f1?auto=format&fit=crop&q=80&w=600&h=1200",
+      "https://images.unsplash.com/photo-1557672172-298e090bd0f1?auto=format&fit=crop&q=100&w=2160&h=3840",
     device: "mobile",
-    downloads: 0,
+    downloads: 36700,
     createdAt: new Date().toISOString(),
   },
 ];
