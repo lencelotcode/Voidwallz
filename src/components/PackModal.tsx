@@ -12,6 +12,7 @@ import {
   Monitor,
   Smartphone,
   X,
+  Lock,
 } from "lucide-react";
 import OptimizedImage from "./OptimizedImage";
 import { VoidPack } from "../types";
@@ -456,55 +457,20 @@ export default function PackModal({
               </div>
             </div>
 
-            {/* Bottom Action Download Buttons */}
-            <div className="space-y-2 pt-2">
-              {/* Download Current Part */}
-              <button
-                onClick={handleDownloadSingle}
-                disabled={singleDownloadStatus === "downloading"}
-                className={`w-full py-2.5 px-4 font-mono text-[10px] uppercase tracking-wider rounded-lg border transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                  singleDownloadStatus === "success"
-                    ? "bg-green-500/20 text-green-400 border-green-500/50"
-                    : "border-white/20 hover:border-white/50 text-white/90 hover:text-white bg-white/5 hover:bg-white/10"
-                }`}
-              >
-                {singleDownloadStatus === "downloading" ? (
-                  "Saving Part..."
-                ) : singleDownloadStatus === "success" ? (
-                  <>
-                    <Check size={13} /> Part Saved!
-                  </>
-                ) : (
-                  <>
-                    <Download size={13} /> Download Current Part ({activeIndex + 1})
-                  </>
-                )}
-              </button>
-
-              {/* Master Pack Download All */}
-              <button
-                onClick={handleDownloadAll}
-                disabled={packDownloadStatus === "downloading"}
-                className={`w-full py-3 px-4 font-sans font-bold uppercase tracking-wider text-xs rounded-lg transition-all flex items-center justify-center gap-2 shadow-xl cursor-pointer ${
-                  packDownloadStatus === "success"
-                    ? "bg-green-500/20 text-green-400 border border-green-500/50"
-                    : packDownloadStatus === "error"
-                      ? "bg-red-500/20 text-red-400 border border-red-500/50"
-                      : "bg-white text-black hover:bg-white/90 hover:shadow-[0_0_20px_rgba(255,255,255,0.4)]"
-                }`}
-              >
-                {packDownloadStatus === "downloading" ? (
-                  "Saving All Files..."
-                ) : packDownloadStatus === "success" ? (
-                  <>
-                    <Check size={15} /> All {selectedPack.items.length} Files Saved!
-                  </>
-                ) : (
-                  <>
-                    <FolderArchive size={14} /> Download Entire Pack ({selectedPack.items.length} Files)
-                  </>
-                )}
-              </button>
+            {/* Vault Locked / Dropping Soon Notice */}
+            <div className="pt-2">
+              <div className="p-4 rounded-xl bg-white/[0.04] border border-amber-500/20 flex flex-col items-center text-center gap-2">
+                <div className="flex items-center gap-2 text-amber-300 font-mono text-xs uppercase tracking-wider">
+                  <Lock size={14} className="text-amber-400" />
+                  <span>VAULT LOCKED // DROPPING SOON</span>
+                </div>
+                <p className="text-[11px] text-white/50 font-sans leading-relaxed">
+                  Downloads for this capsule are currently in quality assurance staging. The public drop is releasing very soon!
+                </p>
+                <div className="mt-1 px-3 py-1 bg-white/5 rounded-full border border-white/10 text-[9px] font-mono text-white/40 uppercase tracking-widest">
+                  Status: Pipeline Testing
+                </div>
+              </div>
             </div>
           </div>
         </motion.div>
