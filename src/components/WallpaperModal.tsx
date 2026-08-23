@@ -7,6 +7,10 @@ import {
   Heart,
   Download,
   Info,
+  Monitor,
+  Smartphone,
+  X,
+  Check,
 } from "lucide-react";
 import OptimizedImage from "./OptimizedImage";
 import { Wallpaper } from "../types";
@@ -85,11 +89,10 @@ export default function WallpaperModal({
   }, [selectedWp, onClose, currentIndex, desktopWallpapers, mobileWallpapers]);
 
   const handleDownload = async () => {
-    if (downloadStatus === "downloading") return;
+    if (downloadStatus === "downloading" || !selectedWp) return;
     setDownloadStatus("downloading");
 
-    const primaryUrl = selectedWp?.originalUrl || selectedWp?.previewUrl;
-    const fallbackUrl = selectedWp?.previewUrl || selectedWp?.fallbackUrl;
+    const primaryUrl = selectedWp.originalUrl || selectedWp.previewUrl;
 
     if (!primaryUrl) {
       setDownloadStatus("error");
@@ -98,7 +101,6 @@ export default function WallpaperModal({
     }
 
     try {
-      // Direct download of master asset
       let ext = "png";
       try {
         const path = new URL(primaryUrl).pathname;
@@ -175,98 +177,93 @@ export default function WallpaperModal({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 flex items-center justify-center p-4 md:p-10"
+          className="fixed inset-0 flex items-center justify-center p-2 sm:p-4 md:p-8"
           style={{ zIndex: 99999 }}
         >
-          {/* Backdrop */}
+          {/* Dark Luxury Blur Backdrop */}
           <div
             className="absolute inset-0 bg-void-black/95 backdrop-blur-2xl"
             onClick={onClose}
           />
 
-          {/* Close Button */}
-          <button
-            className="absolute top-4 right-4 md:top-6 md:right-6 cursor-pointer group z-[100000]"
-            onClick={onClose}
-            data-cursor="CLOSE"
-          >
-            <div className="w-11 h-11 rounded-full luxury-glass flex items-center justify-center hover:bg-black/60 transition-all duration-300">
-              <span className="text-void-light opacity-80 group-hover:opacity-100 text-lg">
-                ✕
-              </span>
-            </div>
-          </button>
-
+          {/* Modal Window Container */}
           <motion.div
             initial={{ scale: 0.96, opacity: 0, y: 15 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.96, opacity: 0, y: 15 }}
             transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-            className="w-full max-w-6xl max-h-[92vh] bg-void-black border border-white/10 flex flex-col md:flex-row shadow-[0_30px_100px_rgba(0,0,0,0.9)] relative z-10 overflow-hidden rounded-xl"
+            className="w-full max-w-5xl max-h-[92vh] bg-[#090909] border border-white/15 flex flex-col md:flex-row shadow-[0_30px_100px_rgba(0,0,0,0.95)] relative z-10 overflow-y-auto md:overflow-hidden rounded-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Image Section - Immersive Studio Preview */}
-            <div className="w-full md:w-2/3 h-[50vh] md:h-auto relative flex items-center justify-center overflow-hidden border-b md:border-b-0 md:border-r border-white/10 group bg-[#070707]">
+            {/* LEFT: Visual Stage Section */}
+            <div className="w-full md:w-3/5 min-h-[300px] sm:min-h-[380px] md:min-h-[520px] relative flex flex-col items-center justify-center overflow-hidden border-b md:border-b-0 md:border-r border-white/10 group bg-[#040404]">
               {/* Immersive blurred backdrop with atmospheric glow */}
               <motion.div
                 initial={{ opacity: 0 }}
-                animate={{ opacity: 0.35 }}
+                animate={{ opacity: 0.3 }}
                 key={`bg-${selectedWp.id}`}
                 className="absolute inset-0 bg-cover bg-center scale-125 blur-3xl pointer-events-none transition-all duration-1000"
                 style={{ backgroundImage: `url(${selectedWp.tinyUrl || selectedWp.previewUrl})` }}
               />
 
-              {/* View Mode Switcher Pill (Studio vs Canvas) */}
-              <div className="absolute top-6 left-6 md:top-8 md:left-8 z-40 flex items-center gap-1.5 p-1 bg-black/60 backdrop-blur-md rounded-full border border-white/10">
-                <button
-                  onClick={() => setPreviewMode("frame")}
-                  className={`px-3 py-1 text-[9px] font-mono uppercase tracking-widest rounded-full transition-all ${
-                    previewMode === "frame"
-                      ? "bg-white text-black font-bold shadow-md"
-                      : "text-white/50 hover:text-white"
-                  }`}
-                >
-                  Display
-                </button>
-                <button
-                  onClick={() => setPreviewMode("canvas")}
-                  className={`px-3 py-1 text-[9px] font-mono uppercase tracking-widest rounded-full transition-all ${
-                    previewMode === "canvas"
-                      ? "bg-white text-black font-bold shadow-md"
-                      : "text-white/50 hover:text-white"
-                  }`}
-                >
-                  Full Art
-                </button>
+              {/* TOP BAR: Clean Integrated View Switcher & Close Controls */}
+              <div className="absolute top-0 inset-x-0 p-3 sm:p-4 flex items-center justify-between z-40 bg-gradient-to-b from-black/80 via-black/30 to-transparent pointer-events-none">
+                {/* Left: View Mode Switcher */}
+                <div className="flex items-center gap-1 p-1 bg-black/80 backdrop-blur-md rounded-full border border-white/10 pointer-events-auto shadow-xl">
+                  <button
+                    onClick={() => setPreviewMode("frame")}
+                    className={`px-3 py-1 text-[9px] font-mono uppercase tracking-widest rounded-full transition-all ${
+                      previewMode === "frame"
+                        ? "bg-white text-black font-bold shadow-md"
+                        : "text-white/60 hover:text-white"
+                    }`}
+                  >
+                    Display
+                  </button>
+                  <button
+                    onClick={() => setPreviewMode("canvas")}
+                    className={`px-3 py-1 text-[9px] font-mono uppercase tracking-widest rounded-full transition-all ${
+                      previewMode === "canvas"
+                        ? "bg-white text-black font-bold shadow-md"
+                        : "text-white/60 hover:text-white"
+                    }`}
+                  >
+                    Full Art
+                  </button>
+                </div>
+
+                {/* Right: Spec Badge + Integrated Close Button */}
+                <div className="flex items-center gap-2 pointer-events-auto">
+                  <span className="spec-badge text-[9px] font-mono px-3 py-1.5 rounded-full text-white/90 tracking-widest bg-black/80 backdrop-blur-md border border-white/10 shadow-xl flex items-center gap-1">
+                    {selectedWp.device === "desktop" ? <Monitor size={10} /> : <Smartphone size={10} />}
+                    {selectedWp.format || (selectedWp.device === "mobile" ? "4K MOBILE" : "8K MASTER")}
+                  </span>
+
+                  <button
+                    onClick={onClose}
+                    className="w-8 h-8 rounded-full bg-black/80 backdrop-blur-md border border-white/15 flex items-center justify-center text-white/80 hover:text-white hover:border-white/40 active:scale-95 transition-all shadow-xl cursor-pointer"
+                    title="Close Modal"
+                  >
+                    <X size={15} />
+                  </button>
+                </div>
               </div>
 
-              {/* Resolution Spec Pill Top Right of Preview */}
-              <div className="absolute top-6 right-6 md:top-8 md:right-8 z-40">
-                <span className="spec-badge text-[9px] font-mono px-3.5 py-1.5 rounded-full text-white/90 tracking-widest">
-                  {selectedWp.format || "8K MASTER"}
-                </span>
-              </div>
-
-              {/* Main Image in Studio Frame / Canvas */}
-              <div className="relative z-10 w-full h-full p-6 pt-16 md:p-12 md:pt-20 flex flex-col items-center justify-center">
+              {/* Stage Center Display */}
+              <div className="relative z-10 w-full h-full p-4 pt-16 pb-6 sm:p-8 sm:pt-20 sm:pb-8 flex items-center justify-center">
                 {previewMode === "frame" ? (
                   <motion.div
-                    initial={{ opacity: 0, scale: 0.94 }}
+                    initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.4 }}
+                    transition={{ duration: 0.3 }}
                     key={`frame-${selectedWp.id}`}
-                    className="flex flex-col items-center justify-center w-full"
+                    className="flex items-center justify-center w-full"
                   >
                     {selectedWp.device === "desktop" ? (
-                      /* Apple Studio Display Pro Mockup */
-                      <div className="relative flex flex-col items-center w-full max-w-[85%] transition-transform duration-500 group-hover:scale-[1.02]">
-                        {/* Display Screen Chassis */}
-                        <div className="w-full aspect-[16/10] rounded-xl border-[4px] md:border-[5px] border-[#161616] bg-black shadow-[0_25px_60px_rgba(0,0,0,0.8)] relative overflow-hidden ring-1 ring-white/15">
-                          {/* Camera Mic Dot */}
-                          <div className="absolute top-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-[#222] rounded-full ring-1 ring-white/10 z-30 pointer-events-none flex items-center justify-center">
-                            <div className="w-0.5 h-0.5 bg-blue-500/60 rounded-full" />
-                          </div>
-
+                      /* Apple Studio Display Pro Mockup (Clean Scaled Aspect Ratio) */
+                      <div className="relative flex flex-col items-center w-full max-w-[460px] sm:max-w-[500px]">
+                        <div className="w-full aspect-[16/10] rounded-xl border-[3.5px] border-[#222] bg-black shadow-[0_25px_60px_rgba(0,0,0,0.9)] relative overflow-hidden ring-1 ring-white/15">
+                          <div className="absolute top-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-[#333] rounded-full ring-1 ring-white/10 z-30 pointer-events-none" />
                           <OptimizedImage
                             src={selectedWp.previewUrl}
                             placeholder={selectedWp.tinyUrl}
@@ -276,24 +273,34 @@ export default function WallpaperModal({
                             className={`w-full h-full object-cover ${isOledOptimized ? "oled-image" : ""}`}
                             containerClassName="w-full h-full"
                           />
-
-                          {/* Natural Studio Glass Glare */}
                           <div className="absolute inset-0 bg-gradient-to-tr from-white/[0.08] via-transparent to-transparent pointer-events-none z-20" />
                         </div>
-
-                        {/* Aluminum Stand Neck */}
-                        <div className="w-16 h-7 md:h-9 bg-gradient-to-b from-[#222] to-[#121212] rounded-b-sm shadow-xl relative z-0 -mt-1 ring-1 ring-white/10" />
-                        {/* Aluminum Stand Base Plate */}
-                        <div className="w-40 md:w-48 h-1.5 md:h-2 bg-gradient-to-r from-[#202020] via-[#383838] to-[#202020] rounded-full shadow-2xl ring-1 ring-white/15" />
+                        {/* Slim Pedestal */}
+                        <div className="w-14 h-4 bg-gradient-to-b from-[#222] to-[#141414] rounded-b-sm shadow-md ring-1 ring-white/10" />
+                        <div className="w-28 h-1 bg-[#282828] rounded-full shadow-lg ring-1 ring-white/10" />
                       </div>
                     ) : (
-                      /* iPhone Titanium Pro Chassis Mockup */
-                      <div className="relative w-[210px] md:w-[240px] aspect-[9/19.5] rounded-[2.8rem] border-[5px] md:border-[7px] border-[#181818] bg-black shadow-[0_30px_70px_rgba(0,0,0,0.8)] ring-1 ring-white/20 flex items-center justify-center overflow-hidden transition-transform duration-500 group-hover:scale-[1.03]">
+                      /* Titanium Pro iPhone Mockup (Ultra-Thin Bezel + iOS Lockscreen Clock) */
+                      <div className="relative w-[170px] sm:w-[200px] md:w-[220px] aspect-[9/19.5] rounded-[2.5rem] border-[3.5px] border-[#222] bg-black shadow-[0_30px_80px_rgba(0,0,0,0.9)] ring-1 ring-white/20 flex items-center justify-center overflow-hidden">
                         {/* Dynamic Island */}
-                        <div className="absolute top-3 left-1/2 -translate-x-1/2 w-20 h-5 bg-black rounded-full z-30 flex items-center justify-end px-2 ring-1 ring-white/10">
-                          <div className="w-2.5 h-2.5 rounded-full bg-[#0d0d0d] ring-1 ring-blue-900/30" />
+                        <div className="absolute top-2.5 left-1/2 -translate-x-1/2 w-14 h-3 bg-black rounded-full z-30 ring-1 ring-white/10 flex items-center justify-end px-1.5">
+                          <div className="w-1.5 h-1.5 rounded-full bg-[#080808] ring-1 ring-blue-900/30" />
                         </div>
 
+                        {/* iOS Lockscreen Clock & Date */}
+                        <div className="absolute top-8 inset-x-0 flex flex-col items-center pointer-events-none z-20 text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)] select-none">
+                          <span className="text-[8px] font-sans font-medium tracking-wider text-white/80 uppercase">
+                            Sunday, August 23
+                          </span>
+                          <span className="text-3xl sm:text-4xl font-sans font-bold tracking-tight text-white mt-0.5">
+                            12:45
+                          </span>
+                        </div>
+
+                        {/* Bottom Home Indicator */}
+                        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-20 h-1 bg-white/70 rounded-full z-20 pointer-events-none" />
+
+                        {/* Wallpaper Image */}
                         <OptimizedImage
                           src={selectedWp.previewUrl}
                           placeholder={selectedWp.tinyUrl}
@@ -301,31 +308,36 @@ export default function WallpaperModal({
                           alt={selectedWp.title}
                           priority={true}
                           className={`w-full h-full object-cover ${isOledOptimized ? "oled-image" : ""}`}
-                          containerClassName="w-full h-full rounded-[2.3rem]"
+                          containerClassName="w-full h-full rounded-[2.2rem]"
                         />
-
-                        {/* Glass Glare */}
-                        <div className="absolute inset-0 bg-gradient-to-tr from-white/[0.08] via-transparent to-transparent pointer-events-none z-20 rounded-[2.3rem]" />
+                        {/* Glass Reflection */}
+                        <div className="absolute inset-0 bg-gradient-to-tr from-white/[0.08] via-transparent to-transparent pointer-events-none z-20 rounded-[2.2rem]" />
                       </div>
                     )}
                   </motion.div>
                 ) : (
-                  /* Full-Bleed Clean Canvas Mode */
+                  /* Clean Full Art Canvas Mode */
                   <motion.div
                     initial={{ opacity: 0, scale: 0.96 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.4 }}
+                    transition={{ duration: 0.3 }}
                     key={`canvas-${selectedWp.id}`}
-                    className="w-full h-full max-h-[75vh] relative flex items-center justify-center"
+                    className="w-full h-full max-h-[62vh] relative flex items-center justify-center"
                   >
-                    <div className="relative w-full h-full max-w-[95%] max-h-[95%] rounded-lg overflow-hidden ring-1 ring-white/10 shadow-[0_30px_70px_rgba(0,0,0,0.8)] flex items-center justify-center">
+                    <div
+                      className={`relative overflow-hidden ring-1 ring-white/15 shadow-[0_30px_70px_rgba(0,0,0,0.9)] flex items-center justify-center ${
+                        selectedWp.device === "mobile"
+                          ? "h-[90%] aspect-[9/16] rounded-2xl"
+                          : "w-[92%] aspect-[16/10] rounded-xl"
+                      }`}
+                    >
                       <OptimizedImage
                         src={selectedWp.previewUrl}
                         placeholder={selectedWp.tinyUrl}
                         fallbackSrc={selectedWp.fallbackUrl || selectedWp.previewUrl}
                         alt={selectedWp.title}
                         priority={true}
-                        className={`w-full h-full object-contain ${isOledOptimized ? "oled-image" : ""}`}
+                        className={`w-full h-full object-cover ${isOledOptimized ? "oled-image" : ""}`}
                         containerClassName="w-full h-full"
                       />
                     </div>
@@ -333,115 +345,114 @@ export default function WallpaperModal({
                 )}
               </div>
 
-              {/* Desktop Nav Controls - Styled as Floating Glass */}
-              <div className="absolute inset-x-6 top-1/2 -translate-y-1/2 flex justify-between pointer-events-none opacity-0 group-hover:opacity-100 transition-all duration-300 z-30">
-                <button
-                  onClick={handlePrev}
-                  disabled={currentIndex === 0}
-                  data-cursor="PREV"
-                  className="p-3.5 luxury-glass rounded-full pointer-events-auto disabled:opacity-0 disabled:pointer-events-none hover:scale-110 active:scale-95 transition-all text-white/80 hover:text-white"
-                >
-                  <ChevronLeft size={24} strokeWidth={1.5} />
-                </button>
-                <button
-                  onClick={handleNext}
-                  disabled={currentIndex === allRelevantWallpapers.length - 1}
-                  data-cursor="NEXT"
-                  className="p-3.5 luxury-glass rounded-full pointer-events-auto disabled:opacity-0 disabled:pointer-events-none hover:scale-110 active:scale-95 transition-all text-white/80 hover:text-white"
-                >
-                  <ChevronRight size={24} strokeWidth={1.5} />
-                </button>
-              </div>
+              {/* Left & Right Pagination Arrows */}
+              <button
+                onClick={handlePrev}
+                disabled={currentIndex === 0}
+                aria-label="Previous Wallpaper"
+                className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 p-2.5 sm:p-3 rounded-full bg-black/60 hover:bg-black/90 backdrop-blur-md border border-white/15 text-white/80 hover:text-white transition-all shadow-xl hover:scale-105 active:scale-95 disabled:opacity-0 disabled:pointer-events-none z-30 cursor-pointer"
+              >
+                <ChevronLeft size={20} strokeWidth={2} />
+              </button>
+
+              <button
+                onClick={handleNext}
+                disabled={currentIndex === allRelevantWallpapers.length - 1}
+                aria-label="Next Wallpaper"
+                className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 p-2.5 sm:p-3 rounded-full bg-black/60 hover:bg-black/90 backdrop-blur-md border border-white/15 text-white/80 hover:text-white transition-all shadow-xl hover:scale-105 active:scale-95 disabled:opacity-0 disabled:pointer-events-none z-30 cursor-pointer"
+              >
+                <ChevronRight size={20} strokeWidth={2} />
+              </button>
             </div>
 
-            {/* Info Section */}
-            <div className="w-full md:w-1/3 p-6 md:p-10 flex flex-col justify-between bg-void-gray/30 backdrop-blur-md overflow-y-auto">
+            {/* RIGHT: Wallpaper Details & Action Panel */}
+            <div className="w-full md:w-2/5 p-5 sm:p-6 md:p-8 flex flex-col justify-between bg-[#0b0b0b]">
               <div>
-                <div className="flex justify-between items-start mb-6">
+                {/* Header Info */}
+                <div className="flex justify-between items-start mb-4">
                   <div>
-                    <h2 className="text-3xl font-serif italic tracking-tight mb-1 leading-none">
+                    <span className="font-mono text-[9px] text-white/40 uppercase tracking-widest block mb-1">
+                      {selectedWp.serial || `V-${selectedWp.id}`} // {selectedWp.device === "desktop" ? "DESKTOP" : "PHONE"}
+                    </span>
+                    <h2 className="text-2xl sm:text-3xl font-sans font-bold uppercase tracking-tight text-white">
                       {selectedWp.title}
                     </h2>
-                    <p className="font-mono text-[10px] opacity-40 uppercase tracking-widest">
-                      {selectedWp.serial}
-                    </p>
                   </div>
+
+                  {/* Favorite Button */}
                   <button
                     onClick={() => toggleFavorite(selectedWp.id)}
-                    className={`p-3 rounded-full transition-colors ${
+                    className={`p-2.5 rounded-full border transition-all cursor-pointer ${
                       isFavorite(selectedWp.id)
-                        ? "bg-red-500/20 text-red-500"
-                        : "bg-white/5 text-white/50"
+                        ? "bg-red-500/20 text-red-400 border-red-500/40"
+                        : "bg-white/5 text-white/50 border-white/10 hover:text-white hover:border-white/30"
                     }`}
+                    title="Toggle Favorite"
                   >
                     <Heart
-                      size={20}
+                      size={18}
                       fill={isFavorite(selectedWp.id) ? "currentColor" : "none"}
                     />
                   </button>
                 </div>
 
-                <div className="space-y-8 mt-10 border-t border-white/5 pt-8">
-                  <div>
-                    <span className="text-[10px] opacity-30 font-mono uppercase tracking-[0.2em] block mb-4 flex items-center gap-2">
-                      <Info size={12} />
-                      Metadata
-                    </span>
-                    <div className="grid grid-cols-2 gap-y-6">
-                      <div>
-                        <span className="text-[9px] opacity-30 uppercase tracking-widest block mb-1">
-                          Category
-                        </span>
-                        <span className="text-[12px] font-mono text-white/90">
-                          {selectedWp.category}
-                        </span>
-                      </div>
-                      <div>
-                        <span className="text-[9px] opacity-30 uppercase tracking-widest block mb-1">
-                          Format
-                        </span>
-                        <span className="text-[12px] font-mono text-white/90">
-                          {selectedWp.format}
-                        </span>
-                      </div>
-                      <div>
-                        <span className="text-[9px] opacity-30 uppercase tracking-widest block mb-1">
-                          Downloads
-                        </span>
-                        <span className="text-[12px] font-mono text-white/90">
-                          {selectedWp.downloads?.toLocaleString() || "10,245"}
-                        </span>
-                      </div>
-                      <div>
-                        <span className="text-[9px] opacity-30 uppercase tracking-widest block mb-1">
-                          Release
-                        </span>
-                        <span className="text-[12px] font-mono text-white/90">
-                          {new Date(selectedWp.createdAt || Date.now()).getFullYear()}
-                        </span>
-                      </div>
+                {/* Compact Specifications Grid */}
+                <div className="border-t border-white/10 pt-4 mb-4">
+                  <span className="text-[9px] opacity-40 font-mono uppercase tracking-[0.2em] block mb-2.5 flex items-center gap-1.5">
+                    <Info size={11} />
+                    Specifications
+                  </span>
+                  <div className="grid grid-cols-2 gap-2 text-[11px] font-mono">
+                    <div className="bg-white/[0.03] p-2.5 rounded-lg border border-white/5">
+                      <span className="text-[8px] text-white/40 uppercase block">Category</span>
+                      <span className="text-white/90 truncate block">{selectedWp.category}</span>
+                    </div>
+                    <div className="bg-white/[0.03] p-2.5 rounded-lg border border-white/5">
+                      <span className="text-[8px] text-white/40 uppercase block">Format</span>
+                      <span className="text-white/90 truncate block">{selectedWp.format || "8K MASTER"}</span>
+                    </div>
+                    <div className="bg-white/[0.03] p-2.5 rounded-lg border border-white/5">
+                      <span className="text-[8px] text-white/40 uppercase block">Downloads</span>
+                      <span className="text-white/90 truncate block">
+                        {selectedWp.downloads?.toLocaleString() || "10,273"}
+                      </span>
+                    </div>
+                    <div className="bg-white/[0.03] p-2.5 rounded-lg border border-white/5">
+                      <span className="text-[8px] text-white/40 uppercase block">Release</span>
+                      <span className="text-white/90 truncate block">
+                        {new Date(selectedWp.createdAt || Date.now()).getFullYear()}
+                      </span>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <button
-                className={`w-full py-5 font-bold uppercase tracking-[0.2em] text-[10px] transition-all flex justify-center items-center gap-2 mt-10 ${
-                  downloadStatus === "success"
-                    ? "bg-green-500/20 text-green-400 border border-green-500/50"
-                    : downloadStatus === "error"
-                      ? "bg-red-500/20 text-red-400 border border-red-500/50"
-                      : "bg-white text-black hover:bg-white/80"
-                }`}
-                onClick={handleDownload}
-                disabled={downloadStatus === "downloading"}
-              >
-                {downloadStatus === "downloading"
-                  ? "Processing..."
-                  : downloadStatus === "success"
-                    ? "Ready"
-                    : "Download Original"}
-              </button>
+              {/* Bottom Download Original Button */}
+              <div className="pt-3">
+                <button
+                  className={`w-full py-3.5 px-4 font-sans font-bold uppercase tracking-wider text-xs rounded-lg transition-all flex justify-center items-center gap-2 shadow-xl cursor-pointer ${
+                    downloadStatus === "success"
+                      ? "bg-green-500/20 text-green-400 border border-green-500/50"
+                      : downloadStatus === "error"
+                        ? "bg-red-500/20 text-red-400 border border-red-500/50"
+                        : "bg-white text-black hover:bg-white/90 hover:shadow-[0_0_20px_rgba(255,255,255,0.4)]"
+                  }`}
+                  onClick={handleDownload}
+                  disabled={downloadStatus === "downloading"}
+                >
+                  {downloadStatus === "downloading" ? (
+                    "Downloading Master..."
+                  ) : downloadStatus === "success" ? (
+                    <>
+                      <Check size={16} /> Download Complete!
+                    </>
+                  ) : (
+                    <>
+                      <Download size={15} /> Download Original
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
           </motion.div>
         </motion.div>
