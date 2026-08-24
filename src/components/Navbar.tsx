@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Volume2, VolumeX } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { createPortal } from "react-dom";
+import { sound } from "../lib/soundEffects";
 
 export type AtmosphereMode = "standard" | "oled" | "crt" | "noir";
 
@@ -17,7 +18,13 @@ export default function Navbar({
   setAtmosphereMode?: (mode: AtmosphereMode) => void;
 }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [isAtmosphereMenuOpen, setIsAtmosphereMenuOpen] = useState(false);
+  const [isMuted, setIsMuted] = useState(sound.getIsMuted());
+
+  useEffect(() => {
+    const handleSfxChange = () => setIsMuted(sound.getIsMuted());
+    window.addEventListener("voidwallz-sfx-toggled", handleSfxChange);
+    return () => window.removeEventListener("voidwallz-sfx-toggled", handleSfxChange);
+  }, []);
 
   useEffect(() => {
     if (isOpen) {
@@ -45,6 +52,7 @@ export default function Navbar({
     path: string,
   ) => {
     e.preventDefault();
+    sound.playTap();
     window.history.pushState(null, "", path);
     window.dispatchEvent(new Event("popstate"));
     setCurrentPath(path);
@@ -61,6 +69,7 @@ export default function Navbar({
   const currentMode = atmosphereMode || (isOledOptimized ? "oled" : "standard");
 
   const cycleAtmosphere = () => {
+    sound.playSwitch();
     if (!setAtmosphereMode) {
       setIsOledOptimized?.(!isOledOptimized);
       return;
@@ -143,27 +152,58 @@ export default function Navbar({
           </nav>
         </div>
 
-        <div className="w-1/3 flex justify-end items-center gap-3">
-          {/* Atmosphere Mode Switcher */}
-          <button
-            onClick={cycleAtmosphere}
-            className={`hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full border text-[10px] font-mono uppercase tracking-widest transition-all duration-300 luxury-border-glow ${
-              currentMode !== "standard"
-                ? "bg-white text-black border-white shadow-[0_0_20px_rgba(255,255,255,0.25)]"
-                : "bg-white/5 text-white/60 border-white/10 hover:border-white/30 hover:text-white"
-            }`}
-            title="Click to cycle atmosphere effects (Standard / OLED / CRT / Noir)"
-            data-cursor="FX"
-          >
-            <span className="text-[11px]">
-              {atmosphereOptions.find((a) => a.id === currentMode)?.icon}
-            </span>
-            <span>
-              FX: {atmosphereOptions.find((a) => a.id === currentMode)?.label}
-            </span>
-          </button>
+        <div className="w-1/3 flex justify-end items-center">
+          {/* Unified Luxury Studio Capsule */}
+          <div className="hidden md:flex items-center p-1 bg-white/[0.04] backdrop-blur-md rounded-full border border-white/10 hover:border-white/20 transition-all duration-300 shadow-lg">
+            {/* Atmosphere Mode Switcher */}
+            <button
+              onClick={cycleAtmosphere}
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-mono uppercase tracking-widest transition-all duration-300 cursor-pointer ${
+                currentMode !== "standard"
+                  ? "bg-white text-black font-bold shadow-md"
+                  : "text-white/70 hover:text-white"
+              }`}
+              title="Cycle Atmosphere Effects (Standard / OLED / CRT / Noir)"
+              data-cursor="FX"
+            >
+              <span className="text-[11px]">
+                {atmosphereOptions.find((a) => a.id === currentMode)?.icon}
+              </span>
+              <span>
+                {atmosphereOptions.find((a) => a.id === currentMode)?.label}
+              </span>
+            </button>
 
-          <div className="md:hidden">
+            <div className="w-px h-3 bg-white/15 mx-0.5" />
+
+            {/* Sound FX Minimalist Icon Toggle */}
+            <button
+              onClick={() => sound.toggleMute()}
+              className="w-7 h-7 rounded-full flex items-center justify-center text-white/60 hover:text-white hover:bg-white/10 transition-all cursor-pointer"
+              title={isMuted ? "Unmute Sound Effects" : "Mute Sound Effects"}
+              data-cursor="SFX"
+            >
+              {!isMuted ? (
+                <Volume2 size={12} className="text-emerald-400" />
+              ) : (
+                <VolumeX size={12} className="text-white/35" />
+              )}
+            </button>
+          </div>
+
+          <div className="md:hidden flex items-center gap-2">
+            <button
+              onClick={() => sound.toggleMute()}
+              className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/70 cursor-pointer"
+              title={isMuted ? "Unmute Sound Effects" : "Mute Sound Effects"}
+            >
+              {!isMuted ? (
+                <Volume2 size={13} className="text-emerald-400" />
+              ) : (
+                <VolumeX size={13} className="text-white/40" />
+              )}
+            </button>
+
             <button
               onClick={() => setIsOpen(true)}
               className="text-white opacity-90 hover:opacity-100 p-2 -mr-2 cursor-pointer"

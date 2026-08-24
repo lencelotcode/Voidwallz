@@ -2,6 +2,7 @@ import { motion } from "motion/react";
 import { useState } from "react";
 import { useWallpapers } from "../hooks/useWallpapers";
 import { Wallpaper } from "../types";
+import { sound } from "../lib/soundEffects";
 import OptimizedImage from "./OptimizedImage";
 import WallpaperModal from "./WallpaperModal";
 
@@ -18,43 +19,22 @@ export default function LatestUploads({
 
   // Combine, sort by date, and take top 1
   const allWallpapers = [...desktopWallpapers, ...mobileWallpapers];
-  const latestWallpapers = allWallpapers
-    .sort((a, b) => {
-      const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-      const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-      return dateB - dateA;
-    })
-    .slice(0, 1);
+  const sorted = allWallpapers.sort(
+    (a, b) => new Date(b.createdAt || "").getTime() - new Date(a.createdAt || "").getTime()
+  );
+  const latestWallpapers = sorted.slice(0, 1);
 
   if (loading || latestWallpapers.length === 0) return null;
 
   return (
-    <section className="py-24 border-t border-white/5 bg-void-black relative">
-      <div className="px-10 mb-12 flex flex-col md:flex-row justify-between items-end gap-6">
-        <div>
-          <span className="text-[10px] opacity-30 uppercase tracking-[0.3em] mb-4 block font-mono">
-            New Arrival
-          </span>
-          <h2 className="text-4xl md:text-5xl font-serif italic font-light tracking-tighter leading-tight">
-            Latest Upload
-          </h2>
-        </div>
-        <a
-          href="/"
-          onClick={(e) => {
-            e.preventDefault();
-            window.history.pushState(null, "", "/");
-            window.dispatchEvent(new Event("popstate"));
-            setTimeout(() => {
-              document
-                .getElementById("gallery")
-                ?.scrollIntoView({ behavior: "smooth" });
-            }, 100);
-          }}
-          className="text-[10px] font-mono uppercase tracking-widest text-white/50 hover:text-white transition-colors hover-trigger"
-        >
-          View Full Gallery &rarr;
-        </a>
+    <section className="border-t border-white/5 bg-void-black relative">
+      <div className="py-24 px-10 flex flex-col items-center justify-center border-b border-white/5 text-center">
+        <h2 className="text-4xl md:text-5xl font-sans font-bold tracking-tighter uppercase mb-4">
+          LATEST ADDITION_
+        </h2>
+        <span className="text-sm font-mono uppercase tracking-widest opacity-40">
+          Fresh From The Neural Generator
+        </span>
       </div>
 
       <div className="w-full bg-white/5 border-y border-white/5">
@@ -65,11 +45,14 @@ export default function LatestUploads({
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-50px" }}
             transition={{ duration: 0.6, delay: i * 0.1 }}
-            onClick={() => onOpenModal(wp)}
+            onClick={() => {
+              sound.playOpenModal();
+              onOpenModal(wp);
+            }}
             onMouseEnter={() => onHoverWallpaper?.(wp.previewUrl)}
             onMouseLeave={() => onHoverWallpaper?.(null)}
             data-cursor="VIEW"
-            className={`relative flex flex-col items-center justify-center overflow-hidden group cursor-pointer hover-trigger bg-void-black ${
+            className={`relative flex flex-col items-center justify-center overflow-hidden group cursor-pointer hover-trigger bg-void-black glass-sheen ${
               wp.device === "desktop"
                 ? "h-[400px] md:h-[500px]"
                 : "h-[500px] md:h-[600px]"

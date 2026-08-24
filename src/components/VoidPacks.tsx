@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { FolderArchive, Sparkles, ArrowUpRight, Monitor, Smartphone, Lock, Clock } from "lucide-react";
+import { motion } from "motion/react";
 import { VoidPack } from "../types";
 import { useVoidPacks } from "../hooks/useVoidPacks";
+import { sound } from "../lib/soundEffects";
 
 export default function VoidPacks({
   onOpenPack,
@@ -41,50 +43,82 @@ export default function VoidPacks({
                 MASTER SUITES UNLOCKED
               </span>
               <span className="text-[10px] font-mono text-white/40 uppercase tracking-widest">
-                // 5-PIECE RETINA ARCHIVES
+                // 5-PIECE PACKAGES
               </span>
             </div>
-            <h2 className="text-4xl md:text-6xl font-serif italic tracking-tighter text-white">
-              Void Packs_
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-sans font-bold uppercase tracking-tight text-white">
+              VOID PACKS_
             </h2>
             <p className="text-xs md:text-sm text-white/50 max-w-lg mt-3 font-sans leading-relaxed">
               Thematic 5-piece wallpaper suites engineered to elevate your entire digital workspace. Download complete .ZIP packages or individual master files.
             </p>
           </div>
 
-          {/* Filter Pills */}
+          {/* Filter Pills with Fluid Segmented Spring Indicator */}
           <div className="flex items-center gap-1.5 p-1 bg-black/60 backdrop-blur-md rounded-full border border-white/10">
             <button
-              onClick={() => setFilter("all")}
-              className={`px-4 py-2 text-[10px] font-mono uppercase tracking-widest rounded-full transition-all cursor-pointer ${
+              onClick={() => {
+                sound.playTap();
+                setFilter("all");
+              }}
+              className={`relative px-4 py-2 text-[10px] font-mono uppercase tracking-widest rounded-full transition-colors duration-200 cursor-pointer ${
                 filter === "all"
-                  ? "bg-white text-black font-bold shadow-lg"
+                  ? "text-black font-bold"
                   : "text-white/50 hover:text-white"
               }`}
             >
-              All ({allPacks.length})
+              {filter === "all" && (
+                <motion.div
+                  layoutId="activePackPill"
+                  transition={{ type: "spring", stiffness: 450, damping: 35 }}
+                  className="absolute inset-0 bg-white rounded-full shadow-lg z-0"
+                />
+              )}
+              <span className="relative z-10">All ({allPacks.length})</span>
             </button>
+
             <button
-              onClick={() => setFilter("desktop")}
-              className={`px-4 py-2 text-[10px] font-mono uppercase tracking-widest rounded-full transition-all flex items-center gap-1.5 cursor-pointer ${
+              onClick={() => {
+                sound.playTap();
+                setFilter("desktop");
+              }}
+              className={`relative px-4 py-2 text-[10px] font-mono uppercase tracking-widest rounded-full transition-colors duration-200 flex items-center gap-1.5 cursor-pointer ${
                 filter === "desktop"
-                  ? "bg-white text-black font-bold shadow-lg"
+                  ? "text-black font-bold"
                   : "text-white/50 hover:text-white"
               }`}
             >
-              <Monitor size={12} />
-              Desktop ({desktopPacks.length})
+              {filter === "desktop" && (
+                <motion.div
+                  layoutId="activePackPill"
+                  transition={{ type: "spring", stiffness: 450, damping: 35 }}
+                  className="absolute inset-0 bg-white rounded-full shadow-lg z-0"
+                />
+              )}
+              <Monitor size={12} className="relative z-10" />
+              <span className="relative z-10">Desktop ({desktopPacks.length})</span>
             </button>
+
             <button
-              onClick={() => setFilter("mobile")}
-              className={`px-4 py-2 text-[10px] font-mono uppercase tracking-widest rounded-full transition-all flex items-center gap-1.5 cursor-pointer ${
+              onClick={() => {
+                sound.playTap();
+                setFilter("mobile");
+              }}
+              className={`relative px-4 py-2 text-[10px] font-mono uppercase tracking-widest rounded-full transition-colors duration-200 flex items-center gap-1.5 cursor-pointer ${
                 filter === "mobile"
-                  ? "bg-white text-black font-bold shadow-lg"
+                  ? "text-black font-bold"
                   : "text-white/50 hover:text-white"
               }`}
             >
-              <Smartphone size={12} />
-              Phone ({mobilePacks.length})
+              {filter === "mobile" && (
+                <motion.div
+                  layoutId="activePackPill"
+                  transition={{ type: "spring", stiffness: 450, damping: 35 }}
+                  className="absolute inset-0 bg-white rounded-full shadow-lg z-0"
+                />
+              )}
+              <Smartphone size={12} className="relative z-10" />
+              <span className="relative z-10">Phone ({mobilePacks.length})</span>
             </button>
           </div>
         </div>
@@ -111,7 +145,10 @@ export default function VoidPacks({
                 <PackCard
                   key={pack.id}
                   pack={pack}
-                  onOpenPack={onOpenPack}
+                  onOpenPack={(p) => {
+                    sound.playOpenModal();
+                    onOpenPack(p);
+                  }}
                   onHoverWallpaper={onHoverWallpaper}
                 />
               ))}
@@ -143,7 +180,7 @@ const PackCard: React.FC<PackCardProps> = ({
       onMouseEnter={() => onHoverWallpaper?.(pack.featuredImage)}
       onMouseLeave={() => onHoverWallpaper?.(null)}
       data-cursor="EXP-PACK"
-      className="group cursor-pointer flex flex-col bg-void-gray/30 border border-white/10 hover:border-white/30 rounded-xl overflow-hidden transition-all duration-300 luxury-border-glow shadow-2xl"
+      className="group cursor-pointer flex flex-col bg-void-gray/30 border border-white/10 hover:border-white/30 rounded-xl overflow-hidden transition-all duration-300 luxury-border-glow shadow-2xl glass-sheen"
     >
       {pack.device === "desktop" ? (
         /* DESKTOP SUITE: Accordion Slice Expansion */

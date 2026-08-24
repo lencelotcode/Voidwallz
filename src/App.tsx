@@ -23,6 +23,7 @@ import AdminPackUpload from "./components/AdminPackUpload";
 import { Wallpaper, VoidPack } from "./types";
 import { useWallpapers } from "./hooks/useWallpapers";
 import { useWallpaperStats } from "./hooks/useWallpaperStats";
+import { sound } from "./lib/soundEffects";
 import {
   PrivacyPolicy,
   TermsOfService,
@@ -237,13 +238,16 @@ function Hero({
             opacity: 1,
             scale: 1,
           }}
-          transition={{ type: "spring", damping: 20, stiffness: 40 }}
-          onClick={() => !loading && onOpenModal(wallpaperOfTheDay)}
-          data-cursor="VIEW"
+          onClick={() => {
+            if (!loading) {
+              sound.playOpenModal();
+              onOpenModal(wallpaperOfTheDay);
+            }
+          }}
           className="w-full md:w-7/12 h-[50vh] md:h-[65vh] relative group cursor-pointer hover-trigger perspective-1000"
           initial={{ opacity: 0, scale: 0.95 }}
         >
-          <div className="w-full h-full border border-white/10 p-2 relative overflow-hidden bg-white/5 shadow-2xl luxury-border-glow isolate">
+          <div className="w-full h-full border border-white/10 p-2 relative overflow-hidden bg-white/5 shadow-2xl luxury-border-glow isolate glass-sheen">
             {loading ? (
               <div className="w-full h-full bg-[#050505] flex items-center justify-center relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/[0.03] to-transparent animate-pulse" />
@@ -692,20 +696,13 @@ function Footer() {
 }
 
 export default function App() {
-  const [isLoading, setIsLoading] = useState(() => {
-    if (typeof window !== "undefined") {
-      // Only show full welcome animation on first arrival at root home
-      return window.location.pathname === "/" && !sessionStorage.getItem("voidwallz_loaded");
-    }
-    return false;
-  });
+  const [isLoading, setIsLoading] = useState(true);
   const [hash, setHash] = useState(window.location.hash);
   const [path, setPath] = useState(window.location.pathname);
   const [atmosphereMode, setAtmosphereMode] = useState<"standard" | "oled" | "crt" | "noir">("standard");
   const [ambientImage, setAmbientImage] = useState<string | null>(null);
   const [selectedPack, setSelectedPack] = useState<VoidPack | null>(null);
 
-  // Derive isOledOptimized for components that consume it
   const isOledOptimized = atmosphereMode === "oled";
   const setIsOledOptimized = (val: boolean) => {
     setAtmosphereMode(val ? "oled" : "standard");
@@ -715,34 +712,18 @@ export default function App() {
     const handleLocationChange = () => {
       setHash(window.location.hash);
       setPath(window.location.pathname);
-      window.scrollTo(0, 0);
     };
 
-    window.addEventListener("hashchange", handleLocationChange);
     window.addEventListener("popstate", handleLocationChange);
+    window.addEventListener("hashchange", handleLocationChange);
 
     return () => {
-      window.removeEventListener("hashchange", handleLocationChange);
       window.removeEventListener("popstate", handleLocationChange);
+      window.removeEventListener("hashchange", handleLocationChange);
     };
   }, []);
 
   const renderContent = () => {
-    const isWallpaperRoute = /^\/(desktop|mobile)\/([^/]+)\/?$/.test(path);
-
-    if (path === "/admin" || path === "/upload-pack" || hash === "#admin")
-      return <AdminPackUpload key="admin" />;
-    if (path === "/updates" || hash === "#updates")
-      return <UpdatesPage key="updates" />;
-    if (path === "/report" || hash === "#report")
-      return <ReportPage key="report" />;
-    if (path === "/privacy" || hash === "#privacy")
-      return <PrivacyPolicy key="privacy" />;
-    if (path === "/terms" || hash === "#terms")
-      return <TermsOfService key="terms" />;
-    if (path === "/license" || hash === "#license")
-      return <License key="license" />;
-
     if (path === "/packs") {
       return (
         <motion.div
@@ -750,12 +731,11 @@ export default function App() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="flex flex-col h-full bg-void-black min-h-[100dvh]"
         >
           <VoidPacks
+            isDedicatedPage={true}
             onOpenPack={setSelectedPack}
             onHoverWallpaper={setAmbientImage}
-            isDedicatedPage={true}
           />
         </motion.div>
       );
@@ -768,7 +748,6 @@ export default function App() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="flex flex-col h-full bg-void-black"
         >
           <Gallery
             view="desktop"
@@ -783,11 +762,10 @@ export default function App() {
     if (path === "/mobile") {
       return (
         <motion.div
-          key="phone"
+          key="mobile"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="flex flex-col h-full bg-void-black"
         >
           <Gallery
             view="phone"
@@ -799,44 +777,110 @@ export default function App() {
       );
     }
 
-    // Always render the main view if we are on a wallpaper route so the modal can overlay the gallery.
-    if (isWallpaperRoute || path === "/" || path === "" || hash === "#main") {
+    if (path === "/updates") {
       return (
         <motion.div
-          key="main"
+          key="updates"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="flex flex-col h-full"
         >
-          <Hero
-            onOpenModal={navigateToWallpaper}
-            isOledOptimized={isOledOptimized}
-          />
-          <Marquee />
-          <LatestUploads
-            onOpenModal={navigateToWallpaper}
-            isOledOptimized={isOledOptimized}
-            onHoverWallpaper={setAmbientImage}
-          />
-          <Gallery
-            onOpenModal={navigateToWallpaper}
-            isOledOptimized={isOledOptimized}
-            onHoverWallpaper={setAmbientImage}
-          />
-          <Manifesto />
+          <UpdatesPage />
         </motion.div>
       );
     }
 
-    return null;
+    if (path === "/privacy") {
+      return <PrivacyPolicy key="privacy" />;
+    }
+
+    if (path === "/terms") {
+      return <TermsOfService key="terms" />;
+    }
+
+    if (path === "/license") {
+      return <License key="license" />;
+    }
+
+    if (path === "/report") {
+      return <ReportPage key="report" />;
+    }
+
+    if (path === "/admin") {
+      return <AdminPackUpload key="admin" />;
+    }
+
+    const isWallpaperRoute =
+      path.startsWith("/desktop/") || path.startsWith("/mobile/");
+
+    if (hash === "#desktop") {
+      return (
+        <motion.div
+          key="desktop"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        >
+          <Gallery
+            view="desktop"
+            onOpenModal={navigateToWallpaper}
+            isOledOptimized={isOledOptimized}
+            onHoverWallpaper={setAmbientImage}
+          />
+        </motion.div>
+      );
+    }
+
+    if (hash === "#phone" || hash === "#mobile") {
+      return (
+        <motion.div
+          key="phone"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        >
+          <Gallery
+            view="phone"
+            onOpenModal={navigateToWallpaper}
+            isOledOptimized={isOledOptimized}
+            onHoverWallpaper={setAmbientImage}
+          />
+        </motion.div>
+      );
+    }
+
+    return (
+      <motion.div
+        key="main"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="flex flex-col h-full"
+      >
+        <Hero
+          onOpenModal={navigateToWallpaper}
+          isOledOptimized={isOledOptimized}
+        />
+        <Marquee />
+        <LatestUploads
+          onOpenModal={navigateToWallpaper}
+          isOledOptimized={isOledOptimized}
+          onHoverWallpaper={setAmbientImage}
+        />
+        <Gallery
+          onOpenModal={navigateToWallpaper}
+          isOledOptimized={isOledOptimized}
+          onHoverWallpaper={setAmbientImage}
+        />
+        <Manifesto />
+      </motion.div>
+    );
   };
 
   return (
     <div
       className={`no-cursor bg-void-black min-h-screen text-void-light overflow-x-hidden selection:bg-white selection:text-black relative atmosphere-${atmosphereMode} ${isOledOptimized ? "oled-mode" : ""}`}
     >
-      {/* Global Adaptive Multi-layer Ambient Glow */}
       <AnimatePresence>
         {ambientImage && !isOledOptimized && (
           <motion.div
@@ -850,7 +894,6 @@ export default function App() {
         )}
       </AnimatePresence>
 
-      {/* Atmospheric Overlays */}
       {atmosphereMode === "crt" && <div className="crt-scanlines" />}
       {atmosphereMode === "noir" && <div className="noir-vignette" />}
 
@@ -873,22 +916,14 @@ export default function App() {
         isOledOptimized={isOledOptimized}
       />
 
-      {!isLoading && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.3, ease: "easeOut" }}
-        >
-          <Navbar
-            isOledOptimized={isOledOptimized}
-            setIsOledOptimized={setIsOledOptimized}
-            atmosphereMode={atmosphereMode}
-            setAtmosphereMode={setAtmosphereMode}
-          />
-          <AnimatePresence mode="wait">{renderContent()}</AnimatePresence>
-          <Footer />
-        </motion.div>
-      )}
+      <Navbar
+        isOledOptimized={isOledOptimized}
+        setIsOledOptimized={setIsOledOptimized}
+        atmosphereMode={atmosphereMode}
+        setAtmosphereMode={setAtmosphereMode}
+      />
+      <AnimatePresence mode="wait">{renderContent()}</AnimatePresence>
+      <Footer />
     </div>
   );
 }

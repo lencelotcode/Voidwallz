@@ -19,6 +19,7 @@ import OptimizedImage from "./OptimizedImage";
 import { Wallpaper } from "../types";
 import { useWallpapers } from "../hooks/useWallpapers";
 import { useWallpaperStats } from "../hooks/useWallpaperStats";
+import { sound } from "../lib/soundEffects";
 
 export default function WallpaperModal({
   selectedWp,
@@ -38,6 +39,11 @@ export default function WallpaperModal({
   const { toggleFavorite, isFavorite, recordDownload, getDownloads, getLikes } =
     useWallpaperStats();
 
+  const handleClose = () => {
+    sound.playClose();
+    onClose();
+  };
+
   const allRelevantWallpapers = useMemo(() => {
     if (!selectedWp) return [];
     return selectedWp.device === "desktop"
@@ -51,6 +57,7 @@ export default function WallpaperModal({
   }, [selectedWp, allRelevantWallpapers]);
 
   const handleNext = () => {
+    sound.playTap();
     const all =
       selectedWp?.device === "desktop" ? desktopWallpapers : mobileWallpapers;
     if (currentIndex < all.length - 1) {
@@ -62,6 +69,7 @@ export default function WallpaperModal({
   };
 
   const handlePrev = () => {
+    sound.playTap();
     const all =
       selectedWp?.device === "desktop" ? desktopWallpapers : mobileWallpapers;
     if (currentIndex > 0) {
@@ -80,7 +88,7 @@ export default function WallpaperModal({
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") handleClose();
       if (e.key === "ArrowRight") handleNext();
       if (e.key === "ArrowLeft") handlePrev();
     };
@@ -101,6 +109,7 @@ export default function WallpaperModal({
   if (!selectedWp || typeof document === "undefined") return null;
 
   const handleShare = async () => {
+    sound.playTap();
     const slug = selectedWp.title.toLowerCase().replace(/\s+/g, "-");
     const directUrl = `${window.location.origin}/${selectedWp.device}/${slug}/`;
 
@@ -108,7 +117,7 @@ export default function WallpaperModal({
       try {
         await navigator.share({
           title: `${selectedWp.title} // Voidwallz`,
-          text: `Explore "${selectedWp.title}" on Voidwallz — Curated ${selectedWp.format || "8K"} Minimal Wallpaper.`,
+          text: `Explore "${selectedWp.title}" on Voidwallz — Curated ${selectedWp.format || "8K"} Minimal Wallpaper`,
           url: directUrl,
         });
         return;
@@ -134,6 +143,7 @@ export default function WallpaperModal({
   };
 
   const handleDownload = async () => {
+    sound.playShutter();
     setDownloadStatus("downloading");
     const downloadUrl = selectedWp.originalUrl || selectedWp.previewUrl;
 
@@ -164,12 +174,14 @@ export default function WallpaperModal({
       window.URL.revokeObjectURL(blobUrl);
 
       recordDownload(selectedWp.id);
+      sound.playSuccess();
       setDownloadStatus("success");
       setTimeout(() => setDownloadStatus("idle"), 3000);
     } catch (err) {
       console.warn("Direct blob download failed, falling back to direct open:", err);
       window.open(downloadUrl, "_blank");
       recordDownload(selectedWp.id);
+      sound.playSuccess();
       setDownloadStatus("success");
       setTimeout(() => setDownloadStatus("idle"), 3000);
     }
@@ -187,7 +199,7 @@ export default function WallpaperModal({
         {/* Dark Luxury Blur Backdrop */}
         <div
           className="absolute inset-0 bg-void-black/95 backdrop-blur-2xl"
-          onClick={onClose}
+          onClick={handleClose}
         />
 
         {/* Modal Window Container */}
@@ -216,7 +228,10 @@ export default function WallpaperModal({
               {selectedWp.device === "desktop" ? (
                 <div className="flex items-center p-1 bg-black/80 backdrop-blur-md rounded-full border border-white/10 pointer-events-auto shadow-xl">
                   <button
-                    onClick={() => setPreviewMode("frame")}
+                    onClick={() => {
+                      sound.playSwitch();
+                      setPreviewMode("frame");
+                    }}
                     className={`px-3 py-1 text-[9px] font-mono uppercase tracking-widest rounded-full transition-all cursor-pointer ${
                       previewMode === "frame"
                         ? "bg-white text-black font-bold shadow-md"
@@ -226,7 +241,10 @@ export default function WallpaperModal({
                     Display
                   </button>
                   <button
-                    onClick={() => setPreviewMode("canvas")}
+                    onClick={() => {
+                      sound.playSwitch();
+                      setPreviewMode("canvas");
+                    }}
                     className={`px-3 py-1 text-[9px] font-mono uppercase tracking-widest rounded-full transition-all cursor-pointer ${
                       previewMode === "canvas"
                         ? "bg-white text-black font-bold shadow-md"
@@ -253,7 +271,7 @@ export default function WallpaperModal({
                 </span>
 
                 <button
-                  onClick={onClose}
+                  onClick={handleClose}
                   className="w-8 h-8 rounded-full bg-black/80 backdrop-blur-md border border-white/15 flex items-center justify-center text-white/80 hover:text-white hover:border-white/40 active:scale-95 transition-all shadow-xl cursor-pointer"
                   title="Close Modal"
                 >
@@ -381,7 +399,7 @@ export default function WallpaperModal({
                   {/* Share Artwork Button */}
                   <button
                     onClick={handleShare}
-                    className="flex items-center gap-1.5 py-1.5 px-3 rounded-full border border-white/10 bg-white/5 hover:bg-white/15 hover:border-white/30 text-white/70 hover:text-white transition-all cursor-pointer shadow-sm active:scale-95"
+                    className="flex items-center gap-1.5 py-1.5 px-3 rounded-full border border-white/10 bg-white/5 hover:bg-white/15 hover:border-white/30 text-white/80 hover:text-white transition-all cursor-pointer shadow-sm active:scale-95"
                     title="Share Artwork"
                   >
                     <Share2 size={13} />
@@ -392,7 +410,10 @@ export default function WallpaperModal({
 
                   {/* Favorite / Like Button with Live Counter */}
                   <button
-                    onClick={() => toggleFavorite(selectedWp.id)}
+                    onClick={() => {
+                      sound.playLike();
+                      toggleFavorite(selectedWp.id);
+                    }}
                     className={`flex items-center gap-1.5 py-1.5 px-3 rounded-full border transition-all cursor-pointer ${
                       isFavorite(selectedWp.id)
                         ? "bg-red-500/20 text-red-400 border-red-500/40 shadow-[0_0_15px_rgba(239,68,68,0.2)]"

@@ -29,10 +29,33 @@ interface UpdateLog {
 
 const UPDATES_DATA: UpdateLog[] = [
   {
+    version: "v2.4.1",
+    codename: "TACTILE ACOUSTICS & SPECULAR SHEEN",
+    date: "August 2026",
+    status: "LATEST",
+    category: "ENGINE",
+    icon: Zap,
+    summary: "Synthesized zero-latency Web Audio API ASMR sound engine, dopamine completion chimes, fluid segmented category tabs, and holographic specular glass sheen.",
+    highlights: [
+      "Tactile ASMR Sound Engine: Real-time Web Audio synthesizer for camera shutter snaps, mechanical switches, glass harmonic pop, and tactile clicks with 0 KB audio files.",
+      "Dopamine Download Chime: 3-chord harmonic chime (E5-G#5-B5-E6) triggered on single wallpaper and complete ZIP download completion.",
+      "Fluid Segmented Spring Controls: Magnetic layoutId spring pill physics across gallery and pack category bars.",
+      "Holographic Glass Sheen: 55° specular light glint sweeps across wallpaper and pack cards on hover.",
+      "Unified Studio Navbar: Decluttered top bar into a single luxury atmosphere & audio pill capsule.",
+    ],
+    specs: [
+      { label: "Audio Latency", val: "0 ms (Web Audio API)" },
+      { label: "External Audio Size", val: "0 KB (Synthesized)" },
+      { label: "Tab Physics", val: "Spring LayoutId" },
+      { label: "Specular Glint", val: "55° Holographic" },
+    ],
+    actionLink: { label: "Explore Gallery", path: "/" },
+  },
+  {
     version: "v2.4.0",
     codename: "CAPSULE STAGING",
     date: "August 2026",
-    status: "LATEST",
+    status: "STABLE",
     category: "FEATURE",
     icon: Layers,
     summary: "Deployed Void Packs suite, Admin Pack Studio, and fluid accordion slice physics. Public pack vault locked for final quality assurance.",

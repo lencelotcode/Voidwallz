@@ -5,6 +5,7 @@ import OptimizedImage from "./OptimizedImage";
 import { Wallpaper } from "../types";
 import { useWallpapers } from "../hooks/useWallpapers";
 import { useWallpaperStats } from "../hooks/useWallpaperStats";
+import { sound } from "../lib/soundEffects";
 
 export default function Gallery({
   view = "all",
@@ -38,6 +39,7 @@ export default function Gallery({
   // Fast 1-click download from card
   const handleQuickDownload = async (e: React.MouseEvent, wp: Wallpaper) => {
     e.stopPropagation();
+    sound.playShutter();
     const downloadUrl = wp.originalUrl || wp.previewUrl;
     if (!downloadUrl) return;
 
@@ -66,6 +68,7 @@ export default function Gallery({
           document.body.removeChild(a);
           window.URL.revokeObjectURL(url);
           recordDownload(wp.id);
+          sound.playSuccess();
           return;
         }
       } catch {}
@@ -79,6 +82,7 @@ export default function Gallery({
       direct.click();
       document.body.removeChild(direct);
       recordDownload(wp.id);
+      sound.playSuccess();
     } catch (err) {
       console.error("Quick download failed:", err);
     }
@@ -148,44 +152,76 @@ export default function Gallery({
     >
       {/* Filters & Search */}
       <div className="sticky top-[73px] z-40 bg-void-black/80 backdrop-blur-md border-b border-white/5 px-6 md:px-10 py-4 flex flex-col md:flex-row justify-between items-center gap-4 transition-all duration-300">
-        {/* Categories */}
-        <div className="flex gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 scrollbar-hide">
+        {/* Categories with Fluid Segmented Spring Pill */}
+        <div className="flex items-center gap-1.5 p-1 bg-white/[0.03] backdrop-blur-md rounded-lg border border-white/10 overflow-x-auto w-full md:w-auto pb-1 md:pb-1 scrollbar-hide">
           <button
-            onClick={() => setSelectedCategory(null)}
-            className={`whitespace-nowrap px-3 py-1.5 text-[10px] font-mono uppercase tracking-widest border transition-colors ${
+            onClick={() => {
+              sound.playTap();
+              setSelectedCategory(null);
+            }}
+            className={`relative whitespace-nowrap px-3.5 py-1.5 text-[10px] font-mono uppercase tracking-widest transition-colors duration-200 cursor-pointer rounded-md ${
               selectedCategory === null
-                ? "bg-white text-black border-white"
-                : "bg-transparent text-white/60 border-white/10 hover:border-white/30 hover:text-white"
+                ? "text-black font-bold"
+                : "text-white/60 hover:text-white"
             }`}
           >
-            All
+            {selectedCategory === null && (
+              <motion.div
+                layoutId="activeCategoryPill"
+                transition={{ type: "spring", stiffness: 450, damping: 35 }}
+                className="absolute inset-0 bg-white rounded-md shadow-[0_0_15px_rgba(255,255,255,0.4)] z-0"
+              />
+            )}
+            <span className="relative z-10">All</span>
           </button>
+
           <button
-            onClick={() => setSelectedCategory("Favorites")}
-            className={`whitespace-nowrap px-3 py-1.5 text-[10px] font-mono uppercase tracking-widest border transition-colors flex items-center gap-1.5 ${
+            onClick={() => {
+              sound.playTap();
+              setSelectedCategory("Favorites");
+            }}
+            className={`relative whitespace-nowrap px-3.5 py-1.5 text-[10px] font-mono uppercase tracking-widest transition-colors duration-200 cursor-pointer rounded-md flex items-center gap-1.5 ${
               selectedCategory === "Favorites"
-                ? "bg-red-500/10 text-red-400 border-red-500/50"
-                : "bg-transparent text-white/60 border-white/10 hover:border-white/30 hover:text-red-400"
+                ? "text-red-300 font-bold"
+                : "text-white/60 hover:text-red-400"
             }`}
           >
+            {selectedCategory === "Favorites" && (
+              <motion.div
+                layoutId="activeCategoryPill"
+                transition={{ type: "spring", stiffness: 450, damping: 35 }}
+                className="absolute inset-0 bg-red-500/20 border border-red-500/40 rounded-md shadow-[0_0_15px_rgba(239,68,68,0.3)] z-0"
+              />
+            )}
             <Heart
               size={12}
               fill={selectedCategory === "Favorites" ? "currentColor" : "none"}
-              className={selectedCategory === "Favorites" ? "" : "opacity-70"}
+              className={`relative z-10 ${selectedCategory === "Favorites" ? "" : "opacity-70"}`}
             />
-            Favorites
+            <span className="relative z-10">Favorites</span>
           </button>
+
           {categories.map((cat) => (
             <button
               key={cat}
-              onClick={() => setSelectedCategory(cat)}
-              className={`whitespace-nowrap px-3 py-1.5 text-[10px] font-mono uppercase tracking-widest border transition-colors ${
+              onClick={() => {
+                sound.playTap();
+                setSelectedCategory(cat);
+              }}
+              className={`relative whitespace-nowrap px-3.5 py-1.5 text-[10px] font-mono uppercase tracking-widest transition-colors duration-200 cursor-pointer rounded-md ${
                 selectedCategory === cat
-                  ? "bg-white text-black border-white"
-                  : "bg-transparent text-white/60 border-white/10 hover:border-white/30 hover:text-white"
+                  ? "text-black font-bold"
+                  : "text-white/60 hover:text-white"
               }`}
             >
-              {cat}
+              {selectedCategory === cat && (
+                <motion.div
+                  layoutId="activeCategoryPill"
+                  transition={{ type: "spring", stiffness: 450, damping: 35 }}
+                  className="absolute inset-0 bg-white rounded-md shadow-[0_0_15px_rgba(255,255,255,0.4)] z-0"
+                />
+              )}
+              <span className="relative z-10">{cat}</span>
             </button>
           ))}
         </div>
@@ -197,7 +233,7 @@ export default function Gallery({
             placeholder="SEARCH..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-white/5 border border-white/10 px-4 py-2 pl-10 text-xs font-mono uppercase tracking-widest text-white placeholder-white/30 focus:outline-none focus:border-white/30 transition-colors"
+            className="w-full bg-white/5 border border-white/10 px-4 py-2 pl-10 text-xs font-mono uppercase tracking-widest text-white placeholder-white/30 focus:outline-none focus:border-white/30 transition-colors rounded-lg"
           />
           <Search
             size={14}
@@ -236,14 +272,16 @@ export default function Gallery({
             className="py-24 px-10 flex flex-col items-center justify-center border-b border-white/5 bg-void-black text-center"
           >
             <h2 className="text-4xl md:text-5xl font-sans font-bold tracking-tighter uppercase mb-4">
-              SOME 🖥️ DESKTOP WALLPAPERS_
+              DESKTOP ARCHIVES_
             </h2>
             <span className="text-sm font-mono uppercase tracking-widest opacity-40">
-              High Resolution Mac / PC / Studio Displays
+              Ultra High Resolution 8K & 6K
             </span>
+
+            {/* Error or Fallback Notice */}
             {isUsingFallback && (
-              <div className="mt-2 flex flex-col items-center gap-2">
-                <span className="text-[10px] font-mono uppercase tracking-widest opacity-30 text-yellow-500/60">
+              <div className="mt-8 p-4 border border-white/10 bg-white/5 rounded max-w-xl text-center">
+                <span className="text-xs font-mono text-yellow-400/90 block mb-2">
                   Using fallback data (Supabase not connected)
                 </span>
                 {error && (
@@ -271,11 +309,14 @@ export default function Gallery({
                   whileInView={{ opacity: 1 }}
                   viewport={{ once: true, margin: "-50px" }}
                   transition={{ duration: 0.6, delay: i * 0.1 }}
-                  onClick={() => onOpenModal(wp)}
+                  onClick={() => {
+                    sound.playOpenModal();
+                    onOpenModal(wp);
+                  }}
                   onMouseEnter={() => onHoverWallpaper?.(wp.previewUrl)}
                   onMouseLeave={() => onHoverWallpaper?.(null)}
                   data-cursor="VIEW"
-                  className="relative flex flex-col items-center justify-center h-[400px] md:h-[500px] overflow-hidden group cursor-pointer hover-trigger bg-void-black"
+                  className="relative flex flex-col items-center justify-center h-[400px] md:h-[500px] overflow-hidden group cursor-pointer hover-trigger bg-void-black glass-sheen"
                 >
                   <div
                     className="absolute inset-0 bg-cover bg-center opacity-25 group-hover:opacity-50 transition-opacity duration-700 blur-[50px] scale-150 pointer-events-none"
@@ -285,7 +326,7 @@ export default function Gallery({
                   {/* Spec Badge Top Left */}
                   <div className="absolute top-5 left-5 z-20 opacity-70 group-hover:opacity-100 transition-opacity">
                     <span className="spec-badge text-[9px] font-mono px-2.5 py-1 rounded-full text-white/80 tracking-widest">
-                      {wp.format.includes("AVIF") ? "8K RAW" : "8K UHD"}
+                      {wp.format || "8K MASTER"}
                     </span>
                   </div>
 
@@ -307,6 +348,7 @@ export default function Gallery({
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
+                        sound.playLike();
                         toggleFavorite(wp.id);
                       }}
                       data-cursor={isFavorite(wp.id) ? "SAVED" : "SAVE"}
@@ -387,11 +429,14 @@ export default function Gallery({
                   whileInView={{ opacity: 1 }}
                   viewport={{ once: true, margin: "-50px" }}
                   transition={{ duration: 0.6, delay: i * 0.1 }}
-                  onClick={() => onOpenModal(wp)}
+                  onClick={() => {
+                    sound.playOpenModal();
+                    onOpenModal(wp);
+                  }}
                   onMouseEnter={() => onHoverWallpaper?.(wp.previewUrl)}
                   onMouseLeave={() => onHoverWallpaper?.(null)}
                   data-cursor="VIEW"
-                  className="relative flex flex-col items-center justify-center h-[500px] md:h-[600px] overflow-hidden group cursor-pointer hover-trigger bg-void-black"
+                  className="relative flex flex-col items-center justify-center h-[500px] md:h-[600px] overflow-hidden group cursor-pointer hover-trigger bg-void-black glass-sheen"
                 >
                   <div
                     className="absolute inset-0 bg-cover bg-center opacity-25 group-hover:opacity-50 transition-opacity duration-700 blur-[50px] scale-150 pointer-events-none"
@@ -423,6 +468,7 @@ export default function Gallery({
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
+                        sound.playLike();
                         toggleFavorite(wp.id);
                       }}
                       data-cursor={isFavorite(wp.id) ? "SAVED" : "SAVE"}

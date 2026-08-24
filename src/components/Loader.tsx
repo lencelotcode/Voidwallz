@@ -17,15 +17,12 @@ export default function Loader({ onComplete }: { onComplete: () => void }) {
       setProgress((prev) => {
         if (prev >= 100) {
           clearInterval(timer);
-          try {
-            sessionStorage.setItem("voidwallz_loaded", "true");
-          } catch {}
-          setTimeout(onComplete, 200);
+          setTimeout(onComplete, 400);
           return 100;
         }
-        return prev + 6;
+        return prev + 4;
       });
-    }, 16);
+    }, 18);
 
     return () => clearInterval(timer);
   }, [onComplete]);

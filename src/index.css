@@ -322,5 +322,35 @@
     }
 }
 
+/* Holographic Glass Sheen Glint Effect */
+.glass-sheen {
+    position: relative;
+    overflow: hidden;
+}
 
+.glass-sheen::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -100%;
+    width: 250%;
+    height: 250%;
+    background: linear-gradient(
+        55deg,
+        transparent 38%,
+        rgba(255, 255, 255, 0.05) 45%,
+        rgba(255, 255, 255, 0.22) 50%,
+        rgba(255, 255, 255, 0.05) 55%,
+        transparent 62%
+    );
+    transform: rotate(20deg) translateY(-80%);
+    transition: transform 0.85s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 25;
+}
 
+.glass-sheen:hover::after {
+    transform: rotate(20deg) translateY(80%);
+    opacity: 1;
+}

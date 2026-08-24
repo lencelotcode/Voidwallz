@@ -22,6 +22,7 @@ import JSZip from "jszip";
 import OptimizedImage from "./OptimizedImage";
 import { VoidPack, Wallpaper } from "../types";
 import { useWallpaperStats } from "../hooks/useWallpaperStats";
+import { sound } from "../lib/soundEffects";
 
 export default function PackModal({
   selectedPack,
@@ -42,6 +43,11 @@ export default function PackModal({
 
   const { recordDownload, getDownloads } = useWallpaperStats();
 
+  const handleClose = () => {
+    sound.playClose();
+    onClose();
+  };
+
   useEffect(() => {
     setActiveIndex(0);
     setPreviewMode("frame");
@@ -53,11 +59,13 @@ export default function PackModal({
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") handleClose();
       if (e.key === "ArrowRight" && selectedPack && selectedPack.items.length > 0) {
+        sound.playTap();
         setActiveIndex((prev) => (prev + 1) % selectedPack.items.length);
       }
       if (e.key === "ArrowLeft" && selectedPack && selectedPack.items.length > 0) {
+        sound.playTap();
         setActiveIndex((prev) =>
           prev === 0 ? selectedPack.items.length - 1 : prev - 1,
         );
@@ -82,13 +90,14 @@ export default function PackModal({
   const currentWp = selectedPack.items[activeIndex] || selectedPack.items[0];
 
   const handleSharePack = async () => {
+    sound.playTap();
     const directUrl = `${window.location.origin}/packs`;
 
     if (navigator.share) {
       try {
         await navigator.share({
           title: `${selectedPack.title} // Voidwallz Pack`,
-          text: `Check out the "${selectedPack.title}" ${selectedPack.items.length}-piece wallpaper suite on Voidwallz!`,
+          text: `Check out "${selectedPack.title}" ${selectedPack.items.length}-piece wallpaper suite on Voidwallz`,
           url: directUrl,
         });
         return;
@@ -116,6 +125,7 @@ export default function PackModal({
   // Download entire pack as .ZIP
   const handleDownloadZip = async () => {
     if (isDownloadingZip || isDownloadingSingle || !selectedPack || selectedPack.items.length === 0) return;
+    sound.playShutter();
     setIsDownloadingZip(true);
     setZipProgress({ current: 0, total: selectedPack.items.length, percent: 0 });
 
@@ -178,6 +188,7 @@ export default function PackModal({
       window.URL.revokeObjectURL(blobUrl);
 
       recordDownload(selectedPack.id);
+      sound.playSuccess();
       setDownloadSuccess("Complete Suite Downloaded!");
       setTimeout(() => setDownloadSuccess(null), 4000);
     } catch (err) {
@@ -194,6 +205,7 @@ export default function PackModal({
   // Download single active wallpaper from pack
   const handleDownloadSingle = async () => {
     if (isDownloadingSingle || isDownloadingZip || !currentWp) return;
+    sound.playShutter();
     setIsDownloadingSingle(true);
 
     const downloadUrl = currentWp.originalUrl || currentWp.previewUrl;
@@ -219,6 +231,7 @@ export default function PackModal({
       window.URL.revokeObjectURL(blobUrl);
 
       recordDownload(currentWp.id);
+      sound.playSuccess();
       setDownloadSuccess(`Part 0${activeIndex + 1} Downloaded!`);
       setTimeout(() => setDownloadSuccess(null), 3000);
     } catch (err) {
@@ -240,7 +253,7 @@ export default function PackModal({
         {/* Dark Luxury Blur Backdrop */}
         <div
           className="absolute inset-0 bg-void-black/95 backdrop-blur-2xl"
-          onClick={onClose}
+          onClick={handleClose}
         />
 
         {/* Modal Window Container */}
@@ -281,7 +294,7 @@ export default function PackModal({
                 </span>
 
                 <button
-                  onClick={onClose}
+                  onClick={handleClose}
                   className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-black/80 backdrop-blur-md border border-white/15 flex items-center justify-center text-white/80 hover:text-white hover:border-white/40 active:scale-95 transition-all shadow-xl cursor-pointer"
                   title="Close Modal"
                 >
@@ -373,11 +386,12 @@ export default function PackModal({
 
             {/* Left & Right Pagination Arrows */}
             <button
-              onClick={() =>
+              onClick={() => {
+                sound.playTap();
                 setActiveIndex((prev) =>
                   prev > 0 ? prev - 1 : selectedPack.items.length - 1,
-                )
-              }
+                );
+              }}
               aria-label="Previous Wallpaper"
               className="absolute left-1.5 sm:left-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/60 hover:bg-black/90 backdrop-blur-md border border-white/15 text-white/80 hover:text-white transition-all shadow-xl hover:scale-105 active:scale-95 z-30 cursor-pointer"
             >
@@ -385,11 +399,12 @@ export default function PackModal({
             </button>
 
             <button
-              onClick={() =>
+              onClick={() => {
+                sound.playTap();
                 setActiveIndex((prev) =>
                   prev < selectedPack.items.length - 1 ? prev + 1 : 0,
-                )
-              }
+                );
+              }}
               aria-label="Next Wallpaper"
               className="absolute right-1.5 sm:right-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/60 hover:bg-black/90 backdrop-blur-md border border-white/15 text-white/80 hover:text-white transition-all shadow-xl hover:scale-105 active:scale-95 z-30 cursor-pointer"
             >
@@ -414,7 +429,7 @@ export default function PackModal({
                   {/* Share Pack Button */}
                   <button
                     onClick={handleSharePack}
-                    className="flex items-center gap-1 py-1 px-2.5 rounded-full border border-white/10 bg-white/5 hover:bg-white/15 hover:border-white/30 text-white/70 hover:text-white transition-all cursor-pointer text-[9px] font-mono tracking-wider active:scale-95 shadow-sm"
+                    className="flex items-center gap-1 py-1 px-2.5 rounded-full border border-white/10 bg-white/5 hover:bg-white/15 hover:border-white/30 text-white/80 hover:text-white transition-all cursor-pointer text-[9px] font-mono tracking-wider active:scale-95 shadow-sm"
                     title="Share Pack"
                   >
                     <Share2 size={11} />
@@ -447,7 +462,10 @@ export default function PackModal({
                   {selectedPack.items.map((item, idx) => (
                     <button
                       key={item.id}
-                      onClick={() => setActiveIndex(idx)}
+                      onClick={() => {
+                        sound.playTap();
+                        setActiveIndex(idx);
+                      }}
                       className={`relative rounded-md overflow-hidden border transition-all duration-200 group/thumb cursor-pointer ${
                         selectedPack.device === "mobile" ? "aspect-[9/16]" : "aspect-[16/10]"
                       } ${
