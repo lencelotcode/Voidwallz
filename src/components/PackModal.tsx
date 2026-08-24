@@ -13,6 +13,10 @@ import {
   FolderDown,
   CheckCircle2,
   Loader2,
+  Share2,
+  Link2,
+  ArrowUpRight,
+  Check,
 } from "lucide-react";
 import JSZip from "jszip";
 import OptimizedImage from "./OptimizedImage";
@@ -34,6 +38,7 @@ export default function PackModal({
   const [zipProgress, setZipProgress] = useState({ current: 0, total: 0, percent: 0 });
   const [isDownloadingSingle, setIsDownloadingSingle] = useState(false);
   const [downloadSuccess, setDownloadSuccess] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
   const { recordDownload, getDownloads } = useWallpaperStats();
 
@@ -43,6 +48,7 @@ export default function PackModal({
     setIsDownloadingZip(false);
     setIsDownloadingSingle(false);
     setDownloadSuccess(null);
+    setCopied(false);
   }, [selectedPack]);
 
   useEffect(() => {
@@ -74,6 +80,38 @@ export default function PackModal({
   if (!selectedPack || typeof document === "undefined") return null;
 
   const currentWp = selectedPack.items[activeIndex] || selectedPack.items[0];
+
+  const handleSharePack = async () => {
+    const directUrl = `${window.location.origin}/packs`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `${selectedPack.title} // Voidwallz Pack`,
+          text: `Check out the "${selectedPack.title}" ${selectedPack.items.length}-piece wallpaper suite on Voidwallz!`,
+          url: directUrl,
+        });
+        return;
+      } catch (err: any) {
+        if (err.name === "AbortError") return;
+      }
+    }
+
+    try {
+      await navigator.clipboard.writeText(directUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    } catch (e) {
+      const textarea = document.createElement("textarea");
+      textarea.value = directUrl;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textarea);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    }
+  };
 
   // Download entire pack as .ZIP
   const handleDownloadZip = async () => {
@@ -139,6 +177,7 @@ export default function PackModal({
       document.body.removeChild(link);
       window.URL.revokeObjectURL(blobUrl);
 
+      recordDownload(selectedPack.id);
       setDownloadSuccess("Complete Suite Downloaded!");
       setTimeout(() => setDownloadSuccess(null), 4000);
     } catch (err) {
@@ -361,14 +400,27 @@ export default function PackModal({
           {/* RIGHT: Pack Details & Action Panel */}
           <div className="w-full md:w-2/5 p-4 sm:p-6 md:p-7 flex flex-col justify-between bg-[#0b0b0b] space-y-4">
             <div>
-              {/* Header Badges */}
+              {/* Header Badges & Share */}
               <div className="flex items-center justify-between mb-1.5">
                 <span className="font-mono text-[9px] text-white/40 uppercase tracking-widest">
                   {selectedPack.category} // {selectedPack.device === "desktop" ? "DESKTOP" : "PHONE"}
                 </span>
-                <span className="text-[9px] font-mono text-white/50">
-                  {selectedPack.format}
-                </span>
+
+                <div className="flex items-center gap-2">
+                  <span className="text-[9px] font-mono text-white/50">
+                    {selectedPack.format}
+                  </span>
+
+                  {/* Share Pack Button */}
+                  <button
+                    onClick={handleSharePack}
+                    className="flex items-center gap-1 py-1 px-2.5 rounded-full border border-white/10 bg-white/5 hover:bg-white/15 hover:border-white/30 text-white/70 hover:text-white transition-all cursor-pointer text-[9px] font-mono tracking-wider active:scale-95 shadow-sm"
+                    title="Share Pack"
+                  >
+                    <Share2 size={11} />
+                    <span>{copied ? "COPIED" : "SHARE"}</span>
+                  </button>
+                </div>
               </div>
 
               {/* Bold Modern Sans Title */}
@@ -491,6 +543,38 @@ export default function PackModal({
                   </div>
                 )}
               </button>
+
+              {/* Quick Share Links Strip */}
+              <div className="flex items-center justify-between pt-2 border-t border-white/5 text-[10px] font-mono text-white/50">
+                <button
+                  onClick={handleSharePack}
+                  className="hover:text-white transition-colors flex items-center gap-1.5 cursor-pointer"
+                >
+                  {copied ? (
+                    <>
+                      <Check size={11} className="text-emerald-400" />
+                      <span className="text-emerald-400 font-semibold">Pack Link Copied!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Link2 size={11} />
+                      <span>Copy Pack Link</span>
+                    </>
+                  )}
+                </button>
+
+                <a
+                  href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(
+                    `Check out "${selectedPack.title}" on @voidwallz — ${selectedPack.items.length}-Piece Master Wallpaper Suite:`
+                  )}&url=${encodeURIComponent(`${window.location.origin}/packs`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-white transition-colors flex items-center gap-1 cursor-pointer"
+                >
+                  <span>Share on X</span>
+                  <ArrowUpRight size={10} />
+                </a>
+              </div>
             </div>
           </div>
         </motion.div>
