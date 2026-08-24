@@ -44,7 +44,7 @@ const fallbackDesktop: Wallpaper[] = [
     originalUrl:
       "https://images.unsplash.com/photo-1604871000636-074fa5117945?auto=format&fit=crop&q=100&w=3840",
     device: "desktop",
-    downloads: 14200,
+    downloads: 0,
     createdAt: new Date().toISOString(),
   },
   {
@@ -60,7 +60,7 @@ const fallbackDesktop: Wallpaper[] = [
     originalUrl:
       "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&q=100&w=3840",
     device: "desktop",
-    downloads: 28400,
+    downloads: 0,
     createdAt: new Date().toISOString(),
   },
   {
@@ -76,7 +76,7 @@ const fallbackDesktop: Wallpaper[] = [
     originalUrl:
       "https://images.unsplash.com/photo-1518818419601-72c8673f5852?auto=format&fit=crop&q=100&w=3840",
     device: "desktop",
-    downloads: 19800,
+    downloads: 0,
     createdAt: new Date().toISOString(),
   },
   {
@@ -92,7 +92,7 @@ const fallbackDesktop: Wallpaper[] = [
     originalUrl:
       "https://images.unsplash.com/photo-1634055627253-15df1f63fcb3?auto=format&fit=crop&q=100&w=3840",
     device: "desktop",
-    downloads: 32100,
+    downloads: 0,
     createdAt: new Date().toISOString(),
   },
 ];
@@ -111,7 +111,7 @@ const fallbackMobile: Wallpaper[] = [
     originalUrl:
       "https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?auto=format&fit=crop&q=100&w=2160&h=3840",
     device: "mobile",
-    downloads: 41200,
+    downloads: 0,
     createdAt: new Date().toISOString(),
   },
   {
@@ -127,7 +127,7 @@ const fallbackMobile: Wallpaper[] = [
     originalUrl:
       "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=100&w=2160&h=3840",
     device: "mobile",
-    downloads: 58900,
+    downloads: 0,
     createdAt: new Date().toISOString(),
   },
   {
@@ -143,7 +143,7 @@ const fallbackMobile: Wallpaper[] = [
     originalUrl:
       "https://images.unsplash.com/photo-1506443432602-ac2fcd6f54e0?auto=format&fit=crop&q=100&w=2160&h=3840",
     device: "mobile",
-    downloads: 23400,
+    downloads: 0,
     createdAt: new Date().toISOString(),
   },
   {
@@ -159,7 +159,7 @@ const fallbackMobile: Wallpaper[] = [
     originalUrl:
       "https://images.unsplash.com/photo-1557672172-298e090bd0f1?auto=format&fit=crop&q=100&w=2160&h=3840",
     device: "mobile",
-    downloads: 36700,
+    downloads: 0,
     createdAt: new Date().toISOString(),
   },
 ];

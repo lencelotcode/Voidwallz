@@ -8,7 +8,7 @@ export const MOBILE_PACKS_FOLDER = "packs/mobile";
 
 export const VOID_PACKS_DATA: VoidPack[] = [];
 
-const CACHE_STORAGE_KEY = "voidwallz_cached_packs_v3";
+const CACHE_STORAGE_KEY = "voidwallz_cached_packs_v4";
 
 function getStoredPacks(): VoidPack[] {
   if (typeof window === "undefined") return [];
@@ -52,7 +52,6 @@ const listeners: Array<(packs: VoidPack[]) => void> = [];
 
 function broadcastPacks(newPacks: VoidPack[]) {
   if (arePacksEqual(cachedPacks, newPacks)) {
-    // Zero changes, skip re-renders to prevent any visual glitch
     return;
   }
   cachedPacks = newPacks;
@@ -66,7 +65,6 @@ export function useVoidPacks() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // If cache updated in another listener, sync state immediately
     if (packs !== cachedPacks) {
       setPacks(cachedPacks);
       setLoading(false);
@@ -103,7 +101,7 @@ export function useVoidPacks() {
             category: row.category || "General",
             device: row.device,
             format: row.format || (row.device === "desktop" ? "8K MASTER SUITE" : "4K RETINA DECK"),
-            downloads: row.downloads || 15000,
+            downloads: row.downloads || 0,
             createdAt: row.created_at,
             featuredImage: row.featured_image || row.items?.[0]?.previewUrl,
             items: row.items || [],
@@ -112,7 +110,7 @@ export function useVoidPacks() {
           return;
         }
 
-        // 2. Smart Storage Loader (Supports direct files & subfolders)
+        // 2. Smart Storage Loader
         const storagePacks: VoidPack[] = [];
 
         // Process Desktop Packs from storage
@@ -143,7 +141,7 @@ export function useVoidPacks() {
                     serial: `ID: VP-D${i + 1}`,
                     category: "Desktop Suite",
                     format: "8K AVIF",
-                    downloads: 14000 + i * 1200,
+                    downloads: 0,
                     previewUrl: pubUrl,
                     tinyUrl: pubUrl,
                     originalUrl: pubUrl,
@@ -160,7 +158,7 @@ export function useVoidPacks() {
                 category: "Desktop Suite",
                 device: "desktop",
                 format: "8K MASTER SUITE",
-                downloads: 48000,
+                downloads: 0,
                 createdAt: new Date().toISOString(),
                 featuredImage: items[0]?.previewUrl || "",
                 items,
@@ -189,7 +187,7 @@ export function useVoidPacks() {
                   serial: `ID: VP-D${i + 1}`,
                   category: "Desktop Suite",
                   format: "8K AVIF",
-                  downloads: 16000 + i * 1100,
+                  downloads: 0,
                   previewUrl: pubUrl,
                   tinyUrl: pubUrl,
                   originalUrl: pubUrl,
@@ -205,7 +203,7 @@ export function useVoidPacks() {
                 category: "Desktop Suite",
                 device: "desktop",
                 format: "8K MASTER SUITE",
-                downloads: 52000,
+                downloads: 0,
                 createdAt: new Date().toISOString(),
                 featuredImage: items[0]?.previewUrl || "",
                 items,
@@ -241,7 +239,7 @@ export function useVoidPacks() {
                     serial: `ID: VP-M${i + 1}`,
                     category: "Phone Deck",
                     format: "4K MOBILE",
-                    downloads: 21000 + i * 1800,
+                    downloads: 0,
                     previewUrl: pubUrl,
                     tinyUrl: pubUrl,
                     originalUrl: pubUrl,
@@ -258,7 +256,7 @@ export function useVoidPacks() {
                 category: "Phone Deck",
                 device: "mobile",
                 format: "4K RETINA DECK",
-                downloads: 64000,
+                downloads: 0,
                 createdAt: new Date().toISOString(),
                 featuredImage: items[0]?.previewUrl || "",
                 items,
@@ -286,7 +284,7 @@ export function useVoidPacks() {
                   serial: `ID: VP-M${i + 1}`,
                   category: "Phone Deck",
                   format: "4K MOBILE",
-                  downloads: 24000 + i * 1600,
+                  downloads: 0,
                   previewUrl: pubUrl,
                   tinyUrl: pubUrl,
                   originalUrl: pubUrl,
@@ -302,7 +300,7 @@ export function useVoidPacks() {
                 category: "Phone Deck",
                 device: "mobile",
                 format: "4K RETINA DECK",
-                downloads: 72000,
+                downloads: 0,
                 createdAt: new Date().toISOString(),
                 featuredImage: items[0]?.previewUrl || "",
                 items,

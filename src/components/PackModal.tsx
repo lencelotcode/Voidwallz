@@ -35,7 +35,7 @@ export default function PackModal({
   const [isDownloadingSingle, setIsDownloadingSingle] = useState(false);
   const [downloadSuccess, setDownloadSuccess] = useState<string | null>(null);
 
-  const { recordDownload } = useWallpaperStats();
+  const { recordDownload, getDownloads } = useWallpaperStats();
 
   useEffect(() => {
     setActiveIndex(0);
@@ -423,7 +423,9 @@ export default function PackModal({
                 <div className="grid grid-cols-2 gap-1.5 text-[10px] font-mono">
                   <div className="bg-white/[0.03] p-2 rounded border border-white/5">
                     <span className="text-[8px] text-white/40 uppercase block">Downloads</span>
-                    <span className="text-white/90 font-bold block">{selectedPack.downloads.toLocaleString()}</span>
+                    <span className="text-white/90 font-bold block">
+                      {((getDownloads(selectedPack.id) || 0) + selectedPack.items.reduce((sum, item) => sum + (getDownloads(item.id) || 0), 0)).toLocaleString()}
+                    </span>
                   </div>
                   <div className="bg-white/[0.03] p-2 rounded border border-white/5">
                     <span className="text-[8px] text-white/40 uppercase block">Files</span>

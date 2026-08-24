@@ -22,6 +22,7 @@ import UpdatesPage from "./components/UpdatesPage";
 import AdminPackUpload from "./components/AdminPackUpload";
 import { Wallpaper, VoidPack } from "./types";
 import { useWallpapers } from "./hooks/useWallpapers";
+import { useWallpaperStats } from "./hooks/useWallpaperStats";
 import {
   PrivacyPolicy,
   TermsOfService,
@@ -134,6 +135,7 @@ function Hero({
   isOledOptimized: boolean;
 }) {
   const { desktopWallpapers, mobileWallpapers, loading } = useWallpapers();
+  const { getDownloads } = useWallpaperStats();
   const { scrollY } = useScroll();
   const yText = useTransform(scrollY, [0, 1000], [0, 150]);
   const yImage = useTransform(scrollY, [0, 1000], [0, -100]);
@@ -309,7 +311,7 @@ function Hero({
 
                   <div className="flex items-center gap-2.5 pointer-events-auto">
                     <span className="text-[10px] font-mono text-white/80 bg-black/80 backdrop-blur-md border border-white/20 px-3 py-1.5 rounded-full shadow-lg">
-                      {wallpaperOfTheDay.downloads ? wallpaperOfTheDay.downloads.toLocaleString() : "4,800"} DL
+                      {getDownloads(wallpaperOfTheDay.id, wallpaperOfTheDay.device).toLocaleString()} DL
                     </span>
                     <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-black bg-white px-3.5 py-1.5 rounded-full shadow-[0_0_20px_rgba(255,255,255,0.4)] flex items-center gap-1.5 group-hover:scale-105 transition-transform duration-300">
                       <span>PREVIEW</span>

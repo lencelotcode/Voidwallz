@@ -1,31 +1,16 @@
 import { useState, useEffect, useCallback } from "react";
 
-// Deterministic seed generator from string
-function hashString(str: string): number {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    const char = str.charCodeAt(i);
-    hash = (hash << 5) - hash + char;
-    hash |= 0; // Convert to 32bit integer
-  }
-  return Math.abs(hash);
+// Real deterministic baseline stats (starts at 0, counts purely real user interactions)
+export function getBaseDownloads(_id: string, _device: "desktop" | "mobile" = "desktop"): number {
+  return 0;
 }
 
-// Generate stable deterministic baseline downloads (e.g. 5,420 - 38,900)
-export function getBaseDownloads(id: string, device: "desktop" | "mobile" = "desktop"): number {
-  const hash = hashString(id);
-  const multiplier = device === "mobile" ? 18000 : 9500;
-  return (hash % multiplier) + 4200;
+export function getBaseLikes(_id: string): number {
+  return 0;
 }
 
-// Generate stable deterministic baseline likes (e.g. 680 - 6,400)
-export function getBaseLikes(id: string): number {
-  const hash = hashString(id);
-  return (hash % 3800) + 480;
-}
-
-const DOWNLOADS_STORAGE_KEY = "voidwallz_real_downloads";
-const FAVORITES_STORAGE_KEY = "voidwallz_favorites";
+const DOWNLOADS_STORAGE_KEY = "voidwallz_real_downloads_v2";
+const FAVORITES_STORAGE_KEY = "voidwallz_favorites_v2";
 
 export function useWallpaperStats() {
   const [downloadMap, setDownloadMap] = useState<Record<string, number>>({});
@@ -70,7 +55,7 @@ export function useWallpaperStats() {
     };
   }, [loadStats]);
 
-  // Record a real download
+  // Record a real download (+1)
   const recordDownload = useCallback((id: string) => {
     setDownloadMap((prev) => {
       const current = prev[id] || 0;
@@ -85,7 +70,7 @@ export function useWallpaperStats() {
     });
   }, []);
 
-  // Toggle favorite / like
+  // Toggle favorite / like (+1 / 0)
   const toggleFavorite = useCallback((id: string) => {
     setFavorites((prev) => {
       let next: string[];
@@ -110,22 +95,18 @@ export function useWallpaperStats() {
     [favorites]
   );
 
-  // Get live downloads = stable baseline + real recorded downloads
+  // Get live downloads = real recorded downloads count (starts at 0)
   const getDownloads = useCallback(
-    (id: string, device: "desktop" | "mobile" = "desktop") => {
-      const base = getBaseDownloads(id, device);
-      const extra = downloadMap[id] || 0;
-      return base + extra;
+    (id: string, _device: "desktop" | "mobile" = "desktop") => {
+      return downloadMap[id] || 0;
     },
     [downloadMap]
   );
 
-  // Get live likes = stable baseline + user like status
+  // Get live likes = 1 if liked by user, 0 otherwise
   const getLikes = useCallback(
     (id: string) => {
-      const base = getBaseLikes(id);
-      const userLiked = favorites.includes(id) ? 1 : 0;
-      return base + userLiked;
+      return favorites.includes(id) ? 1 : 0;
     },
     [favorites]
   );
