@@ -317,24 +317,25 @@ export default function WallpaperModal({
                     )}
                   </motion.div>
                 ) : (
-                  /* Clean Full Art Canvas Mode - 100% Uncropped with Margin for Arrows */
+                  /* Clean Full Art Canvas Mode - True Widescreen 16:10 Aspect Ratio */
                   <motion.div
                     initial={{ opacity: 0, scale: 0.96 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.3 }}
                     key={`canvas-${selectedWp.id}`}
-                    className="w-full h-full relative flex items-center justify-center p-2"
+                    className="w-full h-full relative flex items-center justify-center p-3 sm:p-6"
                   >
-                    <div className="relative w-[85%] max-w-[420px] h-full max-h-[320px] sm:max-h-[440px] md:max-h-[480px] flex items-center justify-center">
+                    <div className="relative w-full max-w-[380px] sm:max-w-[440px] md:max-w-[470px] aspect-[16/10] rounded-xl overflow-hidden shadow-[0_25px_70px_rgba(0,0,0,0.9)] ring-1 ring-white/20 bg-black flex items-center justify-center">
                       <OptimizedImage
                         src={selectedWp.previewUrl}
                         placeholder={selectedWp.tinyUrl}
                         fallbackSrc={selectedWp.fallbackUrl || selectedWp.previewUrl}
                         alt={selectedWp.title}
                         priority={true}
-                        className={`max-w-full max-h-full w-auto h-auto object-contain rounded-xl shadow-[0_20px_60px_rgba(0,0,0,0.9)] ring-1 ring-white/15 ${isOledOptimized ? "oled-image" : ""}`}
-                        containerClassName="flex items-center justify-center w-full h-full"
+                        className={`w-full h-full object-cover ${isOledOptimized ? "oled-image" : ""}`}
+                        containerClassName="w-full h-full"
                       />
+                      <div className="absolute inset-0 bg-gradient-to-tr from-white/[0.06] via-transparent to-transparent pointer-events-none z-20" />
                     </div>
                   </motion.div>
                 )}

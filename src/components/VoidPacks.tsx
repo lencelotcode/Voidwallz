@@ -36,19 +36,19 @@ export default function VoidPacks({
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-16 gap-6">
           <div className="flex flex-col">
             <div className="flex items-center gap-2 mb-3">
-              <span className="spec-badge text-[10px] font-mono px-3 py-1 rounded-full text-amber-300/90 bg-amber-500/10 border-amber-500/30 tracking-widest uppercase flex items-center gap-1.5">
-                <Lock size={11} />
-                DROPPING SOON
+              <span className="spec-badge text-[10px] font-mono px-3 py-1 rounded-full text-emerald-300/90 bg-emerald-500/10 border-emerald-500/30 tracking-widest uppercase flex items-center gap-1.5 shadow-lg">
+                <Sparkles size={11} className="text-emerald-400" />
+                MASTER SUITES UNLOCKED
               </span>
               <span className="text-[10px] font-mono text-white/40 uppercase tracking-widest">
-                // VAULT IN PRIVATE STAGING
+                // 5-PIECE RETINA ARCHIVES
               </span>
             </div>
             <h2 className="text-4xl md:text-6xl font-serif italic tracking-tighter text-white">
               Void Packs_
             </h2>
             <p className="text-xs md:text-sm text-white/50 max-w-lg mt-3 font-sans leading-relaxed">
-              Thematic 5-piece wallpaper suites engineered to elevate your entire digital workspace. Currently in staging — public drop coming soon.
+              Thematic 5-piece wallpaper suites engineered to elevate your entire digital workspace. Download complete .ZIP packages or individual master files.
             </p>
           </div>
 
@@ -264,13 +264,13 @@ const PackCard: React.FC<PackCardProps> = ({
         </div>
 
         <div className="mt-6 pt-4 border-t border-white/5 flex items-center justify-between">
-          <span className="text-[10px] font-mono text-amber-400/70 uppercase tracking-widest flex items-center gap-1.5">
-            <Lock size={12} />
-            Dropping Soon
+          <span className="text-[10px] font-mono text-white/50 uppercase tracking-widest flex items-center gap-1.5">
+            <FolderArchive size={12} className="text-white/40" />
+            {pack.items.length} Master Files
           </span>
 
           <div className="flex items-center gap-1.5 text-xs font-mono uppercase tracking-wider text-white/90 bg-white/5 hover:bg-white/10 px-3 py-1.5 rounded-md border border-white/10 group-hover:border-white/30 transition-all">
-            <span>Preview Pack</span>
+            <span>Explore Suite</span>
             <ArrowUpRight size={13} />
           </div>
         </div>

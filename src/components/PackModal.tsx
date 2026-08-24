@@ -9,10 +9,15 @@ import {
   Monitor,
   Smartphone,
   X,
-  Lock,
+  Download,
+  FolderDown,
+  CheckCircle2,
+  Loader2,
 } from "lucide-react";
+import JSZip from "jszip";
 import OptimizedImage from "./OptimizedImage";
-import { VoidPack } from "../types";
+import { VoidPack, Wallpaper } from "../types";
+import { useWallpaperStats } from "../hooks/useWallpaperStats";
 
 export default function PackModal({
   selectedPack,
@@ -25,19 +30,28 @@ export default function PackModal({
 }) {
   const [activeIndex, setActiveIndex] = useState<number>(0);
   const [previewMode, setPreviewMode] = useState<"frame" | "canvas">("frame");
+  const [isDownloadingZip, setIsDownloadingZip] = useState(false);
+  const [zipProgress, setZipProgress] = useState({ current: 0, total: 0, percent: 0 });
+  const [isDownloadingSingle, setIsDownloadingSingle] = useState(false);
+  const [downloadSuccess, setDownloadSuccess] = useState<string | null>(null);
+
+  const { recordDownload } = useWallpaperStats();
 
   useEffect(() => {
     setActiveIndex(0);
     setPreviewMode("frame");
+    setIsDownloadingZip(false);
+    setIsDownloadingSingle(false);
+    setDownloadSuccess(null);
   }, [selectedPack]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
-      if (e.key === "ArrowRight" && selectedPack) {
+      if (e.key === "ArrowRight" && selectedPack && selectedPack.items.length > 0) {
         setActiveIndex((prev) => (prev + 1) % selectedPack.items.length);
       }
-      if (e.key === "ArrowLeft" && selectedPack) {
+      if (e.key === "ArrowLeft" && selectedPack && selectedPack.items.length > 0) {
         setActiveIndex((prev) =>
           prev === 0 ? selectedPack.items.length - 1 : prev - 1,
         );
@@ -60,6 +74,120 @@ export default function PackModal({
   if (!selectedPack || typeof document === "undefined") return null;
 
   const currentWp = selectedPack.items[activeIndex] || selectedPack.items[0];
+
+  // Download entire pack as .ZIP
+  const handleDownloadZip = async () => {
+    if (isDownloadingZip || isDownloadingSingle || !selectedPack || selectedPack.items.length === 0) return;
+    setIsDownloadingZip(true);
+    setZipProgress({ current: 0, total: selectedPack.items.length, percent: 0 });
+
+    try {
+      const zip = new JSZip();
+      const folderName = `VOIDWALLZ-${selectedPack.title.toUpperCase().replace(/\s+/g, "-")}-${selectedPack.device.toUpperCase()}`;
+      const packFolder = zip.folder(folderName) || zip;
+
+      // Add Readme / metadata
+      packFolder.file(
+        "README.txt",
+        `VOIDWALLZ // MASTER WALLPAPER SUITE\n\nPack: ${selectedPack.title}\nSerial: ${selectedPack.serial}\nFormat: ${selectedPack.format}\nDevice: ${selectedPack.device.toUpperCase()}\nTotal Wallpapers: ${selectedPack.items.length}\n\nDownloaded from Voidwallz (https://voidwallz.live)\nExclusively curated for high-resolution digital workspace elevation.\n`
+      );
+
+      for (let i = 0; i < selectedPack.items.length; i++) {
+        const item = selectedPack.items[i];
+        const downloadUrl = item.originalUrl || item.previewUrl;
+
+        setZipProgress({
+          current: i + 1,
+          total: selectedPack.items.length,
+          percent: Math.round(((i + 1) / selectedPack.items.length) * 85),
+        });
+
+        try {
+          let ext = "png";
+          try {
+            const path = new URL(downloadUrl).pathname;
+            const detected = path.split(".").pop()?.toLowerCase();
+            if (detected && ["jpg", "jpeg", "png", "webp", "avif"].includes(detected)) {
+              ext = detected;
+            }
+          } catch (_) {}
+
+          const res = await fetch(downloadUrl);
+          const arrayBuffer = await res.arrayBuffer();
+          const cleanTitle = item.title.replace(/[/\\?%*:|"<>]/g, "-");
+          const filename = `${String(i + 1).padStart(2, "0")} - ${cleanTitle}.${ext}`;
+          packFolder.file(filename, arrayBuffer);
+          recordDownload(item.id);
+        } catch (fetchErr) {
+          console.warn(`Failed to fetch pack item ${item.title}:`, fetchErr);
+        }
+      }
+
+      setZipProgress((prev) => ({ ...prev, percent: 95 }));
+      const zipBlob = await zip.generateAsync({
+        type: "blob",
+        compression: "DEFLATE",
+        compressionOptions: { level: 6 },
+      });
+
+      const blobUrl = window.URL.createObjectURL(zipBlob);
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = `${folderName}.zip`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+
+      setDownloadSuccess("Complete Suite Downloaded!");
+      setTimeout(() => setDownloadSuccess(null), 4000);
+    } catch (err) {
+      console.error("Pack zip generation failed:", err);
+      alert("Could not generate ZIP archive. Downloading individual wallpapers instead...");
+      for (const item of selectedPack.items) {
+        window.open(item.originalUrl || item.previewUrl, "_blank");
+      }
+    } finally {
+      setIsDownloadingZip(false);
+    }
+  };
+
+  // Download single active wallpaper from pack
+  const handleDownloadSingle = async () => {
+    if (isDownloadingSingle || isDownloadingZip || !currentWp) return;
+    setIsDownloadingSingle(true);
+
+    const downloadUrl = currentWp.originalUrl || currentWp.previewUrl;
+    try {
+      let ext = "png";
+      try {
+        const path = new URL(downloadUrl).pathname;
+        const detected = path.split(".").pop()?.toLowerCase();
+        if (detected && ["jpg", "jpeg", "png", "webp", "avif"].includes(detected)) {
+          ext = detected;
+        }
+      } catch (_) {}
+
+      const res = await fetch(downloadUrl);
+      const blob = await res.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = `VOIDWALLZ-${currentWp.title.toUpperCase().replace(/\s+/g, "-")}.${ext}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+
+      recordDownload(currentWp.id);
+      setDownloadSuccess(`Part 0${activeIndex + 1} Downloaded!`);
+      setTimeout(() => setDownloadSuccess(null), 3000);
+    } catch (err) {
+      window.open(downloadUrl, "_blank");
+    } finally {
+      setIsDownloadingSingle(false);
+    }
+  };
 
   return createPortal(
     <AnimatePresence>
@@ -100,7 +228,7 @@ export default function PackModal({
             <div className="absolute top-0 inset-x-0 p-3 sm:p-4 flex items-center justify-between z-40 bg-gradient-to-b from-black/80 via-black/30 to-transparent pointer-events-none">
               {/* Left: Pack Badge */}
               <div className="flex items-center gap-1.5 p-1 px-2.5 bg-black/80 backdrop-blur-md rounded-full border border-white/10 pointer-events-auto shadow-xl">
-                <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                 <span className="text-[9px] font-mono text-white/80 uppercase tracking-widest">
                   {selectedPack.serial}
                 </span>
@@ -180,24 +308,25 @@ export default function PackModal({
                   )}
                 </motion.div>
               ) : (
-                /* Clean Full Art Canvas Mode */
+                /* Clean Full Art Canvas Mode - True Widescreen 16:10 */
                 <motion.div
                   initial={{ opacity: 0, scale: 0.96 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.3 }}
                   key={`canvas-${currentWp.id}`}
-                  className="w-full h-full relative flex items-center justify-center p-2"
+                  className="w-full h-full relative flex items-center justify-center p-3 sm:p-6"
                 >
-                  <div className="relative w-full h-full max-h-[300px] sm:max-h-[420px] md:max-h-[480px] flex items-center justify-center">
+                  <div className="relative w-full max-w-[370px] sm:max-w-[430px] md:max-w-[460px] aspect-[16/10] rounded-xl overflow-hidden shadow-[0_25px_70px_rgba(0,0,0,0.9)] ring-1 ring-white/20 bg-black flex items-center justify-center">
                     <OptimizedImage
                       src={currentWp.previewUrl}
                       placeholder={currentWp.tinyUrl}
                       fallbackSrc={currentWp.fallbackUrl || currentWp.previewUrl}
                       alt={currentWp.title}
                       priority={true}
-                      className={`max-w-full max-h-full w-auto h-auto object-contain rounded-xl shadow-[0_20px_60px_rgba(0,0,0,0.9)] ring-1 ring-white/15 ${isOledOptimized ? "oled-image" : ""}`}
-                      containerClassName="flex items-center justify-center w-full h-full"
+                      className={`w-full h-full object-cover ${isOledOptimized ? "oled-image" : ""}`}
+                      containerClassName="w-full h-full"
                     />
+                    <div className="absolute inset-0 bg-gradient-to-tr from-white/[0.06] via-transparent to-transparent pointer-events-none z-20" />
                   </div>
                 </motion.div>
               )}
@@ -255,7 +384,7 @@ export default function PackModal({
                 <div className="flex items-center justify-between mb-1.5">
                   <span className="text-[9px] opacity-50 font-mono uppercase tracking-widest flex items-center gap-1">
                     <Sparkles size={10} />
-                    Included Wallpapers
+                    Included Wallpapers ({selectedPack.items.length})
                   </span>
                   <span className="text-[10px] font-mono text-white/80 font-semibold truncate max-w-[140px]">
                     {currentWp.title}
@@ -304,26 +433,62 @@ export default function PackModal({
               </div>
             </div>
 
-            {/* Vault Locked / Dropping Soon Notice */}
-            <div>
-              <div className="py-2.5 px-3.5 rounded-xl bg-white/[0.03] border border-amber-500/25 flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 rounded-full bg-amber-500/10 flex items-center justify-center shrink-0">
-                    <Lock size={12} className="text-amber-400" />
-                  </div>
-                  <div className="text-left">
-                    <span className="text-amber-300 font-mono text-[10px] uppercase font-bold tracking-wider block">
-                      VAULT LOCKED // DROPPING SOON
+            {/* Action & Download Section */}
+            <div className="space-y-2 pt-2">
+              {/* Success Notification Pill */}
+              <AnimatePresence>
+                {downloadSuccess && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -6 }}
+                    className="py-2 px-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center gap-2 text-emerald-400 text-xs font-mono"
+                  >
+                    <CheckCircle2 size={13} />
+                    <span>{downloadSuccess}</span>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Primary Action: Download Complete Pack .ZIP */}
+              <button
+                onClick={handleDownloadZip}
+                disabled={isDownloadingZip || isDownloadingSingle}
+                className="w-full py-3.5 bg-white text-black font-mono font-bold text-xs uppercase tracking-widest rounded-xl hover:bg-white/90 active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-[0_0_30px_rgba(255,255,255,0.2)] hover:shadow-[0_0_40px_rgba(255,255,255,0.4)] cursor-pointer disabled:opacity-50"
+              >
+                {isDownloadingZip ? (
+                  <div className="flex items-center gap-2">
+                    <Loader2 size={15} className="animate-spin text-black" />
+                    <span>
+                      Packaging ZIP {zipProgress.current}/{zipProgress.total} ({zipProgress.percent}%)...
                     </span>
-                    <span className="text-[9px] text-white/40 font-sans block">
-                      Quality assurance staging in progress
-                    </span>
                   </div>
-                </div>
-                <span className="px-2 py-0.5 bg-amber-500/10 rounded text-[8px] font-mono text-amber-300 uppercase tracking-wider shrink-0 border border-amber-500/20">
-                  Dropping Soon
-                </span>
-              </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <FolderDown size={15} />
+                    <span>Download Complete Pack (.ZIP)</span>
+                  </div>
+                )}
+              </button>
+
+              {/* Secondary Action: Download Active Single Artwork */}
+              <button
+                onClick={handleDownloadSingle}
+                disabled={isDownloadingZip || isDownloadingSingle}
+                className="w-full py-2.5 bg-white/5 hover:bg-white/10 text-white/80 hover:text-white font-mono text-[11px] uppercase tracking-wider rounded-xl border border-white/10 hover:border-white/25 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+              >
+                {isDownloadingSingle ? (
+                  <div className="flex items-center gap-2">
+                    <Loader2 size={13} className="animate-spin text-white" />
+                    <span>Downloading Part 0{activeIndex + 1}...</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <Download size={13} />
+                    <span>Download Part 0{activeIndex + 1} Only (1 of {selectedPack.items.length})</span>
+                  </div>
+                )}
+              </button>
             </div>
           </div>
         </motion.div>

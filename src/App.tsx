@@ -1,4 +1,4 @@
-import { Instagram, Twitter } from "lucide-react";
+import { Instagram, Twitter, ArrowUpRight, Monitor, Smartphone } from "lucide-react";
 import {
   AnimatePresence,
   motion,
@@ -241,7 +241,7 @@ function Hero({
           className="w-full md:w-7/12 h-[50vh] md:h-[65vh] relative group cursor-pointer hover-trigger perspective-1000"
           initial={{ opacity: 0, scale: 0.95 }}
         >
-          <div className="w-full h-full border border-white/10 p-2 relative overflow-hidden bg-white/5 shadow-2xl luxury-border-glow">
+          <div className="w-full h-full border border-white/10 p-2 relative overflow-hidden bg-white/5 shadow-2xl luxury-border-glow isolate">
             {loading ? (
               <div className="w-full h-full bg-[#050505] flex items-center justify-center relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/[0.03] to-transparent animate-pulse" />
@@ -258,6 +258,23 @@ function Hero({
               </div>
             ) : (
               <>
+                {/* Top Left Floating Tag */}
+                <div className="absolute top-4 left-4 z-30 flex items-center gap-2 pointer-events-none">
+                  <span className="spec-badge text-[9px] font-mono px-3 py-1.5 rounded-full text-white/90 tracking-widest uppercase bg-black/80 backdrop-blur-md border border-white/20 shadow-xl flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    WALLPAPER OF THE DAY
+                  </span>
+                </div>
+
+                {/* Top Right Device Badge */}
+                <div className="absolute top-4 right-4 z-30 flex items-center gap-2 pointer-events-none">
+                  <span className="spec-badge text-[9px] font-mono px-3 py-1.5 rounded-full text-white/80 tracking-widest uppercase bg-black/80 backdrop-blur-md border border-white/20 shadow-xl flex items-center gap-1">
+                    {wallpaperOfTheDay.device === "desktop" ? <Monitor size={10} /> : <Smartphone size={10} />}
+                    {wallpaperOfTheDay.format || (wallpaperOfTheDay.device === "desktop" ? "8K MASTER" : "4K MOBILE")}
+                  </span>
+                </div>
+
+                {/* Main Hero Wallpaper Image */}
                 <OptimizedImage
                   src={wallpaperOfTheDay.previewUrl}
                   placeholder={wallpaperOfTheDay.tinyUrl}
@@ -272,26 +289,31 @@ function Hero({
                     y: mousePos.y * -20,
                   }}
                   transition={{ duration: 0.3, ease: "easeOut" }}
-                  className={`filter brightness-75 group-hover:brightness-90 transition-all duration-300 ease-out ${isOledOptimized ? "oled-image" : ""}`}
+                  className={`filter brightness-80 group-hover:brightness-95 transition-all duration-300 ease-out ${isOledOptimized ? "oled-image" : ""}`}
                   containerClassName="w-full h-full"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
 
-                <div className="absolute bottom-6 left-6 right-6 flex flex-col md:flex-row justify-between md:items-end gap-4">
-                  <div>
-                    <span className="text-[10px] opacity-70 uppercase tracking-widest font-mono mb-2 block text-white drop-shadow-md">
-                      {wallpaperOfTheDay.category}
+                {/* Dark Vignette Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent pointer-events-none z-20" />
+
+                {/* Bottom Wallpaper Detail Strip */}
+                <div className="absolute bottom-0 inset-x-0 p-6 z-30 flex flex-col md:flex-row justify-between md:items-end gap-4 pointer-events-none">
+                  <div className="pointer-events-auto">
+                    <span className="text-[10px] text-white/60 uppercase tracking-[0.25em] font-mono mb-1.5 block drop-shadow-md">
+                      {wallpaperOfTheDay.serial} // {wallpaperOfTheDay.category || "Wallpaper of the Day"}
                     </span>
-                    <h3 className="text-2xl font-serif italic tracking-wide text-white drop-shadow-md">
+                    <h3 className="text-2xl sm:text-3xl font-serif italic tracking-tight text-white drop-shadow-xl group-hover:text-white/90 transition-colors">
                       {wallpaperOfTheDay.title}
                     </h3>
                   </div>
-                  <div className="flex gap-3">
-                    <span className="text-[10px] border border-white/20 px-2 py-1 bg-black/40 backdrop-blur-md rounded font-mono text-white">
-                      {wallpaperOfTheDay.serial}
+
+                  <div className="flex items-center gap-2.5 pointer-events-auto">
+                    <span className="text-[10px] font-mono text-white/80 bg-black/80 backdrop-blur-md border border-white/20 px-3 py-1.5 rounded-full shadow-lg">
+                      {wallpaperOfTheDay.downloads ? wallpaperOfTheDay.downloads.toLocaleString() : "4,800"} DL
                     </span>
-                    <span className="text-[10px] bg-white text-black px-2 py-1 rounded font-bold shadow-[0_0_15px_rgba(255,255,255,0.3)]">
-                      {wallpaperOfTheDay.format}
+                    <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-black bg-white px-3.5 py-1.5 rounded-full shadow-[0_0_20px_rgba(255,255,255,0.4)] flex items-center gap-1.5 group-hover:scale-105 transition-transform duration-300">
+                      <span>PREVIEW</span>
+                      <ArrowUpRight size={12} />
                     </span>
                   </div>
                 </div>
