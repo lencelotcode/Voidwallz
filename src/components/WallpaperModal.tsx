@@ -20,6 +20,7 @@ import { Wallpaper } from "../types";
 import { useWallpapers } from "../hooks/useWallpapers";
 import { useWallpaperStats } from "../hooks/useWallpaperStats";
 import { sound } from "../lib/soundEffects";
+import { downloadWallpaperAsPng } from "../lib/downloadWallpaper";
 
 export default function WallpaperModal({
   selectedWp,
@@ -143,6 +144,7 @@ export default function WallpaperModal({
   };
 
   const handleDownload = async () => {
+    if (downloadStatus === "downloading") return;
     sound.playShutter();
     setDownloadStatus("downloading");
     const downloadUrl = selectedWp.originalUrl || selectedWp.previewUrl;
@@ -153,36 +155,18 @@ export default function WallpaperModal({
     }
 
     try {
-      let ext = "png";
-      try {
-        const path = new URL(downloadUrl).pathname;
-        const detected = path.split(".").pop()?.toLowerCase();
-        if (detected && ["jpg", "jpeg", "png", "webp", "avif"].includes(detected)) {
-          ext = detected;
-        }
-      } catch (_) {}
-
-      const response = await fetch(downloadUrl);
-      const blob = await response.blob();
-      const blobUrl = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = blobUrl;
-      link.download = `VOIDWALLZ-${selectedWp.title.toUpperCase().replace(/\s+/g, "-")}.${ext}`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(blobUrl);
-
+      const ok = await downloadWallpaperAsPng(
+        downloadUrl,
+        selectedWp.title,
+        selectedWp.previewUrl
+      );
       recordDownload(selectedWp.id);
       sound.playSuccess();
-      setDownloadStatus("success");
+      setDownloadStatus(ok ? "success" : "idle");
       setTimeout(() => setDownloadStatus("idle"), 3000);
     } catch (err) {
-      console.warn("Direct blob download failed, falling back to direct open:", err);
-      window.open(downloadUrl, "_blank");
-      recordDownload(selectedWp.id);
-      sound.playSuccess();
-      setDownloadStatus("success");
+      console.error("Direct download failed:", err);
+      setDownloadStatus("error");
       setTimeout(() => setDownloadStatus("idle"), 3000);
     }
   };

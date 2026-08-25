@@ -6,6 +6,7 @@ import { Wallpaper } from "../types";
 import { useWallpapers } from "../hooks/useWallpapers";
 import { useWallpaperStats } from "../hooks/useWallpaperStats";
 import { sound } from "../lib/soundEffects";
+import { downloadWallpaperAsPng } from "../lib/downloadWallpaper";
 
 export default function Gallery({
   view = "all",
@@ -44,43 +45,7 @@ export default function Gallery({
     if (!downloadUrl) return;
 
     try {
-      let ext = "png";
-      try {
-        const path = new URL(downloadUrl).pathname;
-        const detected = path.split(".").pop()?.toLowerCase();
-        if (detected && ["jpg", "jpeg", "png", "webp", "avif"].includes(detected)) {
-          ext = detected;
-        }
-      } catch {}
-
-      const filename = `${wp.title.replace(/\s+/g, "_")}.${ext}`;
-
-      try {
-        const res = await fetch(downloadUrl, { mode: "cors" });
-        if (res.ok) {
-          const blob = await res.blob();
-          const url = window.URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = filename;
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          window.URL.revokeObjectURL(url);
-          recordDownload(wp.id);
-          sound.playSuccess();
-          return;
-        }
-      } catch {}
-
-      const direct = document.createElement("a");
-      direct.href = downloadUrl;
-      direct.download = filename;
-      direct.target = "_blank";
-      direct.rel = "noopener noreferrer";
-      document.body.appendChild(direct);
-      direct.click();
-      document.body.removeChild(direct);
+      await downloadWallpaperAsPng(downloadUrl, wp.title, wp.previewUrl);
       recordDownload(wp.id);
       sound.playSuccess();
     } catch (err) {

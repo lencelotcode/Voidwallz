@@ -23,6 +23,7 @@ import OptimizedImage from "./OptimizedImage";
 import { VoidPack, Wallpaper } from "../types";
 import { useWallpaperStats } from "../hooks/useWallpaperStats";
 import { sound } from "../lib/soundEffects";
+import { downloadWallpaperAsPng, fetchImageAsPngArrayBuffer } from "../lib/downloadWallpaper";
 
 export default function PackModal({
   selectedPack,
@@ -59,16 +60,18 @@ export default function PackModal({
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") handleClose();
-      if (e.key === "ArrowRight" && selectedPack && selectedPack.items.length > 0) {
+      if (e.key === "Escape") {
+        handleClose();
+      } else if (e.key === "ArrowLeft" && selectedPack && selectedPack.items.length > 0) {
         sound.playTap();
-        setActiveIndex((prev) => (prev + 1) % selectedPack.items.length);
-      }
-      if (e.key === "ArrowLeft" && selectedPack && selectedPack.items.length > 0) {
+        setActiveIndex((prev) => (prev > 0 ? prev - 1 : selectedPack.items.length - 1));
+      } else if (e.key === "ArrowRight" && selectedPack && selectedPack.items.length > 0) {
         sound.playTap();
-        setActiveIndex((prev) =>
-          prev === 0 ? selectedPack.items.length - 1 : prev - 1,
-        );
+        setActiveIndex((prev) => (prev < selectedPack.items.length - 1 ? prev + 1 : 0));
+      } else if (e.key === " " || e.key === "Spacebar") {
+        e.preventDefault();
+        sound.playSwitch();
+        setPreviewMode((prev) => (prev === "frame" ? "canvas" : "frame"));
       }
     };
 
@@ -85,44 +88,41 @@ export default function PackModal({
     };
   }, [selectedPack, onClose]);
 
-  if (!selectedPack || typeof document === "undefined") return null;
+  if (!selectedPack || selectedPack.items.length === 0) return null;
 
   const currentWp = selectedPack.items[activeIndex] || selectedPack.items[0];
 
+  // Share Pack Link
   const handleSharePack = async () => {
     sound.playTap();
-    const directUrl = `${window.location.origin}/packs`;
+    const packUrl = `${window.location.origin}/packs#${selectedPack.id}`;
+    const shareTitle = `VOIDWALLZ // ${selectedPack.title} Pack`;
+    const shareText = `Check out the ${selectedPack.title} 5-piece wallpaper suite on Voidwallz: ${selectedPack.tagline}`;
 
-    if (navigator.share) {
+    if (typeof navigator !== "undefined" && navigator.share) {
       try {
         await navigator.share({
-          title: `${selectedPack.title} // Voidwallz Pack`,
-          text: `Check out "${selectedPack.title}" ${selectedPack.items.length}-piece wallpaper suite on Voidwallz`,
-          url: directUrl,
+          title: shareTitle,
+          text: shareText,
+          url: packUrl,
         });
         return;
-      } catch (err: any) {
-        if (err.name === "AbortError") return;
+      } catch (err) {
+        if ((err as Error).name !== "AbortError") {
+          console.warn("Native share failed, falling back to copy:", err);
+        }
       }
     }
 
-    try {
-      await navigator.clipboard.writeText(directUrl);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2500);
-    } catch (e) {
-      const textarea = document.createElement("textarea");
-      textarea.value = directUrl;
-      document.body.appendChild(textarea);
-      textarea.select();
-      document.execCommand("copy");
-      document.body.removeChild(textarea);
+    // Fallback: Copy to clipboard
+    if (typeof navigator !== "undefined" && navigator.clipboard) {
+      await navigator.clipboard.writeText(packUrl);
       setCopied(true);
       setTimeout(() => setCopied(false), 2500);
     }
   };
 
-  // Download entire pack as .ZIP
+  // Download entire pack as .ZIP with genuine lossless PNG files
   const handleDownloadZip = async () => {
     if (isDownloadingZip || isDownloadingSingle || !selectedPack || selectedPack.items.length === 0) return;
     sound.playShutter();
@@ -137,7 +137,7 @@ export default function PackModal({
       // Add Readme / metadata
       packFolder.file(
         "README.txt",
-        `VOIDWALLZ // MASTER WALLPAPER SUITE\n\nPack: ${selectedPack.title}\nSerial: ${selectedPack.serial}\nFormat: ${selectedPack.format}\nDevice: ${selectedPack.device.toUpperCase()}\nTotal Wallpapers: ${selectedPack.items.length}\n\nDownloaded from Voidwallz (https://voidwallz.live)\nExclusively curated for high-resolution digital workspace elevation.\n`
+        `VOIDWALLZ // MASTER WALLPAPER SUITE\n\nPack: ${selectedPack.title}\nSerial: ${selectedPack.serial}\nFormat: PNG Lossless Master\nDevice: ${selectedPack.device.toUpperCase()}\nTotal Wallpapers: ${selectedPack.items.length}\n\nDownloaded from Voidwallz (https://voidwallz.live)\nExclusively curated for high-resolution digital workspace elevation.\n`
       );
 
       for (let i = 0; i < selectedPack.items.length; i++) {
@@ -151,19 +151,9 @@ export default function PackModal({
         });
 
         try {
-          let ext = "png";
-          try {
-            const path = new URL(downloadUrl).pathname;
-            const detected = path.split(".").pop()?.toLowerCase();
-            if (detected && ["jpg", "jpeg", "png", "webp", "avif"].includes(detected)) {
-              ext = detected;
-            }
-          } catch (_) {}
-
-          const res = await fetch(downloadUrl);
-          const arrayBuffer = await res.arrayBuffer();
+          const arrayBuffer = await fetchImageAsPngArrayBuffer(downloadUrl);
           const cleanTitle = item.title.replace(/[/\\?%*:|"<>]/g, "-");
-          const filename = `${String(i + 1).padStart(2, "0")} - ${cleanTitle}.${ext}`;
+          const filename = `${String(i + 1).padStart(2, "0")} - ${cleanTitle}.png`;
           packFolder.file(filename, arrayBuffer);
           recordDownload(item.id);
         } catch (fetchErr) {
@@ -195,14 +185,14 @@ export default function PackModal({
       console.error("Pack zip generation failed:", err);
       alert("Could not generate ZIP archive. Downloading individual wallpapers instead...");
       for (const item of selectedPack.items) {
-        window.open(item.originalUrl || item.previewUrl, "_blank");
+        downloadWallpaperAsPng(item.originalUrl || item.previewUrl, item.title);
       }
     } finally {
       setIsDownloadingZip(false);
     }
   };
 
-  // Download single active wallpaper from pack
+  // Download single active wallpaper from pack as PNG
   const handleDownloadSingle = async () => {
     if (isDownloadingSingle || isDownloadingZip || !currentWp) return;
     sound.playShutter();
@@ -210,32 +200,13 @@ export default function PackModal({
 
     const downloadUrl = currentWp.originalUrl || currentWp.previewUrl;
     try {
-      let ext = "png";
-      try {
-        const path = new URL(downloadUrl).pathname;
-        const detected = path.split(".").pop()?.toLowerCase();
-        if (detected && ["jpg", "jpeg", "png", "webp", "avif"].includes(detected)) {
-          ext = detected;
-        }
-      } catch (_) {}
-
-      const res = await fetch(downloadUrl);
-      const blob = await res.blob();
-      const blobUrl = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = blobUrl;
-      link.download = `VOIDWALLZ-${currentWp.title.toUpperCase().replace(/\s+/g, "-")}.${ext}`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(blobUrl);
-
+      await downloadWallpaperAsPng(downloadUrl, currentWp.title);
       recordDownload(currentWp.id);
       sound.playSuccess();
       setDownloadSuccess(`Part 0${activeIndex + 1} Downloaded!`);
       setTimeout(() => setDownloadSuccess(null), 3000);
     } catch (err) {
-      window.open(downloadUrl, "_blank");
+      console.error("Single download failed:", err);
     } finally {
       setIsDownloadingSingle(false);
     }

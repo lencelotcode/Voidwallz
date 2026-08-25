@@ -230,10 +230,6 @@ function mapFileToWallpaper(
     ? supabase.storage.from(BUCKET_NAME).getPublicUrl(previewPath).data.publicUrl
     : "";
 
-  const originalPublicUrl = supabase
-    ? supabase.storage.from(BUCKET_NAME).getPublicUrl(originalPath).data.publicUrl
-    : "";
-
   // Determine if it's mobile format
   const displayFormat = folder === "mobile" ? `${format} MOBILE` : format;
   const id = `${folder}-${baseName}`;
@@ -252,7 +248,7 @@ function mapFileToWallpaper(
     likes,
     previewUrl: previewPublicUrl,
     tinyUrl: previewPublicUrl,
-    originalUrl: originalPublicUrl || previewPublicUrl,
+    originalUrl: previewPublicUrl,
     fallbackUrl: previewPublicUrl,
     device: folder,
     createdAt: file.created_at,
