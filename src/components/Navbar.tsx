@@ -88,17 +88,33 @@ export default function Navbar({
           <a
             href="/"
             onClick={(e) => handleNavigate(e, "/")}
-            className="flex items-center gap-3 hover-trigger group"
+            className="flex items-center gap-3 hover-trigger group cursor-pointer"
             data-cursor="HOME"
           >
-            <img
-              src="/logomain.png?v=2"
-              alt="Voidwallz Logo"
-              className="w-10 h-10 object-contain group-hover:scale-105 transition-transform duration-500 ease-out"
-            />
-            <h1 className="hidden sm:block text-base md:text-lg font-light tracking-tighter font-serif italic text-white select-none">
-              voidwallz
-            </h1>
+            {/* Animated Logo Emblem */}
+            <div className="relative flex items-center justify-center">
+              {/* Pulsing Ambient Glow */}
+              <div className="absolute -inset-1.5 rounded-2xl bg-gradient-to-r from-emerald-500/0 via-white/10 to-emerald-500/0 opacity-0 group-hover:opacity-100 blur-md group-hover:scale-125 transition-all duration-500 pointer-events-none" />
+
+              {/* Logo Badge Container with 3D Tilt & Sheen */}
+              <div className="relative overflow-hidden rounded-xl ring-1 ring-white/15 group-hover:ring-white/50 group-hover:scale-105 group-hover:-rotate-3 transition-all duration-500 ease-out shadow-xl bg-black">
+                <img
+                  src="/Mainlogo.svg"
+                  alt="Voidwallz Logo"
+                  className="w-8 h-8 sm:w-9 sm:h-9 object-contain"
+                />
+                {/* Diagonal Holographic Sweep on Hover */}
+                <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/25 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out pointer-events-none" />
+              </div>
+            </div>
+
+            {/* Animated Brand Typography */}
+            <div className="flex items-center gap-1.5">
+              <h1 className="text-base sm:text-lg font-serif italic tracking-tight text-white select-none transition-all duration-500 group-hover:tracking-wider group-hover:drop-shadow-[0_0_12px_rgba(255,255,255,0.75)]">
+                voidwallz
+              </h1>
+              <span className="w-1 h-1 rounded-full bg-emerald-400/60 group-hover:bg-emerald-400 group-hover:scale-125 group-hover:shadow-[0_0_8px_rgba(52,211,153,1)] transition-all duration-500" />
+            </div>
           </a>
         </div>
         <div className="w-1/3 flex justify-center">
@@ -230,6 +246,20 @@ export default function Navbar({
                 >
                   <X size={32} />
                 </button>
+
+                {/* Mobile Drawer Top Brand */}
+                <div className="flex flex-col items-center mb-8 gap-2.5 pointer-events-none">
+                  <div className="relative flex items-center justify-center">
+                    <div className="absolute -inset-1 rounded-2xl bg-white/10 blur-md pointer-events-none" />
+                    <img
+                      src="/Mainlogo.svg"
+                      alt="Voidwallz Logo"
+                      className="w-14 h-14 object-contain rounded-2xl ring-1 ring-white/20 shadow-2xl bg-black relative z-10"
+                    />
+                  </div>
+                  <span className="font-serif italic text-2xl tracking-tighter text-white">voidwallz</span>
+                </div>
+
                 <nav className="flex flex-col space-y-8 text-center text-sm uppercase tracking-[0.3em]">
                   <a
                     href="/"
