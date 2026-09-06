@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "motion/react";
-import { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useRef } from "react";
 import { createPortal } from "react-dom";
 import {
   ChevronLeft,
@@ -14,8 +14,11 @@ import {
   Share2,
   Link2,
   ArrowUpRight,
+  ZoomIn,
 } from "lucide-react";
 import OptimizedImage from "./OptimizedImage";
+import Magnetic from "./Magnetic";
+import { triggerRadarPulse } from "../lib/radarPulse";
 import { Wallpaper } from "../types";
 import { useWallpapers } from "../hooks/useWallpapers";
 import { useWallpaperStats } from "../hooks/useWallpaperStats";
@@ -34,8 +37,12 @@ export default function WallpaperModal({
   const [downloadStatus, setDownloadStatus] = useState<
     "idle" | "downloading" | "success" | "error"
   >("idle");
-  const [previewMode, setPreviewMode] = useState<"frame" | "canvas">("frame");
+  const [previewMode, setPreviewMode] = useState<"frame" | "canvas" | "loupe">("frame");
+  const [loupePos, setLoupePos] = useState({ x: 50, y: 50 });
+  const [isHoveringLoupe, setIsHoveringLoupe] = useState(false);
+  const loupeContainerRef = useRef<HTMLDivElement>(null);
   const [copied, setCopied] = useState(false);
+
   const { desktopWallpapers, mobileWallpapers } = useWallpapers();
   const { toggleFavorite, isFavorite, recordDownload, getDownloads, getLikes } =
     useWallpaperStats();
@@ -143,9 +150,32 @@ export default function WallpaperModal({
     }
   };
 
-  const handleDownload = async () => {
+  const updateLoupePosition = (clientX: number, clientY: number) => {
+    if (!loupeContainerRef.current) return;
+    const rect = loupeContainerRef.current.getBoundingClientRect();
+    const x = Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100));
+    const y = Math.max(0, Math.min(100, ((clientY - rect.top) / rect.height) * 100));
+    setLoupePos({ x, y });
+  };
+
+  const handleLoupeMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    setIsHoveringLoupe(true);
+    updateLoupePosition(e.clientX, e.clientY);
+  };
+
+  const handleLoupeTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (e.touches.length > 0) {
+      setIsHoveringLoupe(true);
+      updateLoupePosition(e.touches[0].clientX, e.touches[0].clientY);
+    }
+  };
+
+  const handleDownload = async (e?: React.MouseEvent) => {
     if (downloadStatus === "downloading") return;
     sound.playShutter();
+    if (e) {
+      triggerRadarPulse(e.clientX, e.clientY, "emerald");
+    }
     setDownloadStatus("downloading");
     const downloadUrl = selectedWp.originalUrl || selectedWp.previewUrl;
 
@@ -195,6 +225,19 @@ export default function WallpaperModal({
           className="w-full max-w-5xl max-h-[92vh] bg-[#090909] border border-white/15 flex flex-col md:flex-row shadow-[0_30px_100px_rgba(0,0,0,0.95)] relative z-10 overflow-y-auto md:overflow-hidden rounded-2xl"
           onClick={(e) => e.stopPropagation()}
         >
+          {/* Universal Top-Right Close Button */}
+          <div className="absolute top-4 right-4 z-50 pointer-events-auto">
+            <Magnetic strength={0.25}>
+              <button
+                onClick={handleClose}
+                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 flex items-center justify-center text-white/80 hover:text-white active:scale-95 transition-all shadow-xl cursor-pointer"
+                title="Close Modal"
+              >
+                <X size={15} />
+              </button>
+            </Magnetic>
+          </div>
+
           {/* LEFT: Visual Stage Section */}
           <div className="w-full md:w-3/5 min-h-[300px] sm:min-h-[380px] md:min-h-[520px] relative flex flex-col items-center justify-center overflow-hidden border-b md:border-b-0 md:border-r border-white/10 group bg-[#040404]">
             {/* Ambient Background Glow */}
@@ -206,30 +249,30 @@ export default function WallpaperModal({
               style={{ backgroundImage: `url(${selectedWp.tinyUrl || selectedWp.previewUrl})` }}
             />
 
-            {/* TOP BAR: View Switcher (Desktop only) + Close Button */}
+            {/* TOP BAR: View Switcher + Spec Badge */}
             <div className="absolute top-0 inset-x-0 p-3 sm:p-4 flex items-center justify-between z-40 bg-gradient-to-b from-black/80 via-black/30 to-transparent pointer-events-none">
-              {/* Left: View Switcher (Desktop only) */}
-              {selectedWp.device === "desktop" ? (
-                <div className="flex items-center p-1 bg-black/80 backdrop-blur-md rounded-full border border-white/10 pointer-events-auto shadow-xl">
-                  <button
-                    onClick={() => {
-                      sound.playSwitch();
-                      setPreviewMode("frame");
-                    }}
-                    className={`px-3 py-1 text-[9px] font-mono uppercase tracking-widest rounded-full transition-all cursor-pointer ${
-                      previewMode === "frame"
-                        ? "bg-white text-black font-bold shadow-md"
-                        : "text-white/60 hover:text-white"
-                    }`}
-                  >
-                    Display
-                  </button>
+              {/* Left: View Switcher */}
+              <div className="flex items-center gap-1 p-1 bg-black/80 backdrop-blur-md rounded-full border border-white/10 pointer-events-auto shadow-xl">
+                <button
+                  onClick={() => {
+                    sound.playSwitch();
+                    setPreviewMode("frame");
+                  }}
+                  className={`h-6 px-3 text-[9px] font-mono uppercase tracking-widest rounded-full transition-all cursor-pointer flex items-center justify-center leading-none ${
+                    previewMode === "frame"
+                      ? "bg-white text-black font-bold shadow-md"
+                      : "text-white/60 hover:text-white"
+                  }`}
+                >
+                  Display
+                </button>
+                {selectedWp.device === "desktop" && (
                   <button
                     onClick={() => {
                       sound.playSwitch();
                       setPreviewMode("canvas");
                     }}
-                    className={`px-3 py-1 text-[9px] font-mono uppercase tracking-widest rounded-full transition-all cursor-pointer ${
+                    className={`h-6 px-3 text-[9px] font-mono uppercase tracking-widest rounded-full transition-all cursor-pointer flex items-center justify-center leading-none ${
                       previewMode === "canvas"
                         ? "bg-white text-black font-bold shadow-md"
                         : "text-white/60 hover:text-white"
@@ -237,36 +280,35 @@ export default function WallpaperModal({
                   >
                     Full Art
                   </button>
-                </div>
-              ) : (
-                <div className="flex items-center gap-2 p-1.5 px-3 bg-black/80 backdrop-blur-md rounded-full border border-white/10 pointer-events-auto shadow-xl">
-                  <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
-                  <span className="text-[9px] font-mono text-white/80 uppercase tracking-widest">
-                    PORTRAIT DISPLAY
-                  </span>
-                </div>
-              )}
-
-              {/* Right: Spec Badge + Integrated Close Button */}
-              <div className="flex items-center gap-2 pointer-events-auto">
-                <span className="spec-badge text-[9px] font-mono px-3 py-1.5 rounded-full text-white/90 tracking-widest bg-black/80 backdrop-blur-md border border-white/10 shadow-xl flex items-center gap-1">
-                  {selectedWp.device === "desktop" ? <Monitor size={10} /> : <Smartphone size={10} />}
-                  {selectedWp.format || (selectedWp.device === "mobile" ? "4K MOBILE" : "8K MASTER")}
-                </span>
-
+                )}
                 <button
-                  onClick={handleClose}
-                  className="w-8 h-8 rounded-full bg-black/80 backdrop-blur-md border border-white/15 flex items-center justify-center text-white/80 hover:text-white hover:border-white/40 active:scale-95 transition-all shadow-xl cursor-pointer"
-                  title="Close Modal"
+                  onClick={() => {
+                    sound.playSwitch();
+                    setPreviewMode("loupe");
+                  }}
+                  className={`h-6 px-3 text-[9px] font-mono uppercase tracking-widest rounded-full transition-all cursor-pointer flex items-center justify-center gap-1 leading-none ${
+                    previewMode === "loupe"
+                      ? "bg-white text-black font-bold shadow-md"
+                      : "text-white/60 hover:text-white"
+                  }`}
                 >
-                  <X size={15} />
+                  <ZoomIn size={10} className="flex-shrink-0" />
+                  <span>8K Loupe</span>
                 </button>
+              </div>
+
+              {/* Right: Spec Badge */}
+              <div className="flex items-center pointer-events-auto pr-1">
+                <span className="spec-badge h-6 px-3 text-[9px] font-mono rounded-full text-white/90 tracking-widest bg-black/80 backdrop-blur-md border border-white/10 shadow-xl flex items-center gap-1.5 leading-none">
+                  {selectedWp.device === "desktop" ? <Monitor size={10} /> : <Smartphone size={10} />}
+                  <span>{selectedWp.format || (selectedWp.device === "mobile" ? "4K MOBILE" : "8K MASTER")}</span>
+                </span>
               </div>
             </div>
 
             {/* Stage Center Display */}
             <div className="relative z-10 w-full h-full p-4 pt-16 pb-6 sm:p-8 sm:pt-20 sm:pb-8 flex items-center justify-center">
-              {previewMode === "frame" || selectedWp.device === "mobile" ? (
+              {previewMode === "frame" ? (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
@@ -275,8 +317,12 @@ export default function WallpaperModal({
                   className="flex items-center justify-center w-full"
                 >
                   {selectedWp.device === "desktop" ? (
-                    /* Apple Studio Display Pro Mockup - Balanced Aspect Ratio with generous arrow clearance */
-                    <div className="relative flex flex-col items-center w-full max-w-[370px] sm:max-w-[420px] md:max-w-[435px]">
+                    /* Apple Studio Display Pro Mockup */
+                    <motion.div
+                      layoutId={`wp-display-frame-${selectedWp.id}`}
+                      transition={{ type: "spring", stiffness: 320, damping: 30 }}
+                      className="relative flex flex-col items-center w-full max-w-[370px] sm:max-w-[420px] md:max-w-[435px]"
+                    >
                       <div className="w-full aspect-[16/10] rounded-xl border-[3.5px] border-[#222] bg-black shadow-[0_25px_60px_rgba(0,0,0,0.9)] relative overflow-hidden ring-1 ring-white/15">
                         <div className="absolute top-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-[#333] rounded-full ring-1 ring-white/10 z-30 pointer-events-none" />
                         <OptimizedImage
@@ -293,10 +339,14 @@ export default function WallpaperModal({
                       {/* Slim Pedestal */}
                       <div className="w-14 h-3.5 bg-gradient-to-b from-[#222] to-[#141414] rounded-b-sm shadow-md ring-1 ring-white/10" />
                       <div className="w-24 sm:w-28 h-1 bg-[#282828] rounded-full shadow-lg ring-1 ring-white/10" />
-                    </div>
+                    </motion.div>
                   ) : (
-                    /* Titanium Pro iPhone Mockup (Ultra-Thin Bezel - Clean Display) */
-                    <div className="relative w-[160px] sm:w-[190px] md:w-[210px] aspect-[9/19.5] rounded-[2.5rem] border-[3.5px] border-[#222] bg-black shadow-[0_30px_80px_rgba(0,0,0,0.9)] ring-1 ring-white/20 flex items-center justify-center overflow-hidden">
+                    /* Titanium Pro iPhone Mockup */
+                    <motion.div
+                      layoutId={`wp-display-frame-${selectedWp.id}`}
+                      transition={{ type: "spring", stiffness: 320, damping: 30 }}
+                      className="relative w-[160px] sm:w-[190px] md:w-[210px] aspect-[9/19.5] rounded-[2.5rem] border-[3.5px] border-[#222] bg-black shadow-[0_30px_80px_rgba(0,0,0,0.9)] ring-1 ring-white/20 flex items-center justify-center overflow-hidden"
+                    >
                       {/* Dynamic Island */}
                       <div className="absolute top-2.5 left-1/2 -translate-x-1/2 w-14 h-3 bg-black rounded-full z-30 ring-1 ring-white/10 flex items-center justify-end px-1.5 pointer-events-none">
                         <div className="w-1.5 h-1.5 rounded-full bg-[#080808] ring-1 ring-blue-900/30" />
@@ -317,11 +367,11 @@ export default function WallpaperModal({
                       />
                       {/* Glass Reflection */}
                       <div className="absolute inset-0 bg-gradient-to-tr from-white/[0.08] via-transparent to-transparent pointer-events-none z-20 rounded-[2.2rem]" />
-                    </div>
+                    </motion.div>
                   )}
                 </motion.div>
-              ) : (
-                /* Clean Full Art Canvas Mode - True Widescreen 16:10 Aspect Ratio */
+              ) : previewMode === "canvas" ? (
+                /* Clean Full Art Canvas Mode */
                 <motion.div
                   initial={{ opacity: 0, scale: 0.96 }}
                   animate={{ opacity: 1, scale: 1 }}
@@ -340,6 +390,91 @@ export default function WallpaperModal({
                       containerClassName="w-full h-full"
                     />
                     <div className="absolute inset-0 bg-gradient-to-tr from-white/[0.06] via-transparent to-transparent pointer-events-none z-20" />
+                  </div>
+                </motion.div>
+              ) : (
+                /* Interactive 8K Precision Art Loupe Mode */
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.96 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.3 }}
+                  key={`loupe-${selectedWp.id}`}
+                  className="w-full h-full relative flex flex-col items-center justify-center p-3 sm:p-6 select-none"
+                >
+                  <div
+                    ref={loupeContainerRef}
+                    onMouseMove={handleLoupeMouseMove}
+                    onTouchMove={handleLoupeTouchMove}
+                    onMouseEnter={() => setIsHoveringLoupe(true)}
+                    onMouseLeave={() => setIsHoveringLoupe(false)}
+                    className={`relative w-full ${
+                      selectedWp.device === "mobile"
+                        ? "max-w-[210px] sm:max-w-[240px] aspect-[9/19.5] rounded-[2.5rem]"
+                        : "max-w-[380px] sm:max-w-[440px] md:max-w-[470px] aspect-[16/10] rounded-xl"
+                    } overflow-hidden shadow-[0_25px_70px_rgba(0,0,0,0.95)] ring-1 ring-white/20 bg-black cursor-crosshair group touch-none`}
+                  >
+                    {/* Dimmed Base Canvas */}
+                    <OptimizedImage
+                      src={selectedWp.previewUrl}
+                      placeholder={selectedWp.tinyUrl}
+                      fallbackSrc={selectedWp.fallbackUrl || selectedWp.previewUrl}
+                      alt={selectedWp.title}
+                      priority={true}
+                      className={`w-full h-full object-cover transition-opacity duration-300 ${
+                        isHoveringLoupe ? "opacity-35" : "opacity-85"
+                      } ${isOledOptimized ? "oled-image" : ""}`}
+                      containerClassName="w-full h-full"
+                    />
+
+                    {/* Floating Magnifier Loupe Lens */}
+                    <motion.div
+                      animate={{
+                        left: `${loupePos.x}%`,
+                        top: `${loupePos.y}%`,
+                        opacity: isHoveringLoupe ? 1 : 0.85,
+                        scale: isHoveringLoupe ? 1 : 0.95,
+                      }}
+                      transition={{ type: "spring", stiffness: 450, damping: 32 }}
+                      className="absolute w-40 h-40 sm:w-48 sm:h-48 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white/60 shadow-[0_20px_50px_rgba(0,0,0,0.95)] ring-4 ring-white/15 overflow-hidden pointer-events-none z-30 bg-black"
+                    >
+                      {/* Magnified Optical Canvas View */}
+                      <div
+                        className="w-full h-full"
+                        style={{
+                          backgroundImage: `url(${selectedWp.originalUrl || selectedWp.previewUrl})`,
+                          backgroundPosition: `${loupePos.x}% ${loupePos.y}%`,
+                          backgroundSize: "280%",
+                          backgroundRepeat: "no-repeat",
+                        }}
+                      />
+
+                      {/* Optical Glass Flare */}
+                      <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-white/25 via-transparent to-transparent pointer-events-none" />
+
+                      {/* Reticle Crosshair */}
+                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <div className="w-5 h-5 relative">
+                          <div className="absolute top-1/2 left-0 w-2 h-px bg-white/80 -translate-y-1/2" />
+                          <div className="absolute top-1/2 right-0 w-2 h-px bg-white/80 -translate-y-1/2" />
+                          <div className="absolute top-0 left-1/2 h-2 w-px bg-white/80 -translate-x-1/2" />
+                          <div className="absolute bottom-0 left-1/2 h-2 w-px bg-white/80 -translate-x-1/2" />
+                          <div className="absolute inset-1 rounded-full border border-white/40" />
+                        </div>
+                      </div>
+
+                      {/* HUD Label Tag */}
+                      <div className="absolute bottom-2 inset-x-0 flex justify-center pointer-events-none">
+                        <span className="px-2 py-0.5 rounded-full bg-black/90 backdrop-blur-md border border-white/25 text-[7px] font-mono tracking-widest text-white/90 shadow-lg uppercase">
+                          8K MASTER // 2.8X
+                        </span>
+                      </div>
+                    </motion.div>
+                  </div>
+
+                  {/* Stage Footer Status Pill */}
+                  <div className="mt-3 flex items-center gap-2 text-[9px] font-mono tracking-widest text-white/50 uppercase">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    <span>Inspection Mode // {Math.round(loupePos.x)}% X : {Math.round(loupePos.y)}% Y</span>
                   </div>
                 </motion.div>
               )}
@@ -363,56 +498,67 @@ export default function WallpaperModal({
             >
               <ChevronRight size={18} strokeWidth={2} />
             </button>
-          </div>
-
-          {/* RIGHT: Wallpaper Details & Action Panel */}
-          <div className="w-full md:w-2/5 p-5 sm:p-6 md:p-8 flex flex-col justify-between bg-[#0b0b0b]">
+          </div>          {/* RIGHT: Wallpaper Details & Action Panel */}
+          <div className="w-full md:w-2/5 p-5 sm:p-6 md:p-8 flex flex-col justify-between bg-[#0b0b0b] relative">
             <div>
               {/* Header Info */}
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <span className="font-mono text-[9px] text-white/40 uppercase tracking-widest block mb-1">
-                    {selectedWp.serial || `V-${selectedWp.id}`} // {selectedWp.device === "desktop" ? "DESKTOP" : "PHONE"}
-                  </span>
-                  <h2 className="text-2xl sm:text-3xl font-sans font-bold uppercase tracking-tight text-white">
-                    {selectedWp.title}
-                  </h2>
-                </div>
+              <div className="mb-5 pr-10">
+                <span className="font-mono text-[9px] text-white/40 uppercase tracking-[0.2em] block mb-1">
+                  {selectedWp.serial || `V-${selectedWp.id}`} // {selectedWp.device === "desktop" ? "DESKTOP MASTER" : "PHONE MASTER"}
+                </span>
+                <h2 className="text-2xl sm:text-3xl font-sans font-bold uppercase tracking-tight text-white mb-3">
+                  {selectedWp.title}
+                </h2>
 
                 <div className="flex items-center gap-2">
                   {/* Share Artwork Button */}
-                  <button
-                    onClick={handleShare}
-                    className="flex items-center gap-1.5 py-1.5 px-3 rounded-full border border-white/10 bg-white/5 hover:bg-white/15 hover:border-white/30 text-white/80 hover:text-white transition-all cursor-pointer shadow-sm active:scale-95"
-                    title="Share Artwork"
-                  >
-                    <Share2 size={13} />
-                    <span className="font-mono text-[10px] tracking-wider uppercase font-semibold">
-                      {copied ? "COPIED" : "SHARE"}
-                    </span>
-                  </button>
+                  <Magnetic strength={0.25}>
+                    <button
+                      onClick={(e) => {
+                        triggerRadarPulse(e.clientX, e.clientY, "cyan");
+                        handleShare();
+                      }}
+                      className="h-8 px-3 rounded-full border border-white/10 bg-white/5 hover:bg-white/15 hover:border-white/30 text-white/80 hover:text-white transition-all cursor-pointer shadow-sm active:scale-95 flex items-center gap-1.5 text-xs font-mono"
+                      title="Share Artwork"
+                    >
+                      {copied ? (
+                        <>
+                          <Check size={12} className="text-emerald-400" />
+                          <span className="text-emerald-400 font-semibold text-[10px] uppercase">COPIED</span>
+                        </>
+                      ) : (
+                        <>
+                          <Share2 size={12} />
+                          <span className="text-[10px] uppercase font-semibold">SHARE</span>
+                        </>
+                      )}
+                    </button>
+                  </Magnetic>
 
                   {/* Favorite / Like Button with Live Counter */}
-                  <button
-                    onClick={() => {
-                      sound.playLike();
-                      toggleFavorite(selectedWp.id);
-                    }}
-                    className={`flex items-center gap-1.5 py-1.5 px-3 rounded-full border transition-all cursor-pointer ${
-                      isFavorite(selectedWp.id)
-                        ? "bg-red-500/20 text-red-400 border-red-500/40 shadow-[0_0_15px_rgba(239,68,68,0.2)]"
-                        : "bg-white/5 text-white/60 border-white/10 hover:text-white hover:border-white/30"
-                    }`}
-                    title="Like Wallpaper"
-                  >
-                    <Heart
-                      size={13}
-                      fill={isFavorite(selectedWp.id) ? "currentColor" : "none"}
-                    />
-                    <span className="font-mono text-[10px] tracking-wider font-semibold">
-                      {getLikes(selectedWp.id).toLocaleString()}
-                    </span>
-                  </button>
+                  <Magnetic strength={0.25}>
+                    <button
+                      onClick={(e) => {
+                        sound.playLike();
+                        triggerRadarPulse(e.clientX, e.clientY, "crimson");
+                        toggleFavorite(selectedWp.id);
+                      }}
+                      className={`h-8 px-3.5 rounded-full border transition-all cursor-pointer flex items-center gap-1.5 text-xs font-mono active:scale-95 ${
+                        isFavorite(selectedWp.id)
+                          ? "bg-red-500/20 text-red-400 border-red-500/40 shadow-[0_0_15px_rgba(239,68,68,0.2)]"
+                          : "bg-white/5 text-white/60 border-white/10 hover:text-white hover:border-white/30"
+                      }`}
+                      title="Like Wallpaper"
+                    >
+                      <Heart
+                        size={12}
+                        fill={isFavorite(selectedWp.id) ? "currentColor" : "none"}
+                      />
+                      <span className="text-[10px] font-semibold">
+                        {getLikes(selectedWp.id).toLocaleString()}
+                      </span>
+                    </button>
+                  </Magnetic>
                 </div>
               </div>
 
@@ -449,13 +595,15 @@ export default function WallpaperModal({
 
             {/* Bottom Actions & Download Button */}
             <div className="pt-3 space-y-3">
-              <button
-                className={`w-full py-3.5 px-4 font-sans font-bold uppercase tracking-wider text-xs rounded-lg transition-all flex justify-center items-center gap-2 shadow-xl cursor-pointer ${
+              <motion.button
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
+                className={`w-full py-3.5 px-4 font-sans font-bold uppercase tracking-wider text-xs rounded-xl transition-all flex justify-center items-center gap-2 shadow-xl cursor-pointer ${
                   downloadStatus === "success"
                     ? "bg-green-500/20 text-green-400 border border-green-500/50"
                     : downloadStatus === "error"
                       ? "bg-red-500/20 text-red-400 border border-red-500/50"
-                      : "bg-white text-black hover:bg-white/90 hover:shadow-[0_0_20px_rgba(255,255,255,0.4)]"
+                      : "bg-white text-black hover:bg-white/90 hover:shadow-[0_0_25px_rgba(255,255,255,0.4)]"
                 }`}
                 onClick={handleDownload}
                 disabled={downloadStatus === "downloading"}
@@ -471,7 +619,7 @@ export default function WallpaperModal({
                     <Download size={15} /> Download Original
                   </>
                 )}
-              </button>
+              </motion.button>
 
               {/* Quick Share Links Strip */}
               <div className="flex items-center justify-between pt-2 border-t border-white/5 text-[10px] font-mono text-white/50">

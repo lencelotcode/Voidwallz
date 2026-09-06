@@ -44,7 +44,8 @@ const fallbackDesktop: Wallpaper[] = [
     originalUrl:
       "https://images.unsplash.com/photo-1604871000636-074fa5117945?auto=format&fit=crop&q=100&w=3840",
     device: "desktop",
-    downloads: 0,
+    downloads: getBaseDownloads("desktop-vortex-1", "desktop"),
+    likes: getBaseLikes("desktop-vortex-1"),
     createdAt: new Date().toISOString(),
   },
   {
@@ -60,7 +61,8 @@ const fallbackDesktop: Wallpaper[] = [
     originalUrl:
       "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&q=100&w=3840",
     device: "desktop",
-    downloads: 0,
+    downloads: getBaseDownloads("desktop-angular-drift", "desktop"),
+    likes: getBaseLikes("desktop-angular-drift"),
     createdAt: new Date().toISOString(),
   },
   {
@@ -76,7 +78,8 @@ const fallbackDesktop: Wallpaper[] = [
     originalUrl:
       "https://images.unsplash.com/photo-1518818419601-72c8673f5852?auto=format&fit=crop&q=100&w=3840",
     device: "desktop",
-    downloads: 0,
+    downloads: getBaseDownloads("desktop-nested-void", "desktop"),
+    likes: getBaseLikes("desktop-nested-void"),
     createdAt: new Date().toISOString(),
   },
   {
@@ -92,7 +95,8 @@ const fallbackDesktop: Wallpaper[] = [
     originalUrl:
       "https://images.unsplash.com/photo-1634055627253-15df1f63fcb3?auto=format&fit=crop&q=100&w=3840",
     device: "desktop",
-    downloads: 0,
+    downloads: getBaseDownloads("desktop-chrome-aesthetic", "desktop"),
+    likes: getBaseLikes("desktop-chrome-aesthetic"),
     createdAt: new Date().toISOString(),
   },
 ];
@@ -111,7 +115,8 @@ const fallbackMobile: Wallpaper[] = [
     originalUrl:
       "https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?auto=format&fit=crop&q=100&w=2160&h=3840",
     device: "mobile",
-    downloads: 0,
+    downloads: getBaseDownloads("mobile-singularity", "mobile"),
+    likes: getBaseLikes("mobile-singularity"),
     createdAt: new Date().toISOString(),
   },
   {
@@ -127,7 +132,8 @@ const fallbackMobile: Wallpaper[] = [
     originalUrl:
       "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=100&w=2160&h=3840",
     device: "mobile",
-    downloads: 0,
+    downloads: getBaseDownloads("mobile-obsidian-wave", "mobile"),
+    likes: getBaseLikes("mobile-obsidian-wave"),
     createdAt: new Date().toISOString(),
   },
   {
@@ -143,7 +149,8 @@ const fallbackMobile: Wallpaper[] = [
     originalUrl:
       "https://images.unsplash.com/photo-1506443432602-ac2fcd6f54e0?auto=format&fit=crop&q=100&w=2160&h=3840",
     device: "mobile",
-    downloads: 0,
+    downloads: getBaseDownloads("mobile-grain-matrix", "mobile"),
+    likes: getBaseLikes("mobile-grain-matrix"),
     createdAt: new Date().toISOString(),
   },
   {
@@ -159,7 +166,8 @@ const fallbackMobile: Wallpaper[] = [
     originalUrl:
       "https://images.unsplash.com/photo-1557672172-298e090bd0f1?auto=format&fit=crop&q=100&w=2160&h=3840",
     device: "mobile",
-    downloads: 0,
+    downloads: getBaseDownloads("mobile-void-aura", "mobile"),
+    likes: getBaseLikes("mobile-void-aura"),
     createdAt: new Date().toISOString(),
   },
 ];
@@ -230,6 +238,10 @@ function mapFileToWallpaper(
     ? supabase.storage.from(BUCKET_NAME).getPublicUrl(previewPath).data.publicUrl
     : "";
 
+  const originalPublicUrl = supabase
+    ? supabase.storage.from(BUCKET_NAME).getPublicUrl(originalPath).data.publicUrl
+    : "";
+
   // Determine if it's mobile format
   const displayFormat = folder === "mobile" ? `${format} MOBILE` : format;
   const id = `${folder}-${baseName}`;
@@ -248,7 +260,7 @@ function mapFileToWallpaper(
     likes,
     previewUrl: previewPublicUrl,
     tinyUrl: previewPublicUrl,
-    originalUrl: previewPublicUrl,
+    originalUrl: originalPublicUrl || previewPublicUrl,
     fallbackUrl: previewPublicUrl,
     device: folder,
     createdAt: file.created_at,

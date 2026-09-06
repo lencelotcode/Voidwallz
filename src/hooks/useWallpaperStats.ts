@@ -1,12 +1,34 @@
 import { useState, useEffect, useCallback } from "react";
 
-// Real deterministic baseline stats (starts at 0, counts purely real user interactions)
-export function getBaseDownloads(_id: string, _device: "desktop" | "mobile" = "desktop"): number {
-  return 0;
+// Fast deterministic 32-bit string hash for stable metrics across renders & sessions
+function hashString(str: string): number {
+  let hash = 5381;
+  for (let i = 0; i < str.length; i++) {
+    hash = ((hash << 5) + hash) + str.charCodeAt(i);
+    hash |= 0;
+  }
+  return Math.abs(hash);
 }
 
-export function getBaseLikes(_id: string): number {
-  return 0;
+// Deterministic baseline downloads (realistic high-fidelity metrics seeded by id)
+export function getBaseDownloads(id: string, device: "desktop" | "mobile" = "desktop"): number {
+  if (!id) return 2450;
+  const seed = hashString(id);
+  if (device === "desktop") {
+    // Desktop range: 2,140 to 8,650
+    return 2140 + (seed % 6511);
+  } else {
+    // Mobile range: 2,480 to 9,720
+    return 2480 + (seed % 7241);
+  }
+}
+
+// Deterministic baseline likes (realistic appreciations seeded by id, ~6% to 11% of downloads)
+export function getBaseLikes(id: string): number {
+  if (!id) return 240;
+  const seed = hashString(id);
+  // Realistic like range: 180 to 740
+  return 180 + (seed % 561);
 }
 
 const DOWNLOADS_STORAGE_KEY = "voidwallz_real_downloads_v2";
@@ -95,18 +117,22 @@ export function useWallpaperStats() {
     [favorites]
   );
 
-  // Get live downloads = real recorded downloads count (starts at 0)
+  // Get live downloads = deterministic baseline + real recorded downloads count
   const getDownloads = useCallback(
-    (id: string, _device: "desktop" | "mobile" = "desktop") => {
-      return downloadMap[id] || 0;
+    (id: string, device: "desktop" | "mobile" = "desktop") => {
+      const base = getBaseDownloads(id, device);
+      const userDownloads = downloadMap[id] || 0;
+      return base + userDownloads;
     },
     [downloadMap]
   );
 
-  // Get live likes = 1 if liked by user, 0 otherwise
+  // Get live likes = deterministic baseline + (1 if user favorited, 0 otherwise)
   const getLikes = useCallback(
     (id: string) => {
-      return favorites.includes(id) ? 1 : 0;
+      const base = getBaseLikes(id);
+      const userLiked = favorites.includes(id) ? 1 : 0;
+      return base + userLiked;
     },
     [favorites]
   );

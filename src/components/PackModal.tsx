@@ -185,7 +185,7 @@ export default function PackModal({
       console.error("Pack zip generation failed:", err);
       alert("Could not generate ZIP archive. Downloading individual wallpapers instead...");
       for (const item of selectedPack.items) {
-        downloadWallpaperAsPng(item.originalUrl || item.previewUrl, item.title);
+        downloadWallpaperAsPng(item.originalUrl || item.previewUrl, item.title, item.previewUrl);
       }
     } finally {
       setIsDownloadingZip(false);
@@ -200,7 +200,7 @@ export default function PackModal({
 
     const downloadUrl = currentWp.originalUrl || currentWp.previewUrl;
     try {
-      await downloadWallpaperAsPng(downloadUrl, currentWp.title);
+      await downloadWallpaperAsPng(downloadUrl, currentWp.title, currentWp.previewUrl);
       recordDownload(currentWp.id);
       sound.playSuccess();
       setDownloadSuccess(`Part 0${activeIndex + 1} Downloaded!`);

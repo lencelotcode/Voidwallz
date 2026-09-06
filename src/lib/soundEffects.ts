@@ -272,6 +272,39 @@ class SoundEngine {
       });
     } catch (_) {}
   }
+
+  // 8. Cybernetic Radar Wave Ping (Action Trigger / Download / Like Wavefront)
+  public playRadarPing() {
+    if (this.isMuted) return;
+    try {
+      this.initContext();
+      if (!this.ctx) return;
+
+      const t = this.ctx.currentTime;
+      // High-tech resonant sine ping with subtle delay harmonic
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      const filter = this.ctx.createBiquadFilter();
+
+      filter.type = "bandpass";
+      filter.frequency.setValueAtTime(2400, t);
+      filter.Q.setValueAtTime(8, t);
+
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(1760, t); // A6
+      osc.frequency.exponentialRampToValueAtTime(880, t + 0.18); // A5
+
+      gain.gain.setValueAtTime(0.09, t);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.22);
+
+      osc.connect(filter);
+      filter.connect(gain);
+      gain.connect(this.ctx.destination);
+
+      osc.start(t);
+      osc.stop(t + 0.23);
+    } catch (_) {}
+  }
 }
 
 export const sound = new SoundEngine();

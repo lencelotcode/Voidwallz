@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { VoidPack } from "../types";
 import { supabase } from "../lib/supabase";
+import { getBaseDownloads } from "./useWallpaperStats";
 
 export const PACKS_BUCKET_NAME = "wallpapers";
 export const DESKTOP_PACKS_FOLDER = "packs/desktop";
@@ -101,7 +102,7 @@ export function useVoidPacks() {
             category: row.category || "General",
             device: row.device,
             format: row.format || (row.device === "desktop" ? "8K MASTER SUITE" : "4K RETINA DECK"),
-            downloads: row.downloads || 0,
+            downloads: row.downloads || getBaseDownloads(row.id, row.device),
             createdAt: row.created_at,
             featuredImage: row.featured_image || row.items?.[0]?.previewUrl,
             items: row.items || [],
@@ -141,7 +142,7 @@ export function useVoidPacks() {
                     serial: `ID: VP-D${i + 1}`,
                     category: "Desktop Suite",
                     format: "8K AVIF",
-                    downloads: 0,
+                    downloads: getBaseDownloads(`${folder.name}-${f.name}`, "desktop"),
                     previewUrl: pubUrl,
                     tinyUrl: pubUrl,
                     originalUrl: pubUrl,
@@ -158,7 +159,7 @@ export function useVoidPacks() {
                 category: "Desktop Suite",
                 device: "desktop",
                 format: "8K MASTER SUITE",
-                downloads: 0,
+                downloads: getBaseDownloads(`pack-desktop-${folder.name}`, "desktop"),
                 createdAt: new Date().toISOString(),
                 featuredImage: items[0]?.previewUrl || "",
                 items,
@@ -187,7 +188,7 @@ export function useVoidPacks() {
                   serial: `ID: VP-D${i + 1}`,
                   category: "Desktop Suite",
                   format: "8K AVIF",
-                  downloads: 0,
+                  downloads: getBaseDownloads(`direct-d-${f.name}`, "desktop"),
                   previewUrl: pubUrl,
                   tinyUrl: pubUrl,
                   originalUrl: pubUrl,
@@ -203,7 +204,7 @@ export function useVoidPacks() {
                 category: "Desktop Suite",
                 device: "desktop",
                 format: "8K MASTER SUITE",
-                downloads: 0,
+                downloads: getBaseDownloads(`pack-direct-desktop-${groupName.toLowerCase().replace(/\s+/g, "-")}`, "desktop"),
                 createdAt: new Date().toISOString(),
                 featuredImage: items[0]?.previewUrl || "",
                 items,
@@ -239,7 +240,7 @@ export function useVoidPacks() {
                     serial: `ID: VP-M${i + 1}`,
                     category: "Phone Deck",
                     format: "4K MOBILE",
-                    downloads: 0,
+                    downloads: getBaseDownloads(`${folder.name}-${f.name}`, "mobile"),
                     previewUrl: pubUrl,
                     tinyUrl: pubUrl,
                     originalUrl: pubUrl,
@@ -256,7 +257,7 @@ export function useVoidPacks() {
                 category: "Phone Deck",
                 device: "mobile",
                 format: "4K RETINA DECK",
-                downloads: 0,
+                downloads: getBaseDownloads(`pack-mobile-${folder.name}`, "mobile"),
                 createdAt: new Date().toISOString(),
                 featuredImage: items[0]?.previewUrl || "",
                 items,
@@ -284,7 +285,7 @@ export function useVoidPacks() {
                   serial: `ID: VP-M${i + 1}`,
                   category: "Phone Deck",
                   format: "4K MOBILE",
-                  downloads: 0,
+                  downloads: getBaseDownloads(`direct-m-${f.name}`, "mobile"),
                   previewUrl: pubUrl,
                   tinyUrl: pubUrl,
                   originalUrl: pubUrl,
@@ -300,7 +301,7 @@ export function useVoidPacks() {
                 category: "Phone Deck",
                 device: "mobile",
                 format: "4K RETINA DECK",
-                downloads: 0,
+                downloads: getBaseDownloads(`pack-direct-mobile-${groupName.toLowerCase().replace(/\s+/g, "-")}`, "mobile"),
                 createdAt: new Date().toISOString(),
                 featuredImage: items[0]?.previewUrl || "",
                 items,

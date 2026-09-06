@@ -2,6 +2,8 @@ import { motion, AnimatePresence } from "motion/react";
 import React, { useState, useMemo, useEffect, useRef } from "react";
 import { Search, Heart, Download, ArrowUpRight } from "lucide-react";
 import OptimizedImage from "./OptimizedImage";
+import Magnetic from "./Magnetic";
+import { triggerRadarPulse } from "../lib/radarPulse";
 import { Wallpaper } from "../types";
 import { useWallpapers } from "../hooks/useWallpapers";
 import { useWallpaperStats } from "../hooks/useWallpaperStats";
@@ -41,6 +43,7 @@ export default function Gallery({
   const handleQuickDownload = async (e: React.MouseEvent, wp: Wallpaper) => {
     e.stopPropagation();
     sound.playShutter();
+    triggerRadarPulse(e.clientX, e.clientY, "emerald");
     const downloadUrl = wp.originalUrl || wp.previewUrl;
     if (!downloadUrl) return;
 
@@ -299,38 +302,47 @@ export default function Gallery({
                   <div className="absolute top-5 right-5 z-30 flex items-center justify-end">
                     {/* Download button slides & expands leftward on card hover */}
                     <div className="overflow-hidden transition-all duration-300 ease-out max-w-0 opacity-0 group-hover:max-w-[40px] group-hover:opacity-100 group-hover:mr-2">
-                      <button
-                        onClick={(e) => handleQuickDownload(e, wp)}
-                        data-cursor="GET"
-                        title="1-Click Download"
-                        className="w-8 h-8 rounded-full bg-black/50 text-white/70 border border-white/10 hover:border-white/40 hover:text-white hover:scale-110 active:scale-95 backdrop-blur-md transition-all duration-200 flex items-center justify-center"
-                      >
-                        <Download size={13} />
-                      </button>
+                      <Magnetic strength={0.3}>
+                        <button
+                          onClick={(e) => handleQuickDownload(e, wp)}
+                          data-cursor="GET"
+                          title="1-Click Download"
+                          className="w-8 h-8 rounded-full bg-black/50 text-white/70 border border-white/10 hover:border-white/40 hover:text-white hover:scale-110 active:scale-95 backdrop-blur-md transition-all duration-200 flex items-center justify-center"
+                        >
+                          <Download size={13} />
+                        </button>
+                      </Magnetic>
                     </div>
 
                     {/* Favorite Button anchored on right */}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        sound.playLike();
-                        toggleFavorite(wp.id);
-                      }}
-                      data-cursor={isFavorite(wp.id) ? "SAVED" : "SAVE"}
-                      className={`w-8 h-8 rounded-full backdrop-blur-md border transition-all duration-300 flex items-center justify-center ${
-                        isFavorite(wp.id)
-                          ? "bg-red-500/20 text-red-500 border-red-500/40 scale-105"
-                          : "bg-black/50 text-white/60 border-white/10 hover:border-white/30 hover:text-white hover:scale-110 active:scale-95"
-                      }`}
-                    >
-                      <Heart
-                        size={13}
-                        fill={isFavorite(wp.id) ? "currentColor" : "none"}
-                      />
-                    </button>
+                    <Magnetic strength={0.3}>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          sound.playLike();
+                          triggerRadarPulse(e.clientX, e.clientY, "crimson");
+                          toggleFavorite(wp.id);
+                        }}
+                        data-cursor={isFavorite(wp.id) ? "SAVED" : "SAVE"}
+                        className={`w-8 h-8 rounded-full backdrop-blur-md border transition-all duration-300 flex items-center justify-center ${
+                          isFavorite(wp.id)
+                            ? "bg-red-500/20 text-red-500 border-red-500/40 scale-105"
+                            : "bg-black/50 text-white/60 border-white/10 hover:border-white/30 hover:text-white hover:scale-110 active:scale-95"
+                        }`}
+                      >
+                        <Heart
+                          size={13}
+                          fill={isFavorite(wp.id) ? "currentColor" : "none"}
+                        />
+                      </button>
+                    </Magnetic>
                   </div>
 
-                  <div className="relative z-10 flex flex-col items-center transition-transform duration-700 group-hover:scale-[1.05] group-hover:-translate-y-2">
+                  <motion.div
+                    layoutId={`wp-display-frame-${wp.id}`}
+                    transition={{ type: "spring", stiffness: 320, damping: 30 }}
+                    className="relative z-10 flex flex-col items-center transition-transform duration-700 group-hover:scale-[1.05] group-hover:-translate-y-2"
+                  >
                     <div className="w-[200px] md:w-[260px] aspect-[16/10] border-[4px] md:border-[6px] border-black rounded-lg relative bg-black shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden ring-1 ring-white/10 luxury-border-glow">
                       <OptimizedImage
                         src={wp.previewUrl}
@@ -343,7 +355,7 @@ export default function Gallery({
                     </div>
                     <div className="w-12 h-6 md:h-8 bg-gradient-to-b from-gray-800 to-black rounded-b-sm shadow-xl relative z-0 -mt-1" />
                     <div className="w-32 h-1 bg-gray-700 mx-auto rounded-t-full shadow-2xl" />
-                  </div>
+                  </motion.div>
 
                   <div className="absolute inset-0 z-20 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none bg-black/30 backdrop-blur-sm">
                     <span className="bg-black text-white text-[10px] px-3 py-1 font-mono uppercase tracking-widest border border-white/10 mb-1">
@@ -419,38 +431,47 @@ export default function Gallery({
                   <div className="absolute top-5 right-5 z-30 flex items-center justify-end">
                     {/* Download button slides & expands leftward on card hover */}
                     <div className="overflow-hidden transition-all duration-300 ease-out max-w-0 opacity-0 group-hover:max-w-[40px] group-hover:opacity-100 group-hover:mr-2">
-                      <button
-                        onClick={(e) => handleQuickDownload(e, wp)}
-                        data-cursor="GET"
-                        title="1-Click Download"
-                        className="w-8 h-8 rounded-full bg-black/50 text-white/70 border border-white/10 hover:border-white/40 hover:text-white hover:scale-110 active:scale-95 backdrop-blur-md transition-all duration-200 flex items-center justify-center"
-                      >
-                        <Download size={13} />
-                      </button>
+                      <Magnetic strength={0.3}>
+                        <button
+                          onClick={(e) => handleQuickDownload(e, wp)}
+                          data-cursor="GET"
+                          title="1-Click Download"
+                          className="w-8 h-8 rounded-full bg-black/50 text-white/70 border border-white/10 hover:border-white/40 hover:text-white hover:scale-110 active:scale-95 backdrop-blur-md transition-all duration-200 flex items-center justify-center"
+                        >
+                          <Download size={13} />
+                        </button>
+                      </Magnetic>
                     </div>
 
                     {/* Favorite Button anchored on right */}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        sound.playLike();
-                        toggleFavorite(wp.id);
-                      }}
-                      data-cursor={isFavorite(wp.id) ? "SAVED" : "SAVE"}
-                      className={`w-8 h-8 rounded-full backdrop-blur-md border transition-all duration-300 flex items-center justify-center ${
-                        isFavorite(wp.id)
-                          ? "bg-red-500/20 text-red-500 border-red-500/40 scale-105"
-                          : "bg-black/50 text-white/60 border-white/10 hover:border-white/30 hover:text-white hover:scale-110 active:scale-95"
-                      }`}
-                    >
-                      <Heart
-                        size={13}
-                        fill={isFavorite(wp.id) ? "currentColor" : "none"}
-                      />
-                    </button>
+                    <Magnetic strength={0.3}>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          sound.playLike();
+                          triggerRadarPulse(e.clientX, e.clientY, "crimson");
+                          toggleFavorite(wp.id);
+                        }}
+                        data-cursor={isFavorite(wp.id) ? "SAVED" : "SAVE"}
+                        className={`w-8 h-8 rounded-full backdrop-blur-md border transition-all duration-300 flex items-center justify-center ${
+                          isFavorite(wp.id)
+                            ? "bg-red-500/20 text-red-500 border-red-500/40 scale-105"
+                            : "bg-black/50 text-white/60 border-white/10 hover:border-white/30 hover:text-white hover:scale-110 active:scale-95"
+                        }`}
+                      >
+                        <Heart
+                          size={13}
+                          fill={isFavorite(wp.id) ? "currentColor" : "none"}
+                        />
+                      </button>
+                    </Magnetic>
                   </div>
 
-                  <div className="relative z-10 flex flex-col items-center transition-transform duration-700 group-hover:scale-[1.05] group-hover:-translate-y-2">
+                  <motion.div
+                    layoutId={`wp-display-frame-${wp.id}`}
+                    transition={{ type: "spring", stiffness: 320, damping: 30 }}
+                    className="relative z-10 flex flex-col items-center transition-transform duration-700 group-hover:scale-[1.05] group-hover:-translate-y-2"
+                  >
                     <div className="w-[160px] aspect-[9/19.5] border-[6px] border-black rounded-[2rem] relative bg-black shadow-[0_20px_50px_rgba(0,0,0,0.5)] ring-1 ring-white/10 flex items-center justify-center luxury-border-glow">
                       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-14 h-4 bg-black rounded-b-xl z-20" />
                       <OptimizedImage
@@ -462,7 +483,7 @@ export default function Gallery({
                         containerClassName="w-full h-full rounded-[1.5rem]"
                       />
                     </div>
-                  </div>
+                  </motion.div>
 
                   <div className="absolute inset-0 z-20 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none bg-black/30 backdrop-blur-sm">
                     <span className="bg-black text-white text-[10px] px-3 py-1 font-mono uppercase tracking-widest border border-white/10 mb-1">

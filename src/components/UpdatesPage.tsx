@@ -29,10 +29,33 @@ interface UpdateLog {
 
 const UPDATES_DATA: UpdateLog[] = [
   {
+    version: "v2.5.0",
+    codename: "OPTICAL PRECISION & KINETIC RADAR",
+    date: "September 2026",
+    status: "LATEST",
+    category: "VISUAL FX",
+    icon: Sparkles,
+    summary: "Integrated shared element spatial morphing, interactive 8K precision art loupe inspection, physics-based magnetic controls, and cybernetic concentric radar shockwaves.",
+    highlights: [
+      "Shared Element Modal Morph: Seamless layoutId spatial transitions between gallery cards and the detail modal visual stage.",
+      "Interactive 8K Art Loupe: Optical magnifying glass with 2.8x magnification, optical reticle crosshair, and real-time HUD coordinates.",
+      "Magnetic Control Physics: Sub-pixel magnetic spring attraction pulling quick-download, favorite, and share buttons towards the cursor.",
+      "Concentric Radar Wavefronts: Expanding neon shockwave rings originating from click coordinates on download and appreciation.",
+      "Cybernetic Acoustic Ping: High-tech resonant sonar pulse synthesized via Web Audio API.",
+    ],
+    specs: [
+      { label: "Loupe Zoom", val: "2.8X Optical Precision" },
+      { label: "Spatial Morph", val: "Framer Motion layoutId" },
+      { label: "Magnetic Pull", val: "Spring Damped (280/20)" },
+      { label: "Shockwave Waves", val: "Concentric Dual Wavefronts" },
+    ],
+    actionLink: { label: "Experience Gallery", path: "/" },
+  },
+  {
     version: "v2.4.1",
     codename: "TACTILE ACOUSTICS & SPECULAR SHEEN",
     date: "August 2026",
-    status: "LATEST",
+    status: "STABLE",
     category: "ENGINE",
     icon: Zap,
     summary: "Synthesized zero-latency Web Audio API ASMR sound engine, dopamine completion chimes, fluid segmented category tabs, and holographic specular glass sheen.",
