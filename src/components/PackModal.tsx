@@ -237,7 +237,7 @@ export default function PackModal({
           onClick={(e) => e.stopPropagation()}
         >
           {/* LEFT: Visual Stage Section */}
-          <div className="w-full md:w-3/5 min-h-[260px] sm:min-h-[340px] md:min-h-[480px] relative flex flex-col items-center justify-center overflow-hidden border-b md:border-b-0 md:border-r border-white/10 group bg-[#040404]">
+          <div className="w-full md:w-3/5 min-h-[320px] sm:min-h-[360px] md:min-h-[480px] relative flex flex-col items-center justify-center overflow-hidden border-b md:border-b-0 md:border-r border-white/10 group bg-[#040404]">
             {/* Ambient Background Glow */}
             <motion.div
               initial={{ opacity: 0 }}
@@ -266,6 +266,7 @@ export default function PackModal({
 
                 <button
                   onClick={handleClose}
+                  aria-label="Close modal"
                   className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-black/80 backdrop-blur-md border border-white/15 flex items-center justify-center text-white/80 hover:text-white hover:border-white/40 active:scale-95 transition-all shadow-xl cursor-pointer"
                   title="Close Modal"
                 >
@@ -275,7 +276,7 @@ export default function PackModal({
             </div>
 
             {/* Stage Center Display */}
-            <div className="relative z-10 w-full h-full p-4 pt-12 pb-4 sm:p-6 sm:pt-14 sm:pb-6 flex items-center justify-center">
+            <div className="relative z-10 w-full h-full p-3 pt-14 pb-4 sm:p-6 sm:pt-14 sm:pb-6 flex items-center justify-center">
               {previewMode === "frame" || selectedPack.device === "mobile" ? (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.95 }}
@@ -286,7 +287,7 @@ export default function PackModal({
                 >
                   {selectedPack.device === "desktop" ? (
                     /* Studio Display Mockup - Spacious & Balanced */
-                    <div className="relative flex flex-col items-center w-full max-w-[270px] sm:max-w-[380px] md:max-w-[440px]">
+                    <div className="relative flex flex-col items-center w-full max-w-[260px] sm:max-w-[380px] md:max-w-[440px]">
                       <div className="w-full aspect-[16/10] rounded-lg sm:rounded-xl border-[3px] sm:border-[3.5px] border-[#222] bg-black shadow-[0_20px_50px_rgba(0,0,0,0.9)] relative overflow-hidden ring-1 ring-white/15">
                         <div className="absolute top-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-[#333] rounded-full ring-1 ring-white/10 z-30 pointer-events-none" />
                         <OptimizedImage
@@ -306,9 +307,9 @@ export default function PackModal({
                     </div>
                   ) : (
                     /* Titanium Pro iPhone Mockup - Clean Proportions */
-                    <div className="relative w-[140px] sm:w-[175px] md:w-[200px] aspect-[9/19.5] rounded-[2.2rem] border-[3px] sm:border-[3.5px] border-[#222] bg-black shadow-[0_25px_60px_rgba(0,0,0,0.9)] ring-1 ring-white/20 flex items-center justify-center overflow-hidden">
+                    <div className="relative h-[240px] sm:h-[290px] md:h-[360px] w-auto aspect-[9/19.5] rounded-[2rem] sm:rounded-[2.4rem] border-[3px] sm:border-[3.5px] border-[#222] bg-black shadow-[0_25px_60px_rgba(0,0,0,0.9)] ring-1 ring-white/20 flex items-center justify-center overflow-hidden">
                       {/* Dynamic Island */}
-                      <div className="absolute top-2 left-1/2 -translate-x-1/2 w-12 h-2.5 bg-black rounded-full z-30 ring-1 ring-white/10 flex items-center justify-end px-1 pointer-events-none">
+                      <div className="absolute top-2 left-1/2 -translate-x-1/2 w-11 sm:w-12 h-2.5 bg-black rounded-full z-30 ring-1 ring-white/10 flex items-center justify-end px-1 pointer-events-none">
                         <div className="w-1.5 h-1.5 rounded-full bg-[#080808] ring-1 ring-blue-900/30" />
                       </div>
 
@@ -323,10 +324,10 @@ export default function PackModal({
                         alt={currentWp.title}
                         priority={true}
                         className={`w-full h-full object-cover ${isOledOptimized ? "oled-image" : ""}`}
-                        containerClassName="w-full h-full rounded-[1.9rem]"
+                        containerClassName="w-full h-full rounded-[1.7rem] sm:rounded-[2.1rem]"
                       />
                       {/* Glass Reflection */}
-                      <div className="absolute inset-0 bg-gradient-to-tr from-white/[0.08] via-transparent to-transparent pointer-events-none z-20 rounded-[1.9rem]" />
+                      <div className="absolute inset-0 bg-gradient-to-tr from-white/[0.08] via-transparent to-transparent pointer-events-none z-20 rounded-[1.7rem] sm:rounded-[2.1rem]" />
                     </div>
                   )}
                 </motion.div>
@@ -337,9 +338,9 @@ export default function PackModal({
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.3 }}
                   key={`canvas-${currentWp.id}`}
-                  className="w-full h-full relative flex items-center justify-center p-3 sm:p-6"
+                  className="w-full h-full relative flex items-center justify-center p-2 sm:p-6"
                 >
-                  <div className="relative w-full max-w-[370px] sm:max-w-[430px] md:max-w-[460px] aspect-[16/10] rounded-xl overflow-hidden shadow-[0_25px_70px_rgba(0,0,0,0.9)] ring-1 ring-white/20 bg-black flex items-center justify-center">
+                  <div className="relative w-full max-w-[260px] sm:max-w-[430px] md:max-w-[460px] aspect-[16/10] rounded-xl overflow-hidden shadow-[0_25px_70px_rgba(0,0,0,0.9)] ring-1 ring-white/20 bg-black flex items-center justify-center">
                     <OptimizedImage
                       src={currentWp.previewUrl}
                       placeholder={currentWp.tinyUrl}
@@ -400,6 +401,7 @@ export default function PackModal({
                   {/* Share Pack Button */}
                   <button
                     onClick={handleSharePack}
+                    aria-label="Share this wallpaper pack"
                     className="flex items-center gap-1 py-1 px-2.5 rounded-full border border-white/10 bg-white/5 hover:bg-white/15 hover:border-white/30 text-white/80 hover:text-white transition-all cursor-pointer text-[9px] font-mono tracking-wider active:scale-95 shadow-sm"
                     title="Share Pack"
                   >
@@ -429,7 +431,7 @@ export default function PackModal({
                   </span>
                 </div>
 
-                <div className="grid grid-cols-4 sm:grid-cols-5 gap-1.5">
+                <div className="grid grid-cols-5 gap-1 sm:gap-1.5">
                   {selectedPack.items.map((item, idx) => (
                     <button
                       key={item.id}
@@ -437,6 +439,7 @@ export default function PackModal({
                         sound.playTap();
                         setActiveIndex(idx);
                       }}
+                      aria-label={`View wallpaper ${idx + 1}: ${item.title}`}
                       className={`relative rounded-md overflow-hidden border transition-all duration-200 group/thumb cursor-pointer ${
                         selectedPack.device === "mobile" ? "aspect-[9/16]" : "aspect-[16/10]"
                       } ${

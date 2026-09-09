@@ -225,21 +225,8 @@ export default function WallpaperModal({
           className="w-full max-w-5xl max-h-[92vh] bg-[#090909] border border-white/15 flex flex-col md:flex-row shadow-[0_30px_100px_rgba(0,0,0,0.95)] relative z-10 overflow-y-auto md:overflow-hidden rounded-2xl"
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Universal Top-Right Close Button */}
-          <div className="absolute top-4 right-4 z-50 pointer-events-auto">
-            <Magnetic strength={0.25}>
-              <button
-                onClick={handleClose}
-                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 flex items-center justify-center text-white/80 hover:text-white active:scale-95 transition-all shadow-xl cursor-pointer"
-                title="Close Modal"
-              >
-                <X size={15} />
-              </button>
-            </Magnetic>
-          </div>
-
           {/* LEFT: Visual Stage Section */}
-          <div className="w-full md:w-3/5 min-h-[300px] sm:min-h-[380px] md:min-h-[520px] relative flex flex-col items-center justify-center overflow-hidden border-b md:border-b-0 md:border-r border-white/10 group bg-[#040404]">
+          <div className="w-full md:w-3/5 min-h-[340px] sm:min-h-[380px] md:min-h-[520px] relative flex flex-col items-center justify-center overflow-hidden border-b md:border-b-0 md:border-r border-white/10 group bg-[#040404]">
             {/* Ambient Background Glow */}
             <motion.div
               initial={{ opacity: 0 }}
@@ -249,8 +236,8 @@ export default function WallpaperModal({
               style={{ backgroundImage: `url(${selectedWp.tinyUrl || selectedWp.previewUrl})` }}
             />
 
-            {/* TOP BAR: View Switcher + Spec Badge */}
-            <div className="absolute top-0 inset-x-0 p-3 sm:p-4 flex items-center justify-between z-40 bg-gradient-to-b from-black/80 via-black/30 to-transparent pointer-events-none">
+            {/* TOP BAR: Unified View Switcher + Close Controls */}
+            <div className="absolute top-0 inset-x-0 p-3 sm:p-4 flex items-center justify-between z-40 bg-gradient-to-b from-black/90 via-black/40 to-transparent pointer-events-none">
               {/* Left: View Switcher */}
               <div className="flex items-center gap-1 p-1 bg-black/80 backdrop-blur-md rounded-full border border-white/10 pointer-events-auto shadow-xl">
                 <button
@@ -297,17 +284,26 @@ export default function WallpaperModal({
                 </button>
               </div>
 
-              {/* Right: Spec Badge */}
-              <div className="flex items-center pointer-events-auto pr-1">
-                <span className="spec-badge h-6 px-3 text-[9px] font-mono rounded-full text-white/90 tracking-widest bg-black/80 backdrop-blur-md border border-white/10 shadow-xl flex items-center gap-1.5 leading-none">
+              {/* Right: Spec Badge (desktop/tablet) + Integrated Close Button */}
+              <div className="flex items-center gap-2 pointer-events-auto">
+                <span className="hidden sm:inline-flex spec-badge h-6 px-3 text-[9px] font-mono rounded-full text-white/90 tracking-widest bg-black/80 backdrop-blur-md border border-white/10 shadow-xl items-center gap-1.5 leading-none">
                   {selectedWp.device === "desktop" ? <Monitor size={10} /> : <Smartphone size={10} />}
                   <span>{selectedWp.format || (selectedWp.device === "mobile" ? "4K MOBILE" : "8K MASTER")}</span>
                 </span>
+
+                <button
+                  onClick={handleClose}
+                  className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-black/80 hover:bg-white/20 backdrop-blur-md border border-white/15 hover:border-white/40 flex items-center justify-center text-white/80 hover:text-white active:scale-95 transition-all shadow-xl cursor-pointer"
+                  title="Close Modal"
+                  aria-label="Close wallpaper modal"
+                >
+                  <X size={14} />
+                </button>
               </div>
             </div>
 
             {/* Stage Center Display */}
-            <div className="relative z-10 w-full h-full p-4 pt-16 pb-6 sm:p-8 sm:pt-20 sm:pb-8 flex items-center justify-center">
+            <div className="relative z-10 w-full h-full p-3 pt-14 pb-4 sm:p-8 sm:pt-20 sm:pb-8 flex items-center justify-center">
               {previewMode === "frame" ? (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.95 }}
@@ -321,9 +317,9 @@ export default function WallpaperModal({
                     <motion.div
                       layoutId={`wp-display-frame-${selectedWp.id}`}
                       transition={{ type: "spring", stiffness: 320, damping: 30 }}
-                      className="relative flex flex-col items-center w-full max-w-[370px] sm:max-w-[420px] md:max-w-[435px]"
+                      className="relative flex flex-col items-center w-full max-w-[260px] sm:max-w-[390px] md:max-w-[435px]"
                     >
-                      <div className="w-full aspect-[16/10] rounded-xl border-[3.5px] border-[#222] bg-black shadow-[0_25px_60px_rgba(0,0,0,0.9)] relative overflow-hidden ring-1 ring-white/15">
+                      <div className="w-full aspect-[16/10] rounded-xl border-[3px] sm:border-[3.5px] border-[#222] bg-black shadow-[0_25px_60px_rgba(0,0,0,0.9)] relative overflow-hidden ring-1 ring-white/15">
                         <div className="absolute top-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-[#333] rounded-full ring-1 ring-white/10 z-30 pointer-events-none" />
                         <OptimizedImage
                           src={selectedWp.previewUrl}
@@ -337,23 +333,23 @@ export default function WallpaperModal({
                         <div className="absolute inset-0 bg-gradient-to-tr from-white/[0.08] via-transparent to-transparent pointer-events-none z-20" />
                       </div>
                       {/* Slim Pedestal */}
-                      <div className="w-14 h-3.5 bg-gradient-to-b from-[#222] to-[#141414] rounded-b-sm shadow-md ring-1 ring-white/10" />
-                      <div className="w-24 sm:w-28 h-1 bg-[#282828] rounded-full shadow-lg ring-1 ring-white/10" />
+                      <div className="w-12 sm:w-14 h-2.5 sm:h-3.5 bg-gradient-to-b from-[#222] to-[#141414] rounded-b-sm shadow-md ring-1 ring-white/10" />
+                      <div className="w-20 sm:w-28 h-1 bg-[#282828] rounded-full shadow-lg ring-1 ring-white/10" />
                     </motion.div>
                   ) : (
                     /* Titanium Pro iPhone Mockup */
                     <motion.div
                       layoutId={`wp-display-frame-${selectedWp.id}`}
                       transition={{ type: "spring", stiffness: 320, damping: 30 }}
-                      className="relative w-[160px] sm:w-[190px] md:w-[210px] aspect-[9/19.5] rounded-[2.5rem] border-[3.5px] border-[#222] bg-black shadow-[0_30px_80px_rgba(0,0,0,0.9)] ring-1 ring-white/20 flex items-center justify-center overflow-hidden"
+                      className="relative h-[250px] sm:h-[300px] md:h-[380px] w-auto aspect-[9/19.5] rounded-[2rem] sm:rounded-[2.4rem] md:rounded-[2.5rem] border-[3px] sm:border-[3.5px] border-[#222] bg-black shadow-[0_30px_80px_rgba(0,0,0,0.9)] ring-1 ring-white/20 flex items-center justify-center overflow-hidden"
                     >
                       {/* Dynamic Island */}
-                      <div className="absolute top-2.5 left-1/2 -translate-x-1/2 w-14 h-3 bg-black rounded-full z-30 ring-1 ring-white/10 flex items-center justify-end px-1.5 pointer-events-none">
-                        <div className="w-1.5 h-1.5 rounded-full bg-[#080808] ring-1 ring-blue-900/30" />
+                      <div className="absolute top-2 sm:top-2.5 left-1/2 -translate-x-1/2 w-11 sm:w-14 h-2.5 sm:h-3 bg-black rounded-full z-30 ring-1 ring-white/10 flex items-center justify-end px-1 sm:px-1.5 pointer-events-none">
+                        <div className="w-1 sm:w-1.5 h-1 sm:h-1.5 rounded-full bg-[#080808] ring-1 ring-blue-900/30" />
                       </div>
 
                       {/* Bottom Home Indicator */}
-                      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-20 h-1 bg-white/70 rounded-full z-20 pointer-events-none" />
+                      <div className="absolute bottom-1.5 sm:bottom-2 left-1/2 -translate-x-1/2 w-16 sm:w-20 h-1 bg-white/70 rounded-full z-20 pointer-events-none" />
 
                       {/* Wallpaper Image */}
                       <OptimizedImage
@@ -363,10 +359,10 @@ export default function WallpaperModal({
                         alt={selectedWp.title}
                         priority={true}
                         className={`w-full h-full object-cover ${isOledOptimized ? "oled-image" : ""}`}
-                        containerClassName="w-full h-full rounded-[2.2rem]"
+                        containerClassName="w-full h-full rounded-[1.7rem] sm:rounded-[2.1rem] md:rounded-[2.2rem]"
                       />
                       {/* Glass Reflection */}
-                      <div className="absolute inset-0 bg-gradient-to-tr from-white/[0.08] via-transparent to-transparent pointer-events-none z-20 rounded-[2.2rem]" />
+                      <div className="absolute inset-0 bg-gradient-to-tr from-white/[0.08] via-transparent to-transparent pointer-events-none z-20 rounded-[1.7rem] sm:rounded-[2.1rem] md:rounded-[2.2rem]" />
                     </motion.div>
                   )}
                 </motion.div>
@@ -377,9 +373,9 @@ export default function WallpaperModal({
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.3 }}
                   key={`canvas-${selectedWp.id}`}
-                  className="w-full h-full relative flex items-center justify-center p-3 sm:p-6"
+                  className="w-full h-full relative flex items-center justify-center p-2 sm:p-6"
                 >
-                  <div className="relative w-full max-w-[380px] sm:max-w-[440px] md:max-w-[470px] aspect-[16/10] rounded-xl overflow-hidden shadow-[0_25px_70px_rgba(0,0,0,0.9)] ring-1 ring-white/20 bg-black flex items-center justify-center">
+                  <div className="relative w-full max-w-[260px] sm:max-w-[400px] md:max-w-[470px] aspect-[16/10] rounded-xl overflow-hidden shadow-[0_25px_70px_rgba(0,0,0,0.9)] ring-1 ring-white/20 bg-black flex items-center justify-center">
                     <OptimizedImage
                       src={selectedWp.previewUrl}
                       placeholder={selectedWp.tinyUrl}
@@ -399,7 +395,7 @@ export default function WallpaperModal({
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.3 }}
                   key={`loupe-${selectedWp.id}`}
-                  className="w-full h-full relative flex flex-col items-center justify-center p-3 sm:p-6 select-none"
+                  className="w-full h-full relative flex flex-col items-center justify-center p-2 sm:p-6 select-none"
                 >
                   <div
                     ref={loupeContainerRef}
@@ -409,8 +405,8 @@ export default function WallpaperModal({
                     onMouseLeave={() => setIsHoveringLoupe(false)}
                     className={`relative w-full ${
                       selectedWp.device === "mobile"
-                        ? "max-w-[210px] sm:max-w-[240px] aspect-[9/19.5] rounded-[2.5rem]"
-                        : "max-w-[380px] sm:max-w-[440px] md:max-w-[470px] aspect-[16/10] rounded-xl"
+                        ? "h-[250px] sm:h-[300px] aspect-[9/19.5] w-auto rounded-[2rem] sm:rounded-[2.5rem]"
+                        : "max-w-[260px] sm:max-w-[400px] md:max-w-[470px] aspect-[16/10] rounded-xl"
                     } overflow-hidden shadow-[0_25px_70px_rgba(0,0,0,0.95)] ring-1 ring-white/20 bg-black cursor-crosshair group touch-none`}
                   >
                     {/* Dimmed Base Canvas */}
@@ -435,7 +431,7 @@ export default function WallpaperModal({
                         scale: isHoveringLoupe ? 1 : 0.95,
                       }}
                       transition={{ type: "spring", stiffness: 450, damping: 32 }}
-                      className="absolute w-40 h-40 sm:w-48 sm:h-48 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white/60 shadow-[0_20px_50px_rgba(0,0,0,0.95)] ring-4 ring-white/15 overflow-hidden pointer-events-none z-30 bg-black"
+                      className="absolute w-36 h-36 sm:w-48 sm:h-48 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white/60 shadow-[0_20px_50px_rgba(0,0,0,0.95)] ring-4 ring-white/15 overflow-hidden pointer-events-none z-30 bg-black"
                     >
                       {/* Magnified Optical Canvas View */}
                       <div
@@ -485,18 +481,18 @@ export default function WallpaperModal({
               onClick={handlePrev}
               disabled={currentIndex === 0}
               aria-label="Previous Wallpaper"
-              className="absolute left-2.5 sm:left-4 top-1/2 -translate-y-1/2 p-2.5 sm:p-3 rounded-full bg-black/70 hover:bg-black/95 backdrop-blur-md border border-white/20 text-white/80 hover:text-white transition-all shadow-xl hover:scale-105 active:scale-95 disabled:opacity-0 disabled:pointer-events-none z-30 cursor-pointer"
+              className="absolute left-1.5 sm:left-4 top-1/2 -translate-y-1/2 p-2 sm:p-2.5 rounded-full bg-black/70 hover:bg-black/95 backdrop-blur-md border border-white/20 text-white/80 hover:text-white transition-all shadow-xl hover:scale-105 active:scale-95 disabled:opacity-0 disabled:pointer-events-none z-30 cursor-pointer"
             >
-              <ChevronLeft size={18} strokeWidth={2} />
+              <ChevronLeft size={16} strokeWidth={2} />
             </button>
 
             <button
               onClick={handleNext}
               disabled={currentIndex === allRelevantWallpapers.length - 1}
               aria-label="Next Wallpaper"
-              className="absolute right-2.5 sm:right-4 top-1/2 -translate-y-1/2 p-2.5 sm:p-3 rounded-full bg-black/70 hover:bg-black/95 backdrop-blur-md border border-white/20 text-white/80 hover:text-white transition-all shadow-xl hover:scale-105 active:scale-95 disabled:opacity-0 disabled:pointer-events-none z-30 cursor-pointer"
+              className="absolute right-1.5 sm:right-4 top-1/2 -translate-y-1/2 p-2 sm:p-2.5 rounded-full bg-black/70 hover:bg-black/95 backdrop-blur-md border border-white/20 text-white/80 hover:text-white transition-all shadow-xl hover:scale-105 active:scale-95 disabled:opacity-0 disabled:pointer-events-none z-30 cursor-pointer"
             >
-              <ChevronRight size={18} strokeWidth={2} />
+              <ChevronRight size={16} strokeWidth={2} />
             </button>
           </div>          {/* RIGHT: Wallpaper Details & Action Panel */}
           <div className="w-full md:w-2/5 p-5 sm:p-6 md:p-8 flex flex-col justify-between bg-[#0b0b0b] relative">
@@ -520,6 +516,7 @@ export default function WallpaperModal({
                       }}
                       className="h-8 px-3 rounded-full border border-white/10 bg-white/5 hover:bg-white/15 hover:border-white/30 text-white/80 hover:text-white transition-all cursor-pointer shadow-sm active:scale-95 flex items-center gap-1.5 text-xs font-mono"
                       title="Share Artwork"
+                      aria-label="Share artwork link"
                     >
                       {copied ? (
                         <>
@@ -548,7 +545,8 @@ export default function WallpaperModal({
                           ? "bg-red-500/20 text-red-400 border-red-500/40 shadow-[0_0_15px_rgba(239,68,68,0.2)]"
                           : "bg-white/5 text-white/60 border-white/10 hover:text-white hover:border-white/30"
                       }`}
-                      title="Like Wallpaper"
+                      title={isFavorite(selectedWp.id) ? "Saved to Favorites" : "Like Wallpaper"}
+                      aria-label={isFavorite(selectedWp.id) ? `Remove ${selectedWp.title} from favorites` : `Like and save ${selectedWp.title}`}
                     >
                       <Heart
                         size={12}

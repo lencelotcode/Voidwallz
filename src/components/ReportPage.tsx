@@ -58,18 +58,18 @@ export default function ReportPage() {
   };
 
   return (
-    <section className="min-h-screen pt-32 pb-24 px-6 md:px-10 bg-void-black flex justify-center items-start">
+    <section className="min-h-screen pt-24 sm:pt-28 md:pt-32 pb-16 sm:pb-24 px-4 sm:px-6 md:px-10 bg-void-black flex justify-center items-start">
       <div className="w-full max-w-3xl">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
-          className="mb-16"
+          className="mb-12 sm:mb-16"
         >
           <span className="text-[10px] opacity-30 uppercase tracking-[0.4em] mb-4 block font-mono">
             System Diagnostics
           </span>
-          <h1 className="text-5xl md:text-6xl font-serif italic font-light tracking-tighter leading-tight text-white/90">
+          <h1 className="text-3xl sm:text-4xl md:text-6xl font-serif italic font-light tracking-tighter leading-tight text-white/90">
             Report an Anomaly.
           </h1>
           <p className="text-sm opacity-50 mt-6 max-w-lg leading-relaxed font-light">
@@ -187,7 +187,16 @@ export default function ReportPage() {
                   Visual Evidence (Optional)
                 </label>
                 <div
-                  className="border border-dashed border-white/20 bg-white/[0.02] p-8 flex flex-col items-center justify-center cursor-pointer hover:bg-white/[0.05] transition-colors rounded-sm hover-trigger group"
+                  tabIndex={0}
+                  role="button"
+                  aria-label="Upload visual screenshot evidence"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      fileInputRef.current?.click();
+                    }
+                  }}
+                  className="border border-dashed border-white/20 bg-white/[0.02] p-8 flex flex-col items-center justify-center cursor-pointer hover:bg-white/[0.05] transition-colors rounded-sm hover-trigger group focus:outline-none focus-visible:border-white/50 focus-visible:ring-1 focus-visible:ring-white/40"
                   onClick={() => fileInputRef.current?.click()}
                 >
                   <input
@@ -209,6 +218,35 @@ export default function ReportPage() {
                   </span>
                 </div>
               </div>
+
+              {/* Explicit Form Privacy & Data Consent Checkbox */}
+              <div className="pt-2 flex items-start gap-3 bg-white/[0.02] p-3.5 rounded-lg border border-white/5">
+                <input
+                  type="checkbox"
+                  id="form-consent"
+                  name="consent"
+                  required
+                  className="mt-0.5 rounded bg-black border-white/30 text-white focus:ring-1 focus:ring-white/50 cursor-pointer h-4 w-4 shrink-0 accent-white"
+                />
+                <label
+                  htmlFor="form-consent"
+                  className="text-xs text-white/70 font-sans leading-relaxed cursor-pointer select-none"
+                >
+                  I consent to the collection and technical processing of this anomaly description, device telemetry (browser type and viewport), and attached screenshot strictly for bug resolution under the{" "}
+                  <a
+                    href="/privacy"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      window.history.pushState(null, "", "/privacy");
+                      window.dispatchEvent(new Event("popstate"));
+                    }}
+                    className="text-white underline underline-offset-2 hover:text-white/80 font-mono text-[11px]"
+                  >
+                    Privacy Policy
+                  </a>
+                  .
+                </label>
+              </div>
             </div>
 
             {status === "error" && (
@@ -221,7 +259,7 @@ export default function ReportPage() {
               <button
                 type="submit"
                 disabled={status === "submitting"}
-                className="bg-white text-black px-10 py-4 text-[10px] font-bold uppercase tracking-widest hover:bg-white/90 transition-all hover-trigger flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full sm:w-auto justify-center bg-white text-black px-10 py-4 text-[10px] font-bold uppercase tracking-widest hover:bg-white/90 transition-all hover-trigger flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               >
                 {status === "submitting" ? (
                   <>

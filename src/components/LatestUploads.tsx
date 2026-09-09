@@ -28,11 +28,11 @@ export default function LatestUploads({
 
   return (
     <section className="border-t border-white/5 bg-void-black relative">
-      <div className="py-24 px-10 flex flex-col items-center justify-center border-b border-white/5 text-center">
-        <h2 className="text-4xl md:text-5xl font-sans font-bold tracking-tighter uppercase mb-4">
+      <div className="py-12 sm:py-16 md:py-24 px-4 sm:px-6 md:px-10 flex flex-col items-center justify-center border-b border-white/5 text-center">
+        <h2 className="text-2xl sm:text-3xl md:text-5xl font-sans font-bold tracking-tighter uppercase mb-2 sm:mb-4">
           LATEST ADDITION_
         </h2>
-        <span className="text-sm font-mono uppercase tracking-widest opacity-40">
+        <span className="text-xs sm:text-sm font-mono uppercase tracking-widest opacity-40">
           Fresh From The Neural Generator
         </span>
       </div>
@@ -52,10 +52,10 @@ export default function LatestUploads({
             onMouseEnter={() => onHoverWallpaper?.(wp.previewUrl)}
             onMouseLeave={() => onHoverWallpaper?.(null)}
             data-cursor="VIEW"
-            className={`relative flex flex-col items-center justify-center overflow-hidden group cursor-pointer hover-trigger bg-void-black glass-sheen ${
+            className={`relative flex flex-col items-center justify-center overflow-hidden group cursor-pointer hover-trigger bg-void-black glass-sheen p-4 ${
               wp.device === "desktop"
-                ? "h-[400px] md:h-[500px]"
-                : "h-[500px] md:h-[600px]"
+                ? "h-[340px] sm:h-[420px] md:h-[500px]"
+                : "h-[380px] sm:h-[480px] md:h-[600px]"
             }`}
           >
             <div
@@ -64,8 +64,8 @@ export default function LatestUploads({
             />
 
             {/* Spec Badge Top Left */}
-            <div className="absolute top-6 left-8 z-20">
-              <span className="spec-badge text-[9px] font-mono px-3 py-1 rounded-full text-white/80 tracking-widest uppercase">
+            <div className="absolute top-4 left-4 sm:top-6 sm:left-8 z-20">
+              <span className="spec-badge text-[8px] sm:text-[9px] font-mono px-2.5 sm:px-3 py-1 rounded-full text-white/80 tracking-widest uppercase">
                 {wp.device === "desktop" ? "8K RAW MASTER" : "OLED MASTER"}
               </span>
             </div>
@@ -73,7 +73,7 @@ export default function LatestUploads({
             <div className="relative z-10 flex flex-col items-center transition-transform duration-700 group-hover:scale-[1.05] group-hover:-translate-y-2">
               {wp.device === "desktop" ? (
                 <>
-                  <div className="w-[200px] md:w-[260px] aspect-[16/10] border-[4px] md:border-[6px] border-black rounded-lg relative bg-black shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden ring-1 ring-white/10 luxury-border-glow">
+                  <div className="w-[190px] sm:w-[220px] md:w-[260px] aspect-[16/10] border-[4px] md:border-[6px] border-black rounded-lg relative bg-black shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden ring-1 ring-white/10 luxury-border-glow">
                     <OptimizedImage
                       src={wp.previewUrl}
                       placeholder={wp.tinyUrl}
@@ -83,31 +83,47 @@ export default function LatestUploads({
                       containerClassName="w-full h-full"
                     />
                   </div>
-                  <div className="w-12 h-6 md:h-8 bg-gradient-to-b from-gray-800 to-black rounded-b-sm shadow-xl relative z-0 -mt-1" />
-                  <div className="w-32 h-1 bg-gray-700 mx-auto rounded-t-full shadow-2xl" />
+                  <div className="w-10 sm:w-12 h-5 sm:h-6 md:h-8 bg-gradient-to-b from-gray-800 to-black rounded-b-sm shadow-xl relative z-0 -mt-1" />
+                  <div className="w-24 sm:w-32 h-1 bg-gray-700 mx-auto rounded-t-full shadow-2xl" />
                 </>
               ) : (
-                <div className="w-[160px] aspect-[9/19.5] border-[6px] border-black rounded-[2rem] relative bg-black shadow-[0_20px_50px_rgba(0,0,0,0.5)] ring-1 ring-white/10 flex items-center justify-center luxury-border-glow">
-                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-14 h-4 bg-black rounded-b-xl z-20" />
+                <div className="w-[130px] sm:w-[150px] md:w-[160px] aspect-[9/19.5] border-[4px] md:border-[6px] border-black rounded-[1.8rem] md:rounded-[2rem] relative bg-black shadow-[0_20px_50px_rgba(0,0,0,0.5)] ring-1 ring-white/10 flex items-center justify-center luxury-border-glow">
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-10 sm:w-14 h-3 sm:h-4 bg-black rounded-b-lg sm:rounded-b-xl z-20" />
                   <OptimizedImage
                     src={wp.previewUrl}
                     placeholder={wp.tinyUrl}
                     fallbackSrc={wp.fallbackUrl || wp.previewUrl}
                     alt={wp.title}
                     className={isOledOptimized ? "oled-image" : ""}
-                    containerClassName="w-full h-full rounded-[1.5rem]"
+                    containerClassName="w-full h-full rounded-[1.3rem] md:rounded-[1.5rem]"
                   />
                 </div>
               )}
             </div>
 
-            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none bg-black/30 backdrop-blur-sm">
+            {/* Desktop Center Hover Overlay */}
+            <div className="absolute inset-0 z-20 hidden md:flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none bg-black/30 backdrop-blur-sm">
               <span className="bg-black text-white text-[10px] px-3 py-1 font-mono uppercase tracking-widest border border-white/10 mb-1">
                 {wp.category}
               </span>
               <h3 className="bg-white text-black text-xl md:text-2xl font-sans font-bold uppercase tracking-wider px-4 py-1 mt-1 text-center max-w-[90%] leading-tight text-stroke-none">
                 {wp.title}
               </h3>
+            </div>
+
+            {/* Mobile Always-Visible Bottom Title Strip */}
+            <div className="absolute bottom-0 inset-x-0 p-3 bg-gradient-to-t from-black/95 via-black/50 to-transparent flex items-end justify-between z-20 md:hidden pointer-events-none">
+              <div className="max-w-[80%]">
+                <span className="text-[8px] font-mono text-white/50 uppercase tracking-widest block truncate">
+                  {wp.category}
+                </span>
+                <h4 className="text-xs font-sans font-bold text-white uppercase tracking-tight truncate">
+                  {wp.title}
+                </h4>
+              </div>
+              <span className="text-[9px] font-mono text-white/70">
+                PREVIEW &rarr;
+              </span>
             </div>
           </motion.div>
         ))}

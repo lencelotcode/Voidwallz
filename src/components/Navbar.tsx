@@ -83,12 +83,12 @@ export default function Navbar({
 
   return (
     <>
-      <nav className="fixed top-0 w-full z-50 px-6 md:px-10 py-4 border-b border-white/5 flex justify-between items-center bg-void-black/80 backdrop-blur-md">
-        <div className="w-1/3 flex justify-start items-center">
+      <nav className="fixed top-0 w-full z-50 px-4 sm:px-6 md:px-10 py-3 sm:py-4 border-b border-white/5 flex justify-between items-center bg-void-black/85 backdrop-blur-md">
+        <div className="flex justify-start items-center flex-shrink-0">
           <a
             href="/"
             onClick={(e) => handleNavigate(e, "/")}
-            className="flex items-center gap-3 hover-trigger group cursor-pointer"
+            className="flex items-center gap-2.5 sm:gap-3 hover-trigger group cursor-pointer"
             data-cursor="HOME"
           >
             {/* Animated Logo Emblem */}
@@ -101,7 +101,7 @@ export default function Navbar({
                 <img
                   src="/Mainlogo.svg"
                   alt="Voidwallz Logo"
-                  className="w-8 h-8 sm:w-9 sm:h-9 object-contain"
+                  className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 object-contain"
                 />
                 {/* Diagonal Holographic Sweep on Hover */}
                 <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/25 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out pointer-events-none" />
@@ -117,8 +117,8 @@ export default function Navbar({
             </div>
           </a>
         </div>
-        <div className="w-1/3 flex justify-center">
-          <nav className="hidden md:flex space-x-8 text-[11px] uppercase tracking-[0.2em]">
+        <div className="hidden md:flex justify-center flex-1">
+          <nav className="flex space-x-8 text-[11px] uppercase tracking-[0.2em]">
             <a
               href="/"
               onClick={(e) => handleNavigate(e, "/")}
@@ -168,12 +168,13 @@ export default function Navbar({
           </nav>
         </div>
 
-        <div className="w-1/3 flex justify-end items-center">
+        <div className="flex justify-end items-center flex-shrink-0">
           {/* Unified Luxury Studio Capsule */}
           <div className="hidden md:flex items-center p-1 bg-white/[0.04] backdrop-blur-md rounded-full border border-white/10 hover:border-white/20 transition-all duration-300 shadow-lg">
             {/* Atmosphere Mode Switcher */}
             <button
               onClick={cycleAtmosphere}
+              aria-label="Cycle visual atmosphere effects"
               className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-mono uppercase tracking-widest transition-all duration-300 cursor-pointer ${
                 currentMode !== "standard"
                   ? "bg-white text-black font-bold shadow-md"
@@ -197,6 +198,7 @@ export default function Navbar({
               onClick={() => sound.toggleMute()}
               className="w-7 h-7 rounded-full flex items-center justify-center text-white/60 hover:text-white hover:bg-white/10 transition-all cursor-pointer"
               title={isMuted ? "Unmute Sound Effects" : "Mute Sound Effects"}
+              aria-label={isMuted ? "Unmute Sound Effects" : "Mute Sound Effects"}
               data-cursor="SFX"
             >
               {!isMuted ? (
@@ -210,8 +212,9 @@ export default function Navbar({
           <div className="md:hidden flex items-center gap-2">
             <button
               onClick={() => sound.toggleMute()}
-              className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/70 cursor-pointer"
+              className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/70 active:scale-95 transition-transform cursor-pointer"
               title={isMuted ? "Unmute Sound Effects" : "Mute Sound Effects"}
+              aria-label={isMuted ? "Unmute Sound Effects" : "Mute Sound Effects"}
             >
               {!isMuted ? (
                 <Volume2 size={13} className="text-emerald-400" />
@@ -222,9 +225,10 @@ export default function Navbar({
 
             <button
               onClick={() => setIsOpen(true)}
-              className="text-white opacity-90 hover:opacity-100 p-2 -mr-2 cursor-pointer"
+              className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/90 hover:text-white active:scale-95 transition-transform cursor-pointer"
+              aria-label="Open Navigation Menu"
             >
-              <Menu size={24} />
+              <Menu size={18} />
             </button>
           </div>
         </div>
@@ -238,33 +242,34 @@ export default function Navbar({
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
-                className="fixed inset-0 z-[9999] bg-void-black/95 backdrop-blur-xl flex flex-col items-center justify-center pointer-events-auto"
+                className="fixed inset-0 z-[9999] bg-void-black/95 backdrop-blur-2xl flex flex-col items-center justify-start overflow-y-auto px-6 py-10 sm:py-14 pointer-events-auto"
               >
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="absolute top-6 right-6 text-white opacity-60 hover:opacity-100 p-2 cursor-pointer"
+                  className="absolute top-4 right-4 text-white/70 hover:text-white w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center active:scale-95 cursor-pointer"
+                  aria-label="Close Navigation Menu"
                 >
-                  <X size={32} />
+                  <X size={20} />
                 </button>
 
                 {/* Mobile Drawer Top Brand */}
-                <div className="flex flex-col items-center mb-8 gap-2.5 pointer-events-none">
+                <div className="flex flex-col items-center mb-6 sm:mb-8 gap-2 pointer-events-none mt-2">
                   <div className="relative flex items-center justify-center">
                     <div className="absolute -inset-1 rounded-2xl bg-white/10 blur-md pointer-events-none" />
                     <img
                       src="/Mainlogo.svg"
                       alt="Voidwallz Logo"
-                      className="w-14 h-14 object-contain rounded-2xl ring-1 ring-white/20 shadow-2xl bg-black relative z-10"
+                      className="w-12 h-12 object-contain rounded-2xl ring-1 ring-white/20 shadow-2xl bg-black relative z-10"
                     />
                   </div>
-                  <span className="font-serif italic text-2xl tracking-tighter text-white">voidwallz</span>
+                  <span className="font-serif italic text-xl tracking-tighter text-white">voidwallz</span>
                 </div>
 
-                <nav className="flex flex-col space-y-8 text-center text-sm uppercase tracking-[0.3em]">
+                <nav className="flex flex-col space-y-6 text-center text-xs sm:text-sm uppercase tracking-[0.25em] w-full max-w-xs">
                   <a
                     href="/"
                     onClick={(e) => handleNavigate(e, "/")}
-                    className={`hover:opacity-100 transition-opacity cursor-pointer ${
+                    className={`py-1.5 hover:opacity-100 transition-opacity cursor-pointer ${
                       currentPath === "/" ? "text-white font-bold" : "text-white/60"
                     }`}
                   >
@@ -273,7 +278,7 @@ export default function Navbar({
                   <a
                     href="/packs"
                     onClick={(e) => handleNavigate(e, "/packs")}
-                    className={`hover:opacity-100 transition-opacity cursor-pointer ${
+                    className={`py-1.5 hover:opacity-100 transition-opacity cursor-pointer ${
                       currentPath === "/packs" ? "text-white font-bold" : "text-white/60"
                     }`}
                   >
@@ -282,7 +287,7 @@ export default function Navbar({
                   <a
                     href="/desktop"
                     onClick={(e) => handleNavigate(e, "/desktop")}
-                    className={`hover:opacity-100 transition-opacity cursor-pointer ${
+                    className={`py-1.5 hover:opacity-100 transition-opacity cursor-pointer ${
                       currentPath === "/desktop" ? "text-white font-bold" : "text-white/60"
                     }`}
                   >
@@ -291,7 +296,7 @@ export default function Navbar({
                   <a
                     href="/mobile"
                     onClick={(e) => handleNavigate(e, "/mobile")}
-                    className={`hover:opacity-100 transition-opacity cursor-pointer ${
+                    className={`py-1.5 hover:opacity-100 transition-opacity cursor-pointer ${
                       currentPath === "/mobile" ? "text-white font-bold" : "text-white/60"
                     }`}
                   >
@@ -300,7 +305,7 @@ export default function Navbar({
                   <a
                     href="/updates"
                     onClick={(e) => handleNavigate(e, "/updates")}
-                    className={`hover:opacity-100 transition-opacity cursor-pointer flex items-center justify-center gap-2 ${
+                    className={`py-1.5 hover:opacity-100 transition-opacity cursor-pointer flex items-center justify-center gap-2 ${
                       currentPath === "/updates" ? "text-white font-bold" : "text-white/60"
                     }`}
                   >
@@ -309,11 +314,11 @@ export default function Navbar({
                   </a>
 
                   {/* Atmosphere selector for mobile */}
-                  <div className="pt-4 flex flex-col items-center gap-2">
+                  <div className="pt-5 border-t border-white/10 flex flex-col items-center gap-2.5">
                     <span className="text-[10px] font-mono text-white/40 uppercase tracking-widest">
                       Atmosphere FX
                     </span>
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-2 gap-2 w-full">
                       {atmosphereOptions.map((opt) => (
                         <button
                           key={opt.id}
@@ -322,10 +327,10 @@ export default function Navbar({
                             setIsOledOptimized?.(opt.id === "oled");
                             setIsOpen(false);
                           }}
-                          className={`px-3 py-2 text-[10px] font-mono rounded border uppercase tracking-wider transition-colors ${
+                          className={`px-3 py-2 text-[10px] font-mono rounded-lg border uppercase tracking-wider transition-colors ${
                             currentMode === opt.id
-                              ? "bg-white text-black border-white font-bold"
-                              : "border-white/10 text-white/50"
+                              ? "bg-white text-black border-white font-bold shadow-md"
+                              : "border-white/10 text-white/50 hover:border-white/30"
                           }`}
                         >
                           {opt.icon} {opt.label}

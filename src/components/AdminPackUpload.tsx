@@ -276,7 +276,7 @@ export default function AdminPackUpload() {
   }
 
   return (
-    <div className="min-h-screen bg-[#050505] text-void-light pt-28 pb-32 px-6 md:px-12 relative overflow-hidden">
+    <div className="min-h-screen bg-[#050505] text-void-light pt-24 sm:pt-28 pb-20 sm:pb-32 px-4 sm:px-6 md:px-12 relative overflow-hidden">
       {/* Ambient background glow */}
       <div className="absolute top-20 left-1/2 -translate-x-1/2 w-[60vw] h-[400px] bg-white/[0.02] blur-[160px] pointer-events-none rounded-full" />
 

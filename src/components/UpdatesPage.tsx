@@ -198,7 +198,7 @@ export default function UpdatesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-void-black text-void-light pt-28 pb-32 px-6 md:px-12 relative overflow-hidden">
+    <div className="min-h-screen bg-void-black text-void-light pt-24 sm:pt-28 pb-20 sm:pb-32 px-4 sm:px-6 md:px-12 relative overflow-hidden">
       {/* Background ambient lighting */}
       <div className="absolute top-20 left-1/2 -translate-x-1/2 w-[60vw] h-[400px] bg-white/[0.02] blur-[160px] pointer-events-none rounded-full" />
       <div className="absolute bottom-20 right-10 w-[30vw] h-[300px] bg-white/[0.015] blur-[140px] pointer-events-none rounded-full" />
@@ -207,14 +207,14 @@ export default function UpdatesPage() {
         {/* Back Link */}
         <button
           onClick={() => handleNavigate("/")}
-          className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-white/50 hover:text-white mb-10 transition-colors group"
+          className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-white/50 hover:text-white mb-8 sm:mb-10 transition-colors group"
         >
           <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
           Back to Terminal
         </button>
 
         {/* Header Block */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-8 pb-10 border-b border-white/5">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 sm:mb-16 gap-6 sm:gap-8 pb-8 sm:pb-10 border-b border-white/5">
           <div>
             <div className="flex items-center gap-2.5 mb-3">
               <span className="w-2 h-2 rounded-full bg-green-400 shadow-[0_0_8px_rgba(74,222,128,0.8)] animate-pulse" />
@@ -222,10 +222,10 @@ export default function UpdatesPage() {
                 System Dispatch // Live Changelog
               </span>
             </div>
-            <h1 className="text-4xl md:text-6xl font-serif italic tracking-tighter text-white">
+            <h1 className="text-3xl sm:text-4xl md:text-6xl font-serif italic tracking-tighter text-white">
               System Logs_
             </h1>
-            <p className="text-sm text-white/50 max-w-xl mt-3 font-sans leading-relaxed">
+            <p className="text-xs sm:text-sm text-white/50 max-w-xl mt-3 font-sans leading-relaxed">
               Chronological log of visual architectural evolutions, new protocol features, and rendering pipeline enhancements.
             </p>
           </div>
@@ -236,7 +236,7 @@ export default function UpdatesPage() {
               <button
                 key={cat}
                 onClick={() => setActiveCategory(cat)}
-                className={`px-3.5 py-1.5 text-[9px] font-mono uppercase tracking-widest rounded-full transition-all ${
+                className={`px-3 sm:px-3.5 py-1 sm:py-1.5 text-[8px] sm:text-[9px] font-mono uppercase tracking-widest rounded-full transition-all ${
                   activeCategory === cat
                     ? "bg-white text-black font-bold shadow-lg"
                     : "text-white/40 hover:text-white"
@@ -249,7 +249,7 @@ export default function UpdatesPage() {
         </div>
 
         {/* Timeline Stream */}
-        <div className="relative pl-6 md:pl-10 space-y-12">
+        <div className="relative pl-7 sm:pl-8 md:pl-10 space-y-10 sm:space-y-12">
           {/* Vertical glowing timeline track */}
           <div className="absolute left-[7px] md:left-[11px] top-4 bottom-8 w-[1px] bg-gradient-to-b from-white/30 via-white/10 to-transparent" />
 
@@ -268,17 +268,17 @@ export default function UpdatesPage() {
               >
                 {/* Timeline node icon */}
                 <div
-                  className={`absolute -left-[30px] md:-left-[46px] top-6 w-6 h-6 md:w-7 md:h-7 rounded-full flex items-center justify-center border transition-all duration-300 ${
+                  className={`absolute -left-[27px] sm:-left-[31px] md:-left-[46px] top-5 sm:top-6 w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 rounded-full flex items-center justify-center border transition-all duration-300 ${
                     isLatest
                       ? "bg-white text-black border-white shadow-[0_0_15px_rgba(255,255,255,0.6)]"
                       : "bg-[#0c0c0c] text-white/60 border-white/20 group-hover:border-white/50 group-hover:text-white"
                   }`}
                 >
-                  <Icon size={12} />
+                  <Icon size={11} />
                 </div>
 
                 {/* Main Patch Card */}
-                <div className="bg-[#0a0a0a]/90 border border-white/10 hover:border-white/25 rounded-xl p-6 md:p-8 backdrop-blur-xl luxury-border-glow shadow-2xl transition-all duration-300">
+                <div className="bg-[#0a0a0a]/90 border border-white/10 hover:border-white/25 rounded-xl p-4 sm:p-6 md:p-8 backdrop-blur-xl luxury-border-glow shadow-2xl transition-all duration-300">
                   {/* Top Meta Bar */}
                   <div className="flex flex-wrap items-center justify-between gap-3 mb-4 pb-4 border-b border-white/5">
                     <div className="flex items-center gap-3">

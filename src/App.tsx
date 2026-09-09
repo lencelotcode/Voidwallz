@@ -24,10 +24,14 @@ import { Wallpaper, VoidPack } from "./types";
 import { useWallpapers } from "./hooks/useWallpapers";
 import { useWallpaperStats } from "./hooks/useWallpaperStats";
 import { sound } from "./lib/soundEffects";
+import CookieConsent from "./components/CookieConsent";
 import {
   PrivacyPolicy,
   TermsOfService,
   License,
+  CookiePolicy,
+  RefundPolicy,
+  DMCAPolicy,
 } from "./components/LegalPages";
 
 export const navigateToWallpaper = (wp: Wallpaper) => {
@@ -171,7 +175,7 @@ function Hero({
       ref={heroRef}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
-      className="relative min-h-screen flex flex-col justify-center px-10 pt-32 pb-16 overflow-hidden border-b border-white/5"
+      className="relative min-h-screen flex flex-col justify-center px-4 sm:px-6 md:px-10 pt-24 sm:pt-28 md:pt-32 pb-12 md:pb-16 overflow-hidden border-b border-white/5"
     >
       <div className="absolute inset-0 bg-void-black z-0 pointer-events-none" />
 
@@ -185,7 +189,7 @@ function Hero({
         className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-white/[0.01] rounded-full blur-[120px] pointer-events-none"
       />
 
-      <div className="relative z-10 w-full max-w-[1600px] mx-auto flex flex-col md:flex-row items-center justify-between gap-16 pb-24 md:pb-16 mt-8 md:mt-0">
+      <div className="relative z-10 w-full max-w-[1600px] mx-auto flex flex-col md:flex-row items-center justify-between gap-10 md:gap-16 pb-6 md:pb-16 mt-4 md:mt-0">
         <motion.div
           style={{ y: yText }}
           className="flex flex-col w-full md:w-5/12"
@@ -194,9 +198,9 @@ function Hero({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="mb-8"
+            className="mb-4 sm:mb-8"
           >
-            <span className="text-[10px] opacity-30 uppercase tracking-[0.3em]">
+            <span className="text-[10px] opacity-30 uppercase tracking-[0.3em] font-mono">
               Selection 01
             </span>
           </motion.div>
@@ -205,7 +209,7 @@ function Hero({
             {titleLines.map((line, i) => (
               <motion.h1
                 key={i}
-                className="text-6xl md:text-7xl lg:text-[6rem] leading-[1.1] font-serif italic font-light tracking-tighter"
+                className="text-4xl sm:text-5xl md:text-7xl lg:text-[6rem] leading-[1.08] font-serif italic font-light tracking-tighter"
                 initial={{ y: "100%", opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{
@@ -220,7 +224,7 @@ function Hero({
           </div>
 
           <motion.p
-            className="text-sm md:text-base opacity-50 max-w-md mt-8 leading-relaxed"
+            className="text-xs sm:text-sm md:text-base opacity-50 max-w-md mt-4 sm:mt-6 md:mt-8 leading-relaxed font-light"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.5 }}
@@ -244,7 +248,7 @@ function Hero({
               onOpenModal(wallpaperOfTheDay);
             }
           }}
-          className="w-full md:w-7/12 h-[50vh] md:h-[65vh] relative group cursor-pointer hover-trigger perspective-1000"
+          className="w-full md:w-7/12 h-[340px] sm:h-[420px] md:h-[65vh] relative group cursor-pointer hover-trigger perspective-1000"
           initial={{ opacity: 0, scale: 0.95 }}
         >
           <div className="w-full h-full border border-white/10 p-2 relative overflow-hidden bg-white/5 shadow-2xl luxury-border-glow isolate glass-sheen">
@@ -265,16 +269,16 @@ function Hero({
             ) : (
               <>
                 {/* Top Left Floating Tag */}
-                <div className="absolute top-4 left-4 z-30 flex items-center gap-2 pointer-events-none">
-                  <span className="spec-badge text-[9px] font-mono px-3 py-1.5 rounded-full text-white/90 tracking-widest uppercase bg-black/80 backdrop-blur-md border border-white/20 shadow-xl flex items-center gap-1.5">
+                <div className="absolute top-3 left-3 sm:top-4 sm:left-4 z-30 flex items-center gap-2 pointer-events-none">
+                  <span className="spec-badge text-[8px] sm:text-[9px] font-mono px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-white/90 tracking-widest uppercase bg-black/80 backdrop-blur-md border border-white/20 shadow-xl flex items-center gap-1.5">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                     WALLPAPER OF THE DAY
                   </span>
                 </div>
 
                 {/* Top Right Device Badge */}
-                <div className="absolute top-4 right-4 z-30 flex items-center gap-2 pointer-events-none">
-                  <span className="spec-badge text-[9px] font-mono px-3 py-1.5 rounded-full text-white/80 tracking-widest uppercase bg-black/80 backdrop-blur-md border border-white/20 shadow-xl flex items-center gap-1">
+                <div className="absolute top-3 right-3 sm:top-4 sm:right-4 z-30 flex items-center gap-2 pointer-events-none">
+                  <span className="spec-badge text-[8px] sm:text-[9px] font-mono px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-white/80 tracking-widest uppercase bg-black/80 backdrop-blur-md border border-white/20 shadow-xl flex items-center gap-1">
                     {wallpaperOfTheDay.device === "desktop" ? <Monitor size={10} /> : <Smartphone size={10} />}
                     {wallpaperOfTheDay.format || (wallpaperOfTheDay.device === "desktop" ? "8K MASTER" : "4K MOBILE")}
                   </span>
@@ -303,21 +307,21 @@ function Hero({
                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent pointer-events-none z-20" />
 
                 {/* Bottom Wallpaper Detail Strip */}
-                <div className="absolute bottom-0 inset-x-0 p-6 z-30 flex flex-col md:flex-row justify-between md:items-end gap-4 pointer-events-none">
+                <div className="absolute bottom-0 inset-x-0 p-4 sm:p-6 z-30 flex flex-col sm:flex-row justify-between sm:items-end gap-3 sm:gap-4 pointer-events-none">
                   <div className="pointer-events-auto">
-                    <span className="text-[10px] text-white/60 uppercase tracking-[0.25em] font-mono mb-1.5 block drop-shadow-md">
+                    <span className="text-[9px] sm:text-[10px] text-white/60 uppercase tracking-[0.25em] font-mono mb-1 block drop-shadow-md">
                       {wallpaperOfTheDay.serial} // {wallpaperOfTheDay.category || "Wallpaper of the Day"}
                     </span>
-                    <h3 className="text-2xl sm:text-3xl font-serif italic tracking-tight text-white drop-shadow-xl group-hover:text-white/90 transition-colors">
+                    <h3 className="text-xl sm:text-2xl md:text-3xl font-serif italic tracking-tight text-white drop-shadow-xl group-hover:text-white/90 transition-colors">
                       {wallpaperOfTheDay.title}
                     </h3>
                   </div>
 
-                  <div className="flex items-center gap-2.5 pointer-events-auto">
-                    <span className="text-[10px] font-mono text-white/80 bg-black/80 backdrop-blur-md border border-white/20 px-3 py-1.5 rounded-full shadow-lg">
+                  <div className="flex items-center gap-2 pointer-events-auto">
+                    <span className="text-[9px] sm:text-[10px] font-mono text-white/80 bg-black/80 backdrop-blur-md border border-white/20 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full shadow-lg">
                       {getDownloads(wallpaperOfTheDay.id, wallpaperOfTheDay.device).toLocaleString()} DL
                     </span>
-                    <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-black bg-white px-3.5 py-1.5 rounded-full shadow-[0_0_20px_rgba(255,255,255,0.4)] flex items-center gap-1.5 group-hover:scale-105 transition-transform duration-300">
+                    <span className="text-[9px] sm:text-[10px] font-mono font-bold uppercase tracking-wider text-black bg-white px-3 sm:px-3.5 py-1 sm:py-1.5 rounded-full shadow-[0_0_20px_rgba(255,255,255,0.4)] flex items-center gap-1.5 group-hover:scale-105 transition-transform duration-300">
                       <span>PREVIEW</span>
                       <ArrowUpRight size={12} />
                     </span>
@@ -333,29 +337,29 @@ function Hero({
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1.2, delay: 0.8 }}
-        className="absolute bottom-8 left-10 right-10 flex flex-col md:flex-row justify-between items-start md:items-end border-t border-white/5 pt-4 z-20"
+        className="relative md:absolute md:bottom-8 left-0 right-0 md:left-10 md:right-10 flex flex-col md:flex-row justify-between items-start md:items-end border-t border-white/5 pt-4 mt-8 md:mt-0 z-20"
       >
-        <div className="flex gap-8 md:gap-12 w-full md:w-auto overflow-x-auto pb-4 md:pb-0 scrollbar-hide">
+        <div className="flex gap-6 sm:gap-8 md:gap-12 w-full md:w-auto overflow-x-auto pb-3 md:pb-0 scrollbar-hide">
           <div className="flex flex-col whitespace-nowrap">
-            <span className="text-[10px] opacity-40 uppercase tracking-widest mb-1">
+            <span className="text-[9px] sm:text-[10px] opacity-40 uppercase tracking-widest mb-1">
               Resolution
             </span>
             <span className="text-xs font-mono">8192 &times; 4608</span>
           </div>
           <div className="flex flex-col whitespace-nowrap">
-            <span className="text-[10px] opacity-40 uppercase tracking-widest mb-1">
+            <span className="text-[9px] sm:text-[10px] opacity-40 uppercase tracking-widest mb-1">
               Format
             </span>
             <span className="text-xs font-mono">RAW / AVIF</span>
           </div>
           <div className="flex flex-col whitespace-nowrap">
-            <span className="text-[10px] opacity-40 uppercase tracking-widest mb-1">
+            <span className="text-[9px] sm:text-[10px] opacity-40 uppercase tracking-widest mb-1">
               Color Depth
             </span>
             <span className="text-xs font-mono">14 BIT</span>
           </div>
         </div>
-        <div className="mt-2 md:mt-0 ml-auto md:ml-0">
+        <div className="mt-3 md:mt-0 ml-auto md:ml-0">
           <a
             href="/"
             onClick={(e) => {
@@ -435,12 +439,12 @@ function Manifesto() {
     <section
       id="about"
       ref={ref}
-      className="py-32 md:py-48 px-6 md:px-10 border-t border-white/5 bg-void-black relative overflow-hidden"
+      className="py-20 sm:py-28 md:py-48 px-4 sm:px-6 md:px-10 border-t border-white/5 bg-void-black relative overflow-hidden"
     >
       {/* Ambient background glow */}
       <div className="absolute top-1/2 left-1/4 w-[400px] h-[400px] bg-white/[0.015] rounded-full blur-[100px] pointer-events-none -translate-y-1/2 mix-blend-screen" />
 
-      <div className="max-w-[1400px] mx-auto flex flex-col lg:flex-row gap-20 lg:gap-32 justify-between relative z-10">
+      <div className="max-w-[1400px] mx-auto flex flex-col lg:flex-row gap-12 sm:gap-16 lg:gap-32 justify-between relative z-10">
         <motion.div
           style={{ y: yText }}
           className="lg:w-5/12 flex flex-col justify-start"
@@ -450,7 +454,7 @@ function Manifesto() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="text-[10px] text-white/40 uppercase tracking-[0.4em] mb-8 font-mono"
+            className="text-[10px] text-white/40 uppercase tracking-[0.4em] mb-4 sm:mb-8 font-mono"
           >
             Philosophy
           </motion.p>
@@ -459,7 +463,7 @@ function Manifesto() {
             whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 1.2, ease: [0.21, 0.47, 0.32, 0.98] }}
-            className="text-5xl md:text-7xl lg:text-[5rem] font-serif italic font-light tracking-tighter leading-[1.05] max-w-[12ch] text-white/90 drop-shadow-sm"
+            className="text-3xl sm:text-4xl md:text-6xl lg:text-[5rem] font-serif italic font-light tracking-tighter leading-[1.08] max-w-[14ch] text-white/90 drop-shadow-sm"
           >
             How we craft our voids.
           </motion.h2>
@@ -467,7 +471,7 @@ function Manifesto() {
 
         <motion.div
           style={{ y: ySteps }}
-          className="lg:w-7/12 relative pl-8 md:pl-16"
+          className="lg:w-7/12 relative pl-6 sm:pl-8 md:pl-16"
         >
           {/* Animated Vertical Line */}
           <motion.div
@@ -478,7 +482,7 @@ function Manifesto() {
             className="absolute top-0 left-0 w-px bg-gradient-to-b from-white/20 via-white/5 to-transparent"
           />
 
-          <div className="flex flex-col gap-16 md:gap-24">
+          <div className="flex flex-col gap-12 sm:gap-16 md:gap-24">
             {steps.map((step, i) => (
               <motion.div
                 key={step.num}
@@ -498,19 +502,19 @@ function Manifesto() {
                   whileInView={{ scale: 1, opacity: 1 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: i * 0.2 + 0.6 }}
-                  className="absolute top-2 -left-[35px] md:-left-[67px] w-1.5 h-1.5 bg-white/40 rounded-full group-hover:bg-white/90 transition-colors duration-500 shadow-[0_0_12px_rgba(255,255,255,0.3)]"
+                  className="absolute top-2 -left-[27px] sm:-left-[35px] md:-left-[67px] w-1.5 h-1.5 bg-white/40 rounded-full group-hover:bg-white/90 transition-colors duration-500 shadow-[0_0_12px_rgba(255,255,255,0.3)]"
                 />
 
-                <div className="flex items-center gap-4 mb-4 md:mb-6">
+                <div className="flex items-center gap-3 sm:gap-4 mb-3 sm:mb-4 md:mb-6">
                   <span className="text-[10px] text-white/30 font-mono tracking-widest">
                     {step.num}
                   </span>
-                  <span className="w-8 h-px bg-white/10 group-hover:w-12 transition-all duration-700 ease-out" />
+                  <span className="w-6 sm:w-8 h-px bg-white/10 group-hover:w-12 transition-all duration-700 ease-out" />
                   <span className="text-[10px] text-white/60 font-mono tracking-widest uppercase">
                     {step.title}
                   </span>
                 </div>
-                <p className="text-sm md:text-base text-white/50 leading-[1.8] group-hover:text-white/70 transition-colors duration-500 max-w-lg font-light">
+                <p className="text-xs sm:text-sm md:text-base text-white/50 leading-[1.8] group-hover:text-white/70 transition-colors duration-500 max-w-lg font-light">
                   {step.desc}
                 </p>
               </motion.div>
@@ -524,15 +528,15 @@ function Manifesto() {
 
 function Footer() {
   return (
-    <footer className="bg-void-black border-t border-white/5 pt-32 pb-12 px-10 overflow-hidden relative">
-      <div className="mx-auto grid grid-cols-1 md:grid-cols-2 gap-16 mb-24">
+    <footer className="bg-void-black border-t border-white/5 pt-20 sm:pt-28 md:pt-32 pb-12 px-4 sm:px-6 md:px-10 overflow-hidden relative">
+      <div className="mx-auto grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16 mb-16 md:mb-24">
         <div>
-          <h2 className="text-4xl md:text-5xl font-serif italic tracking-tighter mb-8 leading-tight">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif italic tracking-tighter mb-6 md:mb-8 leading-tight">
             Embrace the <br /> void.
           </h2>
         </div>
 
-        <div className="flex flex-col sm:flex-row justify-start md:justify-end gap-16 md:gap-32">
+        <div className="grid grid-cols-2 sm:flex sm:flex-row justify-start md:justify-end gap-8 sm:gap-16 md:gap-32">
           <div className="flex flex-col gap-6">
             <span className="text-[10px] opacity-30 uppercase tracking-[0.2em] font-mono mb-2 block">
               Social
@@ -608,11 +612,17 @@ function Footer() {
             >
               Report Anomaly
             </a>
+            <a
+              href="mailto:voidwallzbusiness@gmail.com"
+              className="text-sm opacity-60 hover:opacity-100 transition-opacity hover-trigger"
+            >
+              Business Inquiries
+            </a>
           </div>
 
-          <div className="flex flex-col gap-6">
-            <span className="text-[10px] opacity-30 uppercase tracking-[0.2em] font-mono mb-2 block">
-              Legal
+          <div className="flex flex-col gap-3.5 sm:gap-4">
+            <span className="text-[10px] opacity-30 uppercase tracking-[0.2em] font-mono mb-1 block">
+              Legal & Compliance
             </span>
             <a
               href="/privacy"
@@ -621,7 +631,7 @@ function Footer() {
                 window.history.pushState(null, "", "/privacy");
                 window.dispatchEvent(new Event("popstate"));
               }}
-              className="text-sm opacity-60 hover:opacity-100 transition-opacity hover-trigger"
+              className="text-xs sm:text-sm opacity-60 hover:opacity-100 transition-opacity hover-trigger"
             >
               Privacy Policy
             </a>
@@ -632,7 +642,7 @@ function Footer() {
                 window.history.pushState(null, "", "/terms");
                 window.dispatchEvent(new Event("popstate"));
               }}
-              className="text-sm opacity-60 hover:opacity-100 transition-opacity hover-trigger"
+              className="text-xs sm:text-sm opacity-60 hover:opacity-100 transition-opacity hover-trigger"
             >
               Terms of Service
             </a>
@@ -643,9 +653,42 @@ function Footer() {
                 window.history.pushState(null, "", "/license");
                 window.dispatchEvent(new Event("popstate"));
               }}
-              className="text-sm opacity-60 hover:opacity-100 transition-opacity hover-trigger"
+              className="text-xs sm:text-sm opacity-60 hover:opacity-100 transition-opacity hover-trigger"
             >
-              License
+              Personal License
+            </a>
+            <a
+              href="/cookies"
+              onClick={(e) => {
+                e.preventDefault();
+                window.history.pushState(null, "", "/cookies");
+                window.dispatchEvent(new Event("popstate"));
+              }}
+              className="text-xs sm:text-sm opacity-60 hover:opacity-100 transition-opacity hover-trigger"
+            >
+              Cookie Policy
+            </a>
+            <a
+              href="/refunds"
+              onClick={(e) => {
+                e.preventDefault();
+                window.history.pushState(null, "", "/refunds");
+                window.dispatchEvent(new Event("popstate"));
+              }}
+              className="text-xs sm:text-sm opacity-60 hover:opacity-100 transition-opacity hover-trigger"
+            >
+              Refund Policy
+            </a>
+            <a
+              href="/dmca"
+              onClick={(e) => {
+                e.preventDefault();
+                window.history.pushState(null, "", "/dmca");
+                window.dispatchEvent(new Event("popstate"));
+              }}
+              className="text-xs sm:text-sm opacity-60 hover:opacity-100 transition-opacity hover-trigger"
+            >
+              DMCA & Copyright
             </a>
           </div>
         </div>
@@ -653,8 +696,8 @@ function Footer() {
 
       <div className="w-full border-t border-white/5 pt-12 flex flex-col md:flex-row justify-between items-center gap-6">
         <div className="w-full md:w-1/3 flex justify-center md:justify-start">
-          <span className="font-mono text-[10px] opacity-40 uppercase tracking-widest">
-            &copy; 2026 VOIDWALLZ
+          <span className="font-mono text-[10px] opacity-40 uppercase tracking-widest text-center md:text-left">
+            &copy; 2026 VOIDWALLZ // DIGITAL DESIGN COLLECTIVE
           </span>
         </div>
 
@@ -802,6 +845,18 @@ export default function App() {
       return <License key="license" />;
     }
 
+    if (path === "/cookies") {
+      return <CookiePolicy key="cookies" />;
+    }
+
+    if (path === "/refunds") {
+      return <RefundPolicy key="refunds" />;
+    }
+
+    if (path === "/dmca") {
+      return <DMCAPolicy key="dmca" />;
+    }
+
     if (path === "/report") {
       return <ReportPage key="report" />;
     }
@@ -924,6 +979,7 @@ export default function App() {
       />
       <AnimatePresence mode="wait">{renderContent()}</AnimatePresence>
       <Footer />
+      <CookieConsent />
     </div>
   );
 }
