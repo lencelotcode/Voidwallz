@@ -217,6 +217,7 @@ function mapFileToWallpaper(
   file: StorageFile,
   folder: "desktop" | "mobile",
   index: number,
+  originalsSet?: Set<string>,
 ): Wallpaper {
   const { title, category, format } = parseFilename(file.name);
 
@@ -238,9 +239,11 @@ function mapFileToWallpaper(
     ? supabase.storage.from(BUCKET_NAME).getPublicUrl(previewPath).data.publicUrl
     : "";
 
-  const originalPublicUrl = supabase
+  // Only assign original URL if the file actually exists in the originals folder
+  const hasOriginal = originalsSet ? originalsSet.has(file.name) : false;
+  const originalPublicUrl = hasOriginal && supabase
     ? supabase.storage.from(BUCKET_NAME).getPublicUrl(originalPath).data.publicUrl
-    : "";
+    : previewPublicUrl;
 
   // Determine if it's mobile format
   const displayFormat = folder === "mobile" ? `${format} MOBILE` : format;
@@ -345,6 +348,16 @@ export function useWallpapers(): UseWallpapersResult {
 
             if (desktopError) throw desktopError;
 
+            // Check which desktop originals actually exist in storage
+            const { data: desktopOriginals } = await supabase.storage
+              .from(BUCKET_NAME)
+              .list(DESKTOP_ORIGINALS_FOLDER, { limit: 1000 });
+            const desktopOriginalsSet = new Set(
+              (desktopOriginals || [])
+                .filter((f) => (f.metadata?.size ?? 0) > 0 && !f.name.startsWith("."))
+                .map((f) => f.name),
+            );
+
             // Fetch mobile wallpapers from previews folder
             const { data: mobileFiles, error: mobileError } =
               await supabase.storage
@@ -356,13 +369,23 @@ export function useWallpapers(): UseWallpapersResult {
 
             if (mobileError) throw mobileError;
 
+            // Check which mobile originals actually exist in storage
+            const { data: mobileOriginals } = await supabase.storage
+              .from(BUCKET_NAME)
+              .list(MOBILE_ORIGINALS_FOLDER, { limit: 1000 });
+            const mobileOriginalsSet = new Set(
+              (mobileOriginals || [])
+                .filter((f) => (f.metadata?.size ?? 0) > 0 && !f.name.startsWith("."))
+                .map((f) => f.name),
+            );
+
             const desktopResult = (desktopFiles || [])
               .filter(
                 (file: StorageFile) =>
                   file.metadata?.size > 0 && !file.name.startsWith("."),
               )
               .map((file: StorageFile, index: number) =>
-                mapFileToWallpaper(file, "desktop", index),
+                mapFileToWallpaper(file, "desktop", index, desktopOriginalsSet),
               );
 
             const mobileResult = (mobileFiles || [])
@@ -371,7 +394,7 @@ export function useWallpapers(): UseWallpapersResult {
                   file.metadata?.size > 0 && !file.name.startsWith("."),
               )
               .map((file: StorageFile, index: number) =>
-                mapFileToWallpaper(file, "mobile", index),
+                mapFileToWallpaper(file, "mobile", index, mobileOriginalsSet),
               );
 
             cachedDesktopWallpapers = desktopResult;

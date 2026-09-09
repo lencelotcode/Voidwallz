@@ -56,7 +56,9 @@ export async function downloadWallpaperAsPng(
   rawTitle: string,
   fallbackUrl?: string
 ): Promise<boolean> {
-  const targetUrls = [imageUrl, fallbackUrl].filter((u): u is string => Boolean(u && u.trim()));
+  const targetUrls = Array.from(
+    new Set([imageUrl, fallbackUrl].filter((u): u is string => Boolean(u && u.trim())))
+  );
   if (targetUrls.length === 0) return false;
 
   const cleanTitle = rawTitle
@@ -67,29 +69,19 @@ export async function downloadWallpaperAsPng(
   const filename = `VOIDWALLZ-${cleanTitle}.png`;
 
   for (const url of targetUrls) {
-    // Strategy 1: Load image & convert through Canvas to guarantee real 100% PNG
-    try {
-      const img = await loadImage(url);
-      const pngBlob = await imageToPngBlob(img);
-      triggerBlobDownload(pngBlob, filename);
-      return true;
-    } catch (canvasErr) {
-      console.warn(`Canvas conversion failed for ${url}:`, canvasErr);
-    }
-
-    // Strategy 2: Direct CORS fetch -> convert blob to PNG
+    // Strategy 1: Direct CORS fetch -> convert blob to PNG
     try {
       const res = await fetch(url, { mode: "cors" });
       if (res.ok) {
         const originalBlob = await res.blob();
-        
+
         // If already png, download directly
         if (originalBlob.type === "image/png") {
           triggerBlobDownload(originalBlob, filename);
           return true;
         }
 
-        // Convert fetched blob to Image and then PNG
+        // Convert fetched blob to Image and then true PNG via Canvas
         const blobUrl = URL.createObjectURL(originalBlob);
         try {
           const img = await loadImage(blobUrl);
@@ -104,23 +96,41 @@ export async function downloadWallpaperAsPng(
           URL.revokeObjectURL(blobUrl);
           return true;
         }
+      } else {
+        console.warn(`HTTP ${res.status} returned for ${url}. Trying next strategy/fallback.`);
       }
     } catch (fetchErr) {
       console.warn(`Direct fetch failed for ${url}:`, fetchErr);
     }
 
-    // Strategy 3: Direct synthetic anchor download
+    // Strategy 2: Load image & convert through Canvas
     try {
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = filename;
-      link.target = "_self";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      const img = await loadImage(url);
+      const pngBlob = await imageToPngBlob(img);
+      triggerBlobDownload(pngBlob, filename);
       return true;
-    } catch (anchorErr) {
-      console.warn(`Synthetic anchor failed for ${url}:`, anchorErr);
+    } catch (canvasErr) {
+      console.warn(`Canvas conversion failed for ${url}:`, canvasErr);
+    }
+
+    // Strategy 3: Check if this image is currently rendered in the DOM
+    try {
+      const domImages = Array.from(document.querySelectorAll<HTMLImageElement>("img"));
+      const matchedImg = domImages.find(
+        (img) =>
+          img.complete &&
+          img.naturalWidth > 0 &&
+          (img.alt.toLowerCase() === rawTitle.toLowerCase() ||
+            img.src.includes(encodeURIComponent(cleanTitle)) ||
+            (url && img.src.includes(url.split("?")[0])))
+      );
+      if (matchedImg) {
+        const pngBlob = await imageToPngBlob(matchedImg);
+        triggerBlobDownload(pngBlob, filename);
+        return true;
+      }
+    } catch (domErr) {
+      console.warn(`DOM extraction fallback failed:`, domErr);
     }
   }
 
@@ -143,20 +153,49 @@ export function triggerBlobDownload(blob: Blob, filename: string) {
   // Clean up object URL after brief delay
   setTimeout(() => {
     window.URL.revokeObjectURL(blobUrl);
-  }, 1500);
+  }, 2000);
 }
 
 /**
  * Fetches an image URL and returns ArrayBuffer as a PNG for ZIP packaging
  */
-export async function fetchImageAsPngArrayBuffer(imageUrl: string): Promise<ArrayBuffer> {
-  try {
-    const img = await loadImage(imageUrl);
-    const pngBlob = await imageToPngBlob(img);
-    return await pngBlob.arrayBuffer();
-  } catch (_) {
-    // Fallback: direct fetch arrayBuffer
-    const res = await fetch(imageUrl);
-    return await res.arrayBuffer();
+export async function fetchImageAsPngArrayBuffer(
+  imageUrl: string,
+  fallbackUrl?: string
+): Promise<ArrayBuffer> {
+  const targetUrls = Array.from(
+    new Set([imageUrl, fallbackUrl].filter((u): u is string => Boolean(u && u.trim())))
+  );
+
+  for (const url of targetUrls) {
+    try {
+      const res = await fetch(url, { mode: "cors" });
+      if (res.ok) {
+        const blob = await res.blob();
+        if (blob.type === "image/png") {
+          return await blob.arrayBuffer();
+        }
+        const blobUrl = URL.createObjectURL(blob);
+        try {
+          const img = await loadImage(blobUrl);
+          const pngBlob = await imageToPngBlob(img);
+          URL.revokeObjectURL(blobUrl);
+          return await pngBlob.arrayBuffer();
+        } catch {
+          URL.revokeObjectURL(blobUrl);
+          return await blob.arrayBuffer();
+        }
+      }
+    } catch (fetchErr) {
+      console.warn(`Buffer fetch failed for ${url}:`, fetchErr);
+    }
+
+    try {
+      const img = await loadImage(url);
+      const pngBlob = await imageToPngBlob(img);
+      return await pngBlob.arrayBuffer();
+    } catch (_) {}
   }
+
+  throw new Error(`Failed to fetch image buffer for: ${imageUrl}`);
 }

@@ -14,7 +14,6 @@ import {
   Share2,
   Link2,
   ArrowUpRight,
-  ZoomIn,
 } from "lucide-react";
 import OptimizedImage from "./OptimizedImage";
 import Magnetic from "./Magnetic";
@@ -37,10 +36,7 @@ export default function WallpaperModal({
   const [downloadStatus, setDownloadStatus] = useState<
     "idle" | "downloading" | "success" | "error"
   >("idle");
-  const [previewMode, setPreviewMode] = useState<"frame" | "canvas" | "loupe">("frame");
-  const [loupePos, setLoupePos] = useState({ x: 50, y: 50 });
-  const [isHoveringLoupe, setIsHoveringLoupe] = useState(false);
-  const loupeContainerRef = useRef<HTMLDivElement>(null);
+  const [previewMode, setPreviewMode] = useState<"frame" | "canvas">("frame");
   const [copied, setCopied] = useState(false);
 
   const { desktopWallpapers, mobileWallpapers } = useWallpapers();
@@ -150,25 +146,6 @@ export default function WallpaperModal({
     }
   };
 
-  const updateLoupePosition = (clientX: number, clientY: number) => {
-    if (!loupeContainerRef.current) return;
-    const rect = loupeContainerRef.current.getBoundingClientRect();
-    const x = Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100));
-    const y = Math.max(0, Math.min(100, ((clientY - rect.top) / rect.height) * 100));
-    setLoupePos({ x, y });
-  };
-
-  const handleLoupeMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    setIsHoveringLoupe(true);
-    updateLoupePosition(e.clientX, e.clientY);
-  };
-
-  const handleLoupeTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
-    if (e.touches.length > 0) {
-      setIsHoveringLoupe(true);
-      updateLoupePosition(e.touches[0].clientX, e.touches[0].clientY);
-    }
-  };
 
   const handleDownload = async (e?: React.MouseEvent) => {
     if (downloadStatus === "downloading") return;
@@ -253,34 +230,18 @@ export default function WallpaperModal({
                 >
                   Display
                 </button>
-                {selectedWp.device === "desktop" && (
-                  <button
-                    onClick={() => {
-                      sound.playSwitch();
-                      setPreviewMode("canvas");
-                    }}
-                    className={`h-6 px-3 text-[9px] font-mono uppercase tracking-widest rounded-full transition-all cursor-pointer flex items-center justify-center leading-none ${
-                      previewMode === "canvas"
-                        ? "bg-white text-black font-bold shadow-md"
-                        : "text-white/60 hover:text-white"
-                    }`}
-                  >
-                    Full Art
-                  </button>
-                )}
                 <button
                   onClick={() => {
                     sound.playSwitch();
-                    setPreviewMode("loupe");
+                    setPreviewMode("canvas");
                   }}
-                  className={`h-6 px-3 text-[9px] font-mono uppercase tracking-widest rounded-full transition-all cursor-pointer flex items-center justify-center gap-1 leading-none ${
-                    previewMode === "loupe"
+                  className={`h-6 px-3 text-[9px] font-mono uppercase tracking-widest rounded-full transition-all cursor-pointer flex items-center justify-center leading-none ${
+                    previewMode === "canvas"
                       ? "bg-white text-black font-bold shadow-md"
                       : "text-white/60 hover:text-white"
                   }`}
                 >
-                  <ZoomIn size={10} className="flex-shrink-0" />
-                  <span>8K Loupe</span>
+                  Full Art
                 </button>
               </div>
 
@@ -366,7 +327,7 @@ export default function WallpaperModal({
                     </motion.div>
                   )}
                 </motion.div>
-              ) : previewMode === "canvas" ? (
+              ) : (
                 /* Clean Full Art Canvas Mode */
                 <motion.div
                   initial={{ opacity: 0, scale: 0.96 }}
@@ -375,7 +336,13 @@ export default function WallpaperModal({
                   key={`canvas-${selectedWp.id}`}
                   className="w-full h-full relative flex items-center justify-center p-2 sm:p-6"
                 >
-                  <div className="relative w-full max-w-[260px] sm:max-w-[400px] md:max-w-[470px] aspect-[16/10] rounded-xl overflow-hidden shadow-[0_25px_70px_rgba(0,0,0,0.9)] ring-1 ring-white/20 bg-black flex items-center justify-center">
+                  <div
+                    className={`relative w-full ${
+                      selectedWp.device === "mobile"
+                        ? "h-[250px] sm:h-[300px] md:h-[380px] w-auto aspect-[9/19.5] rounded-2xl"
+                        : "max-w-[260px] sm:max-w-[400px] md:max-w-[470px] aspect-[16/10] rounded-xl"
+                    } overflow-hidden shadow-[0_25px_70px_rgba(0,0,0,0.9)] ring-1 ring-white/20 bg-black flex items-center justify-center`}
+                  >
                     <OptimizedImage
                       src={selectedWp.previewUrl}
                       placeholder={selectedWp.tinyUrl}
@@ -386,91 +353,6 @@ export default function WallpaperModal({
                       containerClassName="w-full h-full"
                     />
                     <div className="absolute inset-0 bg-gradient-to-tr from-white/[0.06] via-transparent to-transparent pointer-events-none z-20" />
-                  </div>
-                </motion.div>
-              ) : (
-                /* Interactive 8K Precision Art Loupe Mode */
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.96 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.3 }}
-                  key={`loupe-${selectedWp.id}`}
-                  className="w-full h-full relative flex flex-col items-center justify-center p-2 sm:p-6 select-none"
-                >
-                  <div
-                    ref={loupeContainerRef}
-                    onMouseMove={handleLoupeMouseMove}
-                    onTouchMove={handleLoupeTouchMove}
-                    onMouseEnter={() => setIsHoveringLoupe(true)}
-                    onMouseLeave={() => setIsHoveringLoupe(false)}
-                    className={`relative w-full ${
-                      selectedWp.device === "mobile"
-                        ? "h-[250px] sm:h-[300px] aspect-[9/19.5] w-auto rounded-[2rem] sm:rounded-[2.5rem]"
-                        : "max-w-[260px] sm:max-w-[400px] md:max-w-[470px] aspect-[16/10] rounded-xl"
-                    } overflow-hidden shadow-[0_25px_70px_rgba(0,0,0,0.95)] ring-1 ring-white/20 bg-black cursor-crosshair group touch-none`}
-                  >
-                    {/* Dimmed Base Canvas */}
-                    <OptimizedImage
-                      src={selectedWp.previewUrl}
-                      placeholder={selectedWp.tinyUrl}
-                      fallbackSrc={selectedWp.fallbackUrl || selectedWp.previewUrl}
-                      alt={selectedWp.title}
-                      priority={true}
-                      className={`w-full h-full object-cover transition-opacity duration-300 ${
-                        isHoveringLoupe ? "opacity-35" : "opacity-85"
-                      } ${isOledOptimized ? "oled-image" : ""}`}
-                      containerClassName="w-full h-full"
-                    />
-
-                    {/* Floating Magnifier Loupe Lens */}
-                    <motion.div
-                      animate={{
-                        left: `${loupePos.x}%`,
-                        top: `${loupePos.y}%`,
-                        opacity: isHoveringLoupe ? 1 : 0.85,
-                        scale: isHoveringLoupe ? 1 : 0.95,
-                      }}
-                      transition={{ type: "spring", stiffness: 450, damping: 32 }}
-                      className="absolute w-36 h-36 sm:w-48 sm:h-48 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white/60 shadow-[0_20px_50px_rgba(0,0,0,0.95)] ring-4 ring-white/15 overflow-hidden pointer-events-none z-30 bg-black"
-                    >
-                      {/* Magnified Optical Canvas View */}
-                      <div
-                        className="w-full h-full"
-                        style={{
-                          backgroundImage: `url(${selectedWp.originalUrl || selectedWp.previewUrl})`,
-                          backgroundPosition: `${loupePos.x}% ${loupePos.y}%`,
-                          backgroundSize: "280%",
-                          backgroundRepeat: "no-repeat",
-                        }}
-                      />
-
-                      {/* Optical Glass Flare */}
-                      <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-white/25 via-transparent to-transparent pointer-events-none" />
-
-                      {/* Reticle Crosshair */}
-                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                        <div className="w-5 h-5 relative">
-                          <div className="absolute top-1/2 left-0 w-2 h-px bg-white/80 -translate-y-1/2" />
-                          <div className="absolute top-1/2 right-0 w-2 h-px bg-white/80 -translate-y-1/2" />
-                          <div className="absolute top-0 left-1/2 h-2 w-px bg-white/80 -translate-x-1/2" />
-                          <div className="absolute bottom-0 left-1/2 h-2 w-px bg-white/80 -translate-x-1/2" />
-                          <div className="absolute inset-1 rounded-full border border-white/40" />
-                        </div>
-                      </div>
-
-                      {/* HUD Label Tag */}
-                      <div className="absolute bottom-2 inset-x-0 flex justify-center pointer-events-none">
-                        <span className="px-2 py-0.5 rounded-full bg-black/90 backdrop-blur-md border border-white/25 text-[7px] font-mono tracking-widest text-white/90 shadow-lg uppercase">
-                          8K MASTER // 2.8X
-                        </span>
-                      </div>
-                    </motion.div>
-                  </div>
-
-                  {/* Stage Footer Status Pill */}
-                  <div className="mt-3 flex items-center gap-2 text-[9px] font-mono tracking-widest text-white/50 uppercase">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                    <span>Inspection Mode // {Math.round(loupePos.x)}% X : {Math.round(loupePos.y)}% Y</span>
                   </div>
                 </motion.div>
               )}

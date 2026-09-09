@@ -151,7 +151,7 @@ export default function PackModal({
         });
 
         try {
-          const arrayBuffer = await fetchImageAsPngArrayBuffer(downloadUrl);
+          const arrayBuffer = await fetchImageAsPngArrayBuffer(downloadUrl, item.previewUrl);
           const cleanTitle = item.title.replace(/[/\\?%*:|"<>]/g, "-");
           const filename = `${String(i + 1).padStart(2, "0")} - ${cleanTitle}.png`;
           packFolder.file(filename, arrayBuffer);
