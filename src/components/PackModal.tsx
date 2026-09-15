@@ -40,6 +40,7 @@ export default function PackModal({
   const [zipProgress, setZipProgress] = useState({ current: 0, total: 0, percent: 0 });
   const [isDownloadingSingle, setIsDownloadingSingle] = useState(false);
   const [downloadSuccess, setDownloadSuccess] = useState<string | null>(null);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
   const { recordDownload, getDownloads } = useWallpaperStats();
@@ -55,6 +56,7 @@ export default function PackModal({
     setIsDownloadingZip(false);
     setIsDownloadingSingle(false);
     setDownloadSuccess(null);
+    setDownloadError(null);
     setCopied(false);
   }, [selectedPack]);
 
@@ -179,11 +181,12 @@ export default function PackModal({
 
       recordDownload(selectedPack.id);
       sound.playSuccess();
-      setDownloadSuccess("Complete Suite Downloaded!");
+      setDownloadSuccess("Complete Suite Downloaded");
       setTimeout(() => setDownloadSuccess(null), 4000);
     } catch (err) {
       console.error("Pack zip generation failed:", err);
-      alert("Could not generate ZIP archive. Downloading individual wallpapers instead...");
+      setDownloadError("ZIP archive failed. Falling back to individual downloads.");
+      setTimeout(() => setDownloadError(null), 5000);
       for (const item of selectedPack.items) {
         downloadWallpaperAsPng(item.originalUrl || item.previewUrl, item.title, item.previewUrl);
       }
@@ -203,7 +206,7 @@ export default function PackModal({
       await downloadWallpaperAsPng(downloadUrl, currentWp.title, currentWp.previewUrl);
       recordDownload(currentWp.id);
       sound.playSuccess();
-      setDownloadSuccess(`Part 0${activeIndex + 1} Downloaded!`);
+      setDownloadSuccess(`Part 0${activeIndex + 1} Downloaded`);
       setTimeout(() => setDownloadSuccess(null), 3000);
     } catch (err) {
       console.error("Single download failed:", err);
@@ -220,6 +223,9 @@ export default function PackModal({
         exit={{ opacity: 0 }}
         className="fixed inset-0 flex items-center justify-center p-2 sm:p-4 md:p-8"
         style={{ zIndex: 99999 }}
+        role="dialog"
+        aria-modal="true"
+        aria-label={`Pack details: ${selectedPack.title}`}
       >
         {/* Dark Luxury Blur Backdrop */}
         <div
@@ -233,11 +239,11 @@ export default function PackModal({
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.96, opacity: 0, y: 15 }}
           transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-          className="w-full max-w-5xl max-h-[92vh] bg-[#090909] border border-white/15 flex flex-col md:flex-row shadow-[0_30px_100px_rgba(0,0,0,0.95)] relative z-10 overflow-y-auto md:overflow-hidden rounded-2xl"
+          className="w-full max-w-5xl max-h-[92vh] bg-void-raised border border-white/15 flex flex-col md:flex-row shadow-[0_30px_100px_rgba(0,0,0,0.95)] relative z-10 overflow-y-auto md:overflow-hidden rounded-2xl"
           onClick={(e) => e.stopPropagation()}
         >
           {/* LEFT: Visual Stage Section */}
-          <div className="w-full md:w-3/5 min-h-[320px] sm:min-h-[360px] md:min-h-[480px] relative flex flex-col items-center justify-center overflow-hidden border-b md:border-b-0 md:border-r border-white/10 group bg-[#040404]">
+          <div className="w-full md:w-3/5 min-h-[320px] sm:min-h-[360px] md:min-h-[480px] relative flex flex-col items-center justify-center overflow-hidden border-b md:border-b-0 md:border-r border-white/10 group bg-void-deep">
             {/* Ambient Background Glow */}
             <motion.div
               initial={{ opacity: 0 }}
@@ -385,7 +391,7 @@ export default function PackModal({
           </div>
 
           {/* RIGHT: Pack Details & Action Panel */}
-          <div className="w-full md:w-2/5 p-4 sm:p-6 md:p-7 flex flex-col justify-between bg-[#0b0b0b] space-y-4">
+          <div className="w-full md:w-2/5 p-4 sm:p-6 md:p-7 flex flex-col justify-between bg-void-deep space-y-4">
             <div>
               {/* Header Badges & Share */}
               <div className="flex items-center justify-between mb-1.5">
@@ -494,6 +500,17 @@ export default function PackModal({
                     <span>{downloadSuccess}</span>
                   </motion.div>
                 )}
+                {downloadError && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -6 }}
+                    role="alert"
+                    className="py-2 px-3 rounded-lg bg-red-500/10 border border-red-500/30 flex items-center justify-center gap-2 text-red-400 text-xs font-mono"
+                  >
+                    <span>{downloadError}</span>
+                  </motion.div>
+                )}
               </AnimatePresence>
 
               {/* Primary Action: Download Complete Pack .ZIP */}
@@ -545,7 +562,7 @@ export default function PackModal({
                   {copied ? (
                     <>
                       <Check size={11} className="text-emerald-400" />
-                      <span className="text-emerald-400 font-semibold">Pack Link Copied!</span>
+                      <span className="text-emerald-400 font-semibold">Pack Link Copied</span>
                     </>
                   ) : (
                     <>

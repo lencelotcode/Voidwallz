@@ -49,9 +49,19 @@ export default function LatestUploads({
               sound.playOpenModal();
               onOpenModal(wp);
             }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                sound.playOpenModal();
+                onOpenModal(wp);
+              }
+            }}
             onMouseEnter={() => onHoverWallpaper?.(wp.previewUrl)}
             onMouseLeave={() => onHoverWallpaper?.(null)}
             data-cursor="VIEW"
+            role="button"
+            tabIndex={0}
+            aria-label={`View latest wallpaper: ${wp.title}`}
             className={`relative flex flex-col items-center justify-center overflow-hidden group cursor-pointer hover-trigger bg-void-black glass-sheen p-4 ${
               wp.device === "desktop"
                 ? "h-[340px] sm:h-[420px] md:h-[500px]"
@@ -106,7 +116,7 @@ export default function LatestUploads({
               <span className="bg-black text-white text-[10px] px-3 py-1 font-mono uppercase tracking-widest border border-white/10 mb-1">
                 {wp.category}
               </span>
-              <h3 className="bg-white text-black text-xl md:text-2xl font-sans font-bold uppercase tracking-wider px-4 py-1 mt-1 text-center max-w-[90%] leading-tight text-stroke-none">
+              <h3 className="bg-white text-black text-xl md:text-2xl font-sans font-bold uppercase tracking-wider px-4 py-1 mt-1 text-center max-w-[90%] leading-tight">
                 {wp.title}
               </h3>
             </div>
@@ -114,16 +124,16 @@ export default function LatestUploads({
             {/* Mobile Always-Visible Bottom Title Strip */}
             <div className="absolute bottom-0 inset-x-0 p-3 bg-gradient-to-t from-black/95 via-black/50 to-transparent flex items-end justify-between z-20 md:hidden pointer-events-none">
               <div className="max-w-[80%]">
-                <span className="text-[8px] font-mono text-white/50 uppercase tracking-widest block truncate">
-                  {wp.category}
-                </span>
-                <h4 className="text-xs font-sans font-bold text-white uppercase tracking-tight truncate">
-                  {wp.title}
-                </h4>
-              </div>
-              <span className="text-[9px] font-mono text-white/70">
-                PREVIEW &rarr;
+              <span className="text-[9px] font-mono text-white/50 uppercase tracking-widest block truncate">
+                {wp.category}
               </span>
+              <h4 className="text-xs font-sans font-bold text-white uppercase tracking-tight truncate">
+                {wp.title}
+              </h4>
+            </div>
+            <span className="text-[9px] sm:text-[10px] font-mono text-white/70">
+              PREVIEW &rarr;
+            </span>
             </div>
           </motion.div>
         ))}

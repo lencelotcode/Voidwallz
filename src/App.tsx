@@ -23,8 +23,11 @@ import AdminPackUpload from "./components/AdminPackUpload";
 import { Wallpaper, VoidPack } from "./types";
 import { useWallpapers } from "./hooks/useWallpapers";
 import { useWallpaperStats } from "./hooks/useWallpaperStats";
+import { VisualEffectsProvider } from "./hooks/useVisualEffects";
 import { sound } from "./lib/soundEffects";
 import CookieConsent from "./components/CookieConsent";
+import NotFoundPage from "./components/NotFoundPage";
+import { setPageMeta, DEFAULT_TITLE, DEFAULT_DESCRIPTION } from "./lib/seo";
 import {
   PrivacyPolicy,
   TermsOfService,
@@ -33,6 +36,52 @@ import {
   RefundPolicy,
   DMCAPolicy,
 } from "./components/LegalPages";
+
+const KNOWN_PATHS = [
+  "/",
+  "/packs",
+  "/desktop",
+  "/mobile",
+  "/updates",
+  "/privacy",
+  "/terms",
+  "/license",
+  "/cookies",
+  "/refunds",
+  "/dmca",
+  "/report",
+  "/admin",
+];
+
+const WALLPAPER_ROUTE_PATTERN = /^\/(desktop|mobile)\/([^/]+)\/?$/;
+
+const STATIC_META: Record<string, { title: string; description: string }> = {
+  "/": { title: DEFAULT_TITLE, description: DEFAULT_DESCRIPTION },
+  "/packs": {
+    title: "Void Packs — Curated Wallpaper Suites | Voidwallz",
+    description:
+      "Thematic 5-piece wallpaper suites for desktop and phone. Download complete .ZIP packages or individual master files.",
+  },
+  "/desktop": {
+    title: "Desktop Archives — 8K & 6K Minimal Wallpapers | Voidwallz",
+    description:
+      "Ultra high resolution 8K and 6K minimalist desktop wallpapers, mastered in RAW and AVIF.",
+  },
+  "/mobile": {
+    title: "Phone Archives — OLED 4K Wallpapers | Voidwallz",
+    description:
+      "OLED-optimized 4K wallpapers for iOS and Android. Deep blacks, minimal compositions, native resolutions.",
+  },
+  "/updates": {
+    title: "System Logs — Changelog | Voidwallz",
+    description:
+      "Chronological log of visual architectural evolutions, new protocol features, and rendering pipeline enhancements.",
+  },
+  "/report": {
+    title: "Report Anomaly | Voidwallz",
+    description: "Report a copyright concern or an issue with a wallpaper.",
+  },
+};
 
 export const navigateToWallpaper = (wp: Wallpaper) => {
   const slug = wp.title.toLowerCase().replace(/\s+/g, "-");
@@ -50,10 +99,9 @@ function WallpaperRouteManager({
 
   useEffect(() => {
     if (loading) return;
-
     const handleUrlChange = () => {
       const path = window.location.pathname;
-      const match = path.match(/^\/(desktop|mobile)\/([^/]+)\/?$/);
+      const match = path.match(WALLPAPER_ROUTE_PATTERN);
 
       if (match) {
         const device = match[1];
@@ -90,9 +138,20 @@ function WallpaperRouteManager({
     };
   }, [desktopWallpapers, mobileWallpapers, loading]);
 
+  // Per-wallpaper link-preview metadata for detail routes
+  useEffect(() => {
+    if (!selectedWp) return;
+    setPageMeta({
+      title: `${selectedWp.title} — ${selectedWp.device === "desktop" ? "Desktop" : "Phone"} Wallpaper | Voidwallz`,
+      description: `${selectedWp.title} — a curated ${selectedWp.device === "desktop" ? "8K desktop" : "OLED 4K phone"} wallpaper by Voidwallz. Free to download in lossless PNG.`,
+      image: selectedWp.previewUrl,
+      url: window.location.href,
+    });
+  }, [selectedWp]);
+
   const handleClose = () => {
     const path = window.location.pathname;
-    const match = path.match(/^\/(desktop|mobile)\/([^/]+)\/?$/);
+    const match = path.match(WALLPAPER_ROUTE_PATTERN);
 
     if (match) {
       const device = match[1];
@@ -175,7 +234,7 @@ function Hero({
       ref={heroRef}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
-      className="relative min-h-screen flex flex-col justify-center px-4 sm:px-6 md:px-10 pt-24 sm:pt-28 md:pt-32 pb-12 md:pb-16 overflow-hidden border-b border-white/5"
+      className="relative min-h-[100dvh] flex flex-col justify-center px-4 sm:px-6 md:px-10 pt-24 sm:pt-28 md:pt-32 pb-12 md:pb-16 overflow-hidden border-b border-white/5"
     >
       <div className="absolute inset-0 bg-void-black z-0 pointer-events-none" />
 
@@ -248,6 +307,16 @@ function Hero({
               onOpenModal(wallpaperOfTheDay);
             }
           }}
+          onKeyDown={(e) => {
+            if ((e.key === "Enter" || e.key === " ") && !loading) {
+              e.preventDefault();
+              sound.playOpenModal();
+              onOpenModal(wallpaperOfTheDay);
+            }
+          }}
+          role="button"
+          tabIndex={0}
+          aria-label={`Preview wallpaper of the day: ${wallpaperOfTheDay.title}`}
           className="w-full md:w-7/12 h-[340px] sm:h-[420px] md:h-[65vh] relative group cursor-pointer hover-trigger perspective-1000"
           initial={{ opacity: 0, scale: 0.95 }}
         >
@@ -270,7 +339,7 @@ function Hero({
               <>
                 {/* Top Left Floating Tag */}
                 <div className="absolute top-3 left-3 sm:top-4 sm:left-4 z-30 flex items-center gap-2 pointer-events-none">
-                  <span className="spec-badge text-[8px] sm:text-[9px] font-mono px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-white/90 tracking-widest uppercase bg-black/80 backdrop-blur-md border border-white/20 shadow-xl flex items-center gap-1.5">
+                  <span className="spec-badge text-[9px] sm:text-[10px] font-mono px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-white/90 tracking-widest uppercase bg-black/80 backdrop-blur-md border border-white/20 shadow-xl flex items-center gap-1.5">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                     WALLPAPER OF THE DAY
                   </span>
@@ -278,7 +347,7 @@ function Hero({
 
                 {/* Top Right Device Badge */}
                 <div className="absolute top-3 right-3 sm:top-4 sm:right-4 z-30 flex items-center gap-2 pointer-events-none">
-                  <span className="spec-badge text-[8px] sm:text-[9px] font-mono px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-white/80 tracking-widest uppercase bg-black/80 backdrop-blur-md border border-white/20 shadow-xl flex items-center gap-1">
+                  <span className="spec-badge text-[9px] sm:text-[10px] font-mono px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-white/80 tracking-widest uppercase bg-black/80 backdrop-blur-md border border-white/20 shadow-xl flex items-center gap-1">
                     {wallpaperOfTheDay.device === "desktop" ? <Monitor size={10} /> : <Smartphone size={10} />}
                     {wallpaperOfTheDay.format || (wallpaperOfTheDay.device === "desktop" ? "8K MASTER" : "4K MOBILE")}
                   </span>
@@ -542,8 +611,9 @@ function Footer() {
               Social
             </span>
             <a
-              href="/"
-              onClick={(e) => e.preventDefault()}
+              href="https://www.instagram.com/voidwallz/"
+              target="_blank"
+              rel="noopener noreferrer"
               className="flex items-center gap-3 text-sm opacity-60 hover:opacity-100 transition-opacity hover-trigger group"
             >
               <Instagram
@@ -553,8 +623,9 @@ function Footer() {
               <span>Instagram</span>
             </a>
             <a
-              href="/"
-              onClick={(e) => e.preventDefault()}
+              href="https://x.com/voidwallz"
+              target="_blank"
+              rel="noopener noreferrer"
               className="flex items-center gap-3 text-sm opacity-60 hover:opacity-100 transition-opacity hover-trigger group"
             >
               <Twitter
@@ -598,7 +669,7 @@ function Footer() {
             >
               <span>System Logs</span>
               <span className="text-[8px] font-mono uppercase px-1.5 py-0.5 rounded bg-white text-black font-bold">
-                v2.4.0
+                v2.5.0
               </span>
             </a>
             <a
@@ -755,6 +826,9 @@ export default function App() {
     const handleLocationChange = () => {
       setHash(window.location.hash);
       setPath(window.location.pathname);
+      if (!window.location.hash) {
+        window.scrollTo(0, 0);
+      }
     };
 
     window.addEventListener("popstate", handleLocationChange);
@@ -765,6 +839,17 @@ export default function App() {
       window.removeEventListener("hashchange", handleLocationChange);
     };
   }, []);
+
+  // Per-route document title + link-preview metadata (wallpaper detail
+  // routes manage their own meta in WallpaperRouteManager)
+  useEffect(() => {
+    if (WALLPAPER_ROUTE_PATTERN.test(path)) return;
+    const meta = STATIC_META[path] ?? {
+      title: "Page Not Found | Voidwallz",
+      description: "This coordinate doesn't map to anything in the archive.",
+    };
+    setPageMeta(meta);
+  }, [path]);
 
   const renderContent = () => {
     if (path === "/packs") {
@@ -865,8 +950,12 @@ export default function App() {
       return <AdminPackUpload key="admin" />;
     }
 
-    const isWallpaperRoute =
-      path.startsWith("/desktop/") || path.startsWith("/mobile/");
+    const isWallpaperRoute = WALLPAPER_ROUTE_PATTERN.test(path);
+
+    // Unknown coordinate → branded 404
+    if (!KNOWN_PATHS.includes(path) && !isWallpaperRoute) {
+      return <NotFoundPage key="not-found" />;
+    }
 
     if (hash === "#desktop") {
       return (
@@ -933,6 +1022,7 @@ export default function App() {
   };
 
   return (
+    <VisualEffectsProvider>
     <div
       className={`no-cursor bg-void-black min-h-screen text-void-light overflow-x-hidden selection:bg-white selection:text-black relative atmosphere-${atmosphereMode} ${isOledOptimized ? "oled-mode" : ""}`}
     >
@@ -981,5 +1071,6 @@ export default function App() {
       <Footer />
       <CookieConsent />
     </div>
+    </VisualEffectsProvider>
   );
 }

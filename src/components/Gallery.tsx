@@ -223,7 +223,7 @@ export default function Gallery({
             <span className="text-[10px] sm:text-[11px] font-mono uppercase tracking-[0.3em] text-white/80 animate-pulse">
               Initializing Protocol
             </span>
-            <span className="text-[8px] sm:text-[9px] font-mono uppercase tracking-widest text-white/30">
+            <span className="text-[9px] sm:text-[10px] font-mono uppercase tracking-widest text-white/30">
               Fetching Master Assets...
             </span>
           </div>
@@ -281,9 +281,19 @@ export default function Gallery({
                     sound.playOpenModal();
                     onOpenModal(wp);
                   }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      sound.playOpenModal();
+                      onOpenModal(wp);
+                    }
+                  }}
                   onMouseEnter={() => onHoverWallpaper?.(wp.previewUrl)}
                   onMouseLeave={() => onHoverWallpaper?.(null)}
                   data-cursor="VIEW"
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`View ${wp.title} wallpaper`}
                   className="relative flex flex-col items-center justify-center h-[340px] sm:h-[400px] md:h-[500px] overflow-hidden group cursor-pointer hover-trigger bg-void-black glass-sheen p-4"
                 >
                   <div
@@ -376,14 +386,14 @@ export default function Gallery({
                   {/* Mobile Always-Visible Bottom Title Strip */}
                   <div className="absolute bottom-0 inset-x-0 p-3 bg-gradient-to-t from-black/95 via-black/50 to-transparent flex items-end justify-between z-20 md:hidden pointer-events-none">
                     <div className="max-w-[80%]">
-                      <span className="text-[8px] font-mono text-white/50 uppercase tracking-widest block truncate">
+                      <span className="text-[9px] font-mono text-white/50 uppercase tracking-widest block truncate">
                         {wp.category}
                       </span>
                       <h4 className="text-xs font-sans font-bold text-white uppercase tracking-tight truncate">
                         {wp.title}
                       </h4>
                     </div>
-                    <span className="text-[9px] font-mono text-white/70 flex items-center gap-0.5">
+                    <span className="text-[9px] sm:text-[10px] font-mono text-white/70 flex items-center gap-0.5">
                       VIEW <ArrowUpRight size={11} />
                     </span>
                   </div>
@@ -391,10 +401,34 @@ export default function Gallery({
               ))}
             </div>
           ) : (
-            <div className="py-16 text-center">
-              <p className="text-sm font-mono uppercase tracking-widest opacity-40">
-                No desktop wallpapers available
-              </p>
+            <div className="py-20 px-4 flex flex-col items-center justify-center text-center gap-4">
+              <div className="w-12 h-12 rounded-full border border-white/10 bg-white/[0.02] flex items-center justify-center">
+                <Search size={18} className="text-white/30" />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <p className="text-sm font-mono uppercase tracking-widest text-white/60">
+                  {searchQuery || selectedCategory
+                    ? "Nothing matches your filters"
+                    : "No desktop wallpapers available"}
+                </p>
+                <p className="text-xs font-mono uppercase tracking-widest text-white/30">
+                  {searchQuery || selectedCategory
+                    ? "The void is empty here — try another query or category"
+                    : "New master assets are being forged"}
+                </p>
+              </div>
+              {(searchQuery || selectedCategory) && (
+                <button
+                  onClick={() => {
+                    sound.playTap();
+                    setSearchQuery("");
+                    setSelectedCategory(null);
+                  }}
+                  className="mt-1 px-4 py-2 bg-white/5 border border-white/15 rounded-full text-[10px] font-mono uppercase tracking-widest text-white/70 hover:text-white hover:border-white/40 hover:bg-white/10 transition-all cursor-pointer"
+                >
+                  Reset Filters
+                </button>
+              )}
             </div>
           )}
         </>
@@ -410,7 +444,7 @@ export default function Gallery({
             className={`py-12 sm:py-16 md:py-24 px-4 sm:px-6 md:px-10 flex flex-col items-center justify-center border-y border-white/5 bg-void-black text-center ${view === "all" ? "mt-px" : ""}`}
           >
             <h2 className="text-2xl sm:text-3xl md:text-5xl font-sans font-bold tracking-tighter uppercase mb-2 sm:mb-4">
-              SOME 🔥 PHONE WALLPAPERS_
+              PHONE ARCHIVES_
             </h2>
             <span className="text-xs sm:text-sm font-mono uppercase tracking-widest opacity-40">
               OLED Optimized For iOS / Android
@@ -429,9 +463,19 @@ export default function Gallery({
                     sound.playOpenModal();
                     onOpenModal(wp);
                   }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      sound.playOpenModal();
+                      onOpenModal(wp);
+                    }
+                  }}
                   onMouseEnter={() => onHoverWallpaper?.(wp.previewUrl)}
                   onMouseLeave={() => onHoverWallpaper?.(null)}
                   data-cursor="VIEW"
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`View ${wp.title} wallpaper`}
                   className="relative flex flex-col items-center justify-center h-[310px] sm:h-[370px] md:h-[600px] rounded-xl md:rounded-none overflow-hidden group cursor-pointer hover-trigger bg-void-black border border-white/10 md:border-none glass-sheen p-2 sm:p-4"
                 >
                   <div
@@ -441,7 +485,7 @@ export default function Gallery({
 
                   {/* Spec Badge Top Left */}
                   <div className="absolute top-2.5 left-2.5 sm:top-5 sm:left-5 z-20 opacity-85 md:opacity-70 group-hover:opacity-100 transition-opacity">
-                    <span className="spec-badge text-[7px] sm:text-[8px] md:text-[9px] font-mono px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-white/80 tracking-widest">
+                    <span className="spec-badge text-[9px] sm:text-[10px] font-mono px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-white/80 tracking-widest">
                       OLED 4K
                     </span>
                   </div>
@@ -523,7 +567,7 @@ export default function Gallery({
                   {/* Mobile Always-Visible Bottom Title Strip with Quick Download */}
                   <div className="absolute bottom-0 inset-x-0 p-2 sm:p-2.5 bg-gradient-to-t from-black/95 via-black/70 to-transparent flex items-center justify-between z-20 md:hidden">
                     <div className="max-w-[75%]">
-                      <span className="text-[7px] sm:text-[8px] font-mono text-white/50 uppercase tracking-widest block truncate">
+                      <span className="text-[9px] sm:text-[10px] font-mono text-white/50 uppercase tracking-widest block truncate">
                         {wp.category}
                       </span>
                       <h4 className="text-[10px] sm:text-xs font-sans font-bold text-white uppercase tracking-tight truncate">
@@ -545,10 +589,34 @@ export default function Gallery({
               ))}
             </div>
           ) : (
-            <div className="py-16 text-center">
-              <p className="text-sm font-mono uppercase tracking-widest opacity-40">
-                No mobile wallpapers available
-              </p>
+            <div className="py-20 px-4 flex flex-col items-center justify-center text-center gap-4">
+              <div className="w-12 h-12 rounded-full border border-white/10 bg-white/[0.02] flex items-center justify-center">
+                <Search size={18} className="text-white/30" />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <p className="text-sm font-mono uppercase tracking-widest text-white/60">
+                  {searchQuery || selectedCategory
+                    ? "Nothing matches your filters"
+                    : "No phone wallpapers available"}
+                </p>
+                <p className="text-xs font-mono uppercase tracking-widest text-white/30">
+                  {searchQuery || selectedCategory
+                    ? "The void is empty here — try another query or category"
+                    : "New master assets are being forged"}
+                </p>
+              </div>
+              {(searchQuery || selectedCategory) && (
+                <button
+                  onClick={() => {
+                    sound.playTap();
+                    setSearchQuery("");
+                    setSelectedCategory(null);
+                  }}
+                  className="mt-1 px-4 py-2 bg-white/5 border border-white/15 rounded-full text-[10px] font-mono uppercase tracking-widest text-white/70 hover:text-white hover:border-white/40 hover:bg-white/10 transition-all cursor-pointer"
+                >
+                  Reset Filters
+                </button>
+              )}
             </div>
           )}
         </>

@@ -198,7 +198,7 @@ export default function UpdatesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-void-black text-void-light pt-24 sm:pt-28 pb-20 sm:pb-32 px-4 sm:px-6 md:px-12 relative overflow-hidden">
+    <div className="min-h-screen bg-void-black text-void-light pt-24 sm:pt-28 pb-20 sm:pb-32 px-4 sm:px-6 md:px-10 relative overflow-hidden">
       {/* Background ambient lighting */}
       <div className="absolute top-20 left-1/2 -translate-x-1/2 w-[60vw] h-[400px] bg-white/[0.02] blur-[160px] pointer-events-none rounded-full" />
       <div className="absolute bottom-20 right-10 w-[30vw] h-[300px] bg-white/[0.015] blur-[140px] pointer-events-none rounded-full" />
@@ -278,7 +278,7 @@ export default function UpdatesPage() {
                 </div>
 
                 {/* Main Patch Card */}
-                <div className="bg-[#0a0a0a]/90 border border-white/10 hover:border-white/25 rounded-xl p-4 sm:p-6 md:p-8 backdrop-blur-xl luxury-border-glow shadow-2xl transition-all duration-300">
+                <div className="bg-void-raised/90 border border-white/10 hover:border-white/25 rounded-xl p-4 sm:p-6 md:p-8 backdrop-blur-xl luxury-border-glow shadow-2xl transition-all duration-300">
                   {/* Top Meta Bar */}
                   <div className="flex flex-wrap items-center justify-between gap-3 mb-4 pb-4 border-b border-white/5">
                     <div className="flex items-center gap-3">

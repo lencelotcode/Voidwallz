@@ -186,6 +186,9 @@ export default function WallpaperModal({
         exit={{ opacity: 0 }}
         className="fixed inset-0 flex items-center justify-center p-2 sm:p-4 md:p-8"
         style={{ zIndex: 99999 }}
+        role="dialog"
+        aria-modal="true"
+        aria-label={`Wallpaper details: ${selectedWp.title}`}
       >
         {/* Dark Luxury Blur Backdrop */}
         <div
@@ -199,11 +202,11 @@ export default function WallpaperModal({
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.96, opacity: 0, y: 15 }}
           transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-          className="w-full max-w-5xl max-h-[92vh] bg-[#090909] border border-white/15 flex flex-col md:flex-row shadow-[0_30px_100px_rgba(0,0,0,0.95)] relative z-10 overflow-y-auto md:overflow-hidden rounded-2xl"
+          className="w-full max-w-5xl max-h-[92vh] bg-void-raised border border-white/15 flex flex-col md:flex-row shadow-[0_30px_100px_rgba(0,0,0,0.95)] relative z-10 overflow-y-auto md:overflow-hidden rounded-2xl"
           onClick={(e) => e.stopPropagation()}
         >
           {/* LEFT: Visual Stage Section */}
-          <div className="w-full md:w-3/5 min-h-[340px] sm:min-h-[380px] md:min-h-[520px] relative flex flex-col items-center justify-center overflow-hidden border-b md:border-b-0 md:border-r border-white/10 group bg-[#040404]">
+          <div className="w-full md:w-3/5 min-h-[340px] sm:min-h-[380px] md:min-h-[520px] relative flex flex-col items-center justify-center overflow-hidden border-b md:border-b-0 md:border-r border-white/10 group bg-void-deep">
             {/* Ambient Background Glow */}
             <motion.div
               initial={{ opacity: 0 }}
@@ -306,7 +309,7 @@ export default function WallpaperModal({
                     >
                       {/* Dynamic Island */}
                       <div className="absolute top-2 sm:top-2.5 left-1/2 -translate-x-1/2 w-11 sm:w-14 h-2.5 sm:h-3 bg-black rounded-full z-30 ring-1 ring-white/10 flex items-center justify-end px-1 sm:px-1.5 pointer-events-none">
-                        <div className="w-1 sm:w-1.5 h-1 sm:h-1.5 rounded-full bg-[#080808] ring-1 ring-blue-900/30" />
+                        <div className="w-1 sm:w-1.5 h-1 sm:h-1.5 rounded-full bg-void-raised ring-1 ring-blue-900/30" />
                       </div>
 
                       {/* Bottom Home Indicator */}
@@ -377,7 +380,7 @@ export default function WallpaperModal({
               <ChevronRight size={16} strokeWidth={2} />
             </button>
           </div>          {/* RIGHT: Wallpaper Details & Action Panel */}
-          <div className="w-full md:w-2/5 p-5 sm:p-6 md:p-8 flex flex-col justify-between bg-[#0b0b0b] relative">
+          <div className="w-full md:w-2/5 p-5 sm:p-6 md:p-8 flex flex-col justify-between bg-void-deep relative">
             <div>
               {/* Header Info */}
               <div className="mb-5 pr-10">
@@ -492,7 +495,7 @@ export default function WallpaperModal({
                   "Downloading Master..."
                 ) : downloadStatus === "success" ? (
                   <>
-                    <Check size={16} /> Download Complete!
+                    <Check size={16} /> Download Complete
                   </>
                 ) : (
                   <>
@@ -510,7 +513,7 @@ export default function WallpaperModal({
                   {copied ? (
                     <>
                       <Check size={11} className="text-emerald-400" />
-                      <span className="text-emerald-400 font-semibold">Direct Link Copied!</span>
+                          <span className="text-emerald-400 font-semibold">Direct Link Copied</span>
                     </>
                   ) : (
                     <>

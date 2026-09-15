@@ -206,14 +206,14 @@ export default function AdminPackUpload() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-[#050505] text-void-light flex items-center justify-center p-6 relative overflow-hidden">
+      <div className="min-h-screen bg-void-black text-void-light flex items-center justify-center p-6 relative overflow-hidden">
         {/* Background ambient lighting */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60vw] h-[400px] bg-white/[0.02] blur-[160px] pointer-events-none rounded-full" />
 
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="w-full max-w-md bg-[#0a0a0a] border border-white/10 p-8 rounded-2xl luxury-border-glow shadow-2xl relative z-10 text-center"
+          className="w-full max-w-md bg-void-raised border border-white/10 p-8 rounded-2xl luxury-border-glow shadow-2xl relative z-10 text-center"
         >
           <div className="w-14 h-14 rounded-full luxury-glass mx-auto flex items-center justify-center mb-6 text-white/80">
             <Lock size={24} />
@@ -276,7 +276,7 @@ export default function AdminPackUpload() {
   }
 
   return (
-    <div className="min-h-screen bg-[#050505] text-void-light pt-24 sm:pt-28 pb-20 sm:pb-32 px-4 sm:px-6 md:px-12 relative overflow-hidden">
+    <div className="min-h-screen bg-void-black text-void-light pt-24 sm:pt-28 pb-20 sm:pb-32 px-4 sm:px-6 md:px-10 relative overflow-hidden">
       {/* Ambient background glow */}
       <div className="absolute top-20 left-1/2 -translate-x-1/2 w-[60vw] h-[400px] bg-white/[0.02] blur-[160px] pointer-events-none rounded-full" />
 
@@ -351,7 +351,7 @@ export default function AdminPackUpload() {
           {/* Left Form (7 cols) */}
           <form
             onSubmit={handleUploadPack}
-            className="lg:col-span-7 bg-[#0a0a0a] border border-white/10 p-6 md:p-8 rounded-xl space-y-6 luxury-border-glow shadow-2xl"
+            className="lg:col-span-7 bg-void-raised border border-white/10 p-6 md:p-8 rounded-xl space-y-6 luxury-border-glow shadow-2xl"
           >
             {/* Title & Target Device */}
             <div className="space-y-4">
@@ -576,7 +576,7 @@ export default function AdminPackUpload() {
             </div>
 
             {/* Currently Active Packs list */}
-            <div className="bg-[#0a0a0a] border border-white/10 rounded-xl p-5 space-y-3">
+            <div className="bg-void-raised border border-white/10 rounded-xl p-5 space-y-3">
               <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/40 block mb-2 flex items-center gap-1.5">
                 <Layers size={11} />
                 Live Published Packs ({allPacks.length})

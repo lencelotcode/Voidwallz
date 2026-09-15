@@ -27,7 +27,7 @@ export default function VoidPacks({
   return (
     <section
       id="packs"
-      className={`${isDedicatedPage ? "pt-24 sm:pt-28 pb-24 sm:pb-32 min-h-screen bg-void-black" : "py-16 sm:py-20 md:py-28 border-t border-white/5 bg-[#060606]"} px-4 sm:px-6 md:px-10 relative`}
+      className={`${isDedicatedPage ? "pt-24 sm:pt-28 pb-24 sm:pb-32 min-h-screen bg-void-black" : "py-16 sm:py-20 md:py-28 border-t border-white/5 bg-void-deep"} px-4 sm:px-6 md:px-10 relative`}
     >
       {/* Ambient background decoration */}
       <div className="absolute top-0 right-1/4 w-[40vw] h-[300px] bg-white/[0.02] blur-[150px] pointer-events-none rounded-full" />
@@ -182,9 +182,18 @@ const PackCard: React.FC<PackCardProps> = ({
   return (
     <div
       onClick={() => onOpenPack(pack)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onOpenPack(pack);
+        }
+      }}
       onMouseEnter={() => onHoverWallpaper?.(pack.featuredImage)}
       onMouseLeave={() => onHoverWallpaper?.(null)}
       data-cursor="EXP-PACK"
+      role="button"
+      tabIndex={0}
+      aria-label={`Explore ${pack.title} pack`}
       className="group cursor-pointer flex flex-col bg-void-gray/30 border border-white/10 hover:border-white/30 rounded-xl overflow-hidden transition-all duration-300 luxury-border-glow shadow-2xl glass-sheen"
     >
       {/* DESKTOP ACCORDION VIEW: Active on md:flex, hidden on mobile */}
@@ -205,7 +214,7 @@ const PackCard: React.FC<PackCardProps> = ({
             {/* Dynamic Part Title Pill */}
             <div className="absolute bottom-3 left-3 z-10 opacity-0 group-hover/slice:opacity-100 transition-opacity duration-200 flex items-center gap-2 whitespace-nowrap pointer-events-none">
               <span className="text-[10px] font-mono text-white bg-black/85 backdrop-blur-md px-3 py-1 rounded-full border border-white/20 shadow-xl flex items-center gap-1.5">
-                <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${pack.device === "desktop" ? "bg-green-400" : "bg-blue-400"}`} />
+                <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${pack.device === "desktop" ? "bg-emerald-400" : "bg-blue-400"}`} />
                 {pack.device === "desktop" ? "PART" : "DECK"} 0{sliceIdx + 1}: {item.title}
               </span>
             </div>
@@ -263,7 +272,7 @@ const PackCard: React.FC<PackCardProps> = ({
             <span className="truncate max-w-[170px]">
               0{mobileSliceIdx + 1} // {activeMobileItem.title}
             </span>
-            <span className="text-[7px] text-white/50 uppercase tracking-wider">TAP PIECE</span>
+            <span className="text-[9px] text-white/50 uppercase tracking-wider">TAP PIECE</span>
           </div>
 
           <div className="flex items-center gap-1">
@@ -335,13 +344,13 @@ const ComingSoonCard: React.FC = () => {
   return (
     <div className="group flex flex-col bg-void-gray/20 border border-white/10 hover:border-white/20 rounded-xl overflow-hidden transition-all duration-300 luxury-border-glow shadow-2xl relative select-none">
       {/* Visual Top Stage */}
-      <div className="relative w-full h-56 sm:h-64 overflow-hidden border-b border-white/10 flex items-center justify-center bg-gradient-to-b from-[#0c0c0c] via-[#070707] to-[#040404]">
+      <div className="relative w-full h-56 sm:h-64 overflow-hidden border-b border-white/10 flex items-center justify-center bg-gradient-to-b from-void-raised via-void-black to-void-deep">
         {/* Ambient Aura */}
         <div className="absolute w-44 h-44 rounded-full bg-gradient-to-tr from-white/[0.04] via-blue-500/[0.08] to-purple-500/[0.05] blur-3xl group-hover:scale-150 transition-transform duration-1000" />
 
         {/* Subtle Grid Lines */}
         <div
-          className="absolute inset-0 opacity-10 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"
+          className="absolute inset-0 opacity-10 bg-[linear-gradient(to_right,rgba(128,128,128,0.07)_1px,transparent_1px),linear-gradient(to_bottom,rgba(128,128,128,0.07)_1px,transparent_1px)] bg-[size:24px_24px]"
         />
 
         {/* Center Glowing Lock */}

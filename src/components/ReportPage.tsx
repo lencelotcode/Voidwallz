@@ -17,6 +17,7 @@ export default function ReportPage() {
   });
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     setSystemInfo({
       userAgent: navigator.userAgent,
       viewport: `${window.innerWidth}x${window.innerHeight}`,
@@ -45,8 +46,10 @@ export default function ReportPage() {
         body: formData,
       });
 
+      const data = await response.json().catch(() => null);
+
       if (!response.ok) {
-        throw new Error("Transmission failed. Please try again.");
+        throw new Error(data?.error || "Transmission failed. Please try again.");
       }
 
       setStatus("success");

@@ -163,7 +163,7 @@ export default function Navbar({
               }`}
             >
               <span>Logs</span>
-              <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
             </a>
           </nav>
         </div>
@@ -310,7 +310,7 @@ export default function Navbar({
                     }`}
                   >
                     <span>System Logs</span>
-                    <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                   </a>
 
                   {/* Atmosphere selector for mobile */}
