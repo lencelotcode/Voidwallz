@@ -191,6 +191,22 @@ const fallbackWallpaperOfTheDay: Wallpaper = {
   device: "desktop",
 };
 
+const fallbackMobileWallpaperOfTheDay: Wallpaper = {
+  id: "mobile-void-aura",
+  title: "Void Aura",
+  serial: "ID: V-505",
+  category: "Wallpaper of the Day",
+  format: "4K OLED",
+  downloads: 36240,
+  previewUrl:
+    "https://images.unsplash.com/photo-1557672172-298e090bd0f1?auto=format&fit=crop&q=95&w=1440&h=2560",
+  tinyUrl:
+    "https://images.unsplash.com/photo-1557672172-298e090bd0f1?auto=format&fit=crop&q=20&w=50&h=89",
+  originalUrl:
+    "https://images.unsplash.com/photo-1557672172-298e090bd0f1?auto=format&fit=crop&q=100&w=2160&h=3840",
+  device: "mobile",
+};
+
 function Hero({
   onOpenModal,
   isOledOptimized,
@@ -203,6 +219,14 @@ function Hero({
   const { scrollY } = useScroll();
   const yText = useTransform(scrollY, [0, 1000], [0, 150]);
   const yImage = useTransform(scrollY, [0, 1000], [0, -100]);
+
+  // Active device tab: "desktop" or "mobile"
+  const [activeDevice, setActiveDevice] = useState<"desktop" | "mobile">(() => {
+    if (typeof window !== "undefined" && window.innerWidth < 768) {
+      return "mobile";
+    }
+    return "desktop";
+  });
 
   // Mouse parallax state
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
@@ -221,13 +245,55 @@ function Hero({
     setMousePos({ x: 0, y: 0 });
   };
 
-  // Dynamically select the newest wallpaper
-  const dynamicWp = desktopWallpapers[0] || mobileWallpapers[0];
-  const wallpaperOfTheDay = dynamicWp
-    ? { ...dynamicWp, category: "Wallpaper of the Day" }
+  // Dynamically select desktop or mobile wallpaper of the day
+  const desktopWp = desktopWallpapers[0]
+    ? { ...desktopWallpapers[0], category: desktopWallpapers[0].category || "Wallpaper of the Day" }
     : fallbackWallpaperOfTheDay;
 
-  const titleLines = ["The Ethereal", "Monochrome"];
+  const mobileWp = mobileWallpapers[0]
+    ? { ...mobileWallpapers[0], category: mobileWallpapers[0].category || "Wallpaper of the Day" }
+    : fallbackMobileWallpaperOfTheDay;
+
+  const wallpaperOfTheDay = activeDevice === "desktop" ? desktopWp : mobileWp;
+
+  // Split title dynamically into two editorial, poetic lines
+  const getTitleLines = (title: string): [string, string] => {
+    if (!title) return ["The Ethereal", "Monochrome"];
+    const cleaned = title.replace(/^ID:\s*V-\d+\s*\/\/\s*/i, "").trim();
+    const words = cleaned.split(/\s+/);
+    if (words.length === 1) {
+      return ["The", words[0]];
+    }
+    if (words.length === 2) {
+      return words[0].toLowerCase() === "the"
+        ? [words[0], words[1]]
+        : [`The ${words[0]}`, words[1]];
+    }
+    const mid = Math.ceil(words.length / 2);
+    const firstPart = words.slice(0, mid).join(" ");
+    const secondPart = words.slice(mid).join(" ");
+    return [
+      firstPart.toLowerCase().startsWith("the") ? firstPart : `The ${firstPart}`,
+      secondPart,
+    ];
+  };
+
+  const titleLines = getTitleLines(wallpaperOfTheDay.title);
+
+  const getHeroDescription = (wp: Wallpaper, device: "desktop" | "mobile") => {
+    if (device === "desktop") {
+      const cat =
+        wp.category && wp.category !== "Wallpaper of the Day"
+          ? wp.category.toLowerCase()
+          : "minimalist architectural";
+      return `Curated ${cat} capture designed for high-resolution desktop architecture. Lossless 8K master crafted for deep focus, negative space, and subtle gradients.`;
+    }
+    const cat =
+      wp.category && wp.category !== "Wallpaper of the Day"
+        ? wp.category.toLowerCase()
+        : "ultra-deep OLED";
+    return `Curated ${cat} capture tailored for modern edge-to-edge mobile screens. Tuned for pure black levels, battery efficiency, and distraction-free lock screens.`;
+  };
 
   return (
     <section
@@ -238,14 +304,36 @@ function Hero({
     >
       <div className="absolute inset-0 bg-void-black z-0 pointer-events-none" />
 
-      {/* Interactive background elements */}
+      {/* Dynamic Ambient Color Aura from Featured Wallpaper */}
+      {!isOledOptimized && (
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={`ambient-${wallpaperOfTheDay.id}-${activeDevice}`}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 0.26 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1.2, ease: "easeOut" }}
+            className="absolute inset-0 z-0 pointer-events-none overflow-hidden"
+          >
+            <div
+              className="absolute -top-1/4 -right-1/4 w-[130%] h-[130%] bg-cover bg-center blur-[140px] opacity-75 scale-110"
+              style={{ backgroundImage: `url(${wallpaperOfTheDay.previewUrl})` }}
+            />
+            {/* Soft dark vignette to keep typography razor-sharp */}
+            <div className="absolute inset-0 bg-gradient-to-r from-void-black via-void-black/75 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-void-black via-void-black/35 to-void-black/80" />
+          </motion.div>
+        </AnimatePresence>
+      )}
+
+      {/* Interactive mouse parallax ambient element */}
       <motion.div
         animate={{
           x: mousePos.x * 50,
           y: mousePos.y * 50,
         }}
         transition={{ type: "spring", damping: 30, stiffness: 50 }}
-        className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-white/[0.01] rounded-full blur-[120px] pointer-events-none"
+        className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-white/[0.012] rounded-full blur-[120px] pointer-events-none"
       />
 
       <div className="relative z-10 w-full max-w-[1600px] mx-auto flex flex-col md:flex-row items-center justify-between gap-10 md:gap-16 pb-6 md:pb-16 mt-4 md:mt-0">
@@ -257,40 +345,53 @@ function Hero({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="mb-4 sm:mb-8"
+            className="mb-4 sm:mb-8 flex flex-wrap items-center gap-2.5"
           >
-            <span className="text-[10px] opacity-30 uppercase tracking-[0.3em] font-mono">
-              Selection 01
+            <span className="text-[10px] opacity-40 uppercase tracking-[0.3em] font-mono">
+              Selection 01 // {activeDevice === "desktop" ? "Desktop Edition" : "Mobile Edition"}
+            </span>
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400/80 animate-pulse" />
+            <span className="text-[10px] font-mono text-white/50 uppercase tracking-widest">
+              {wallpaperOfTheDay.serial}
             </span>
           </motion.div>
 
-          <div className="overflow-hidden">
-            {titleLines.map((line, i) => (
-              <motion.h1
-                key={i}
-                className="text-4xl sm:text-5xl md:text-7xl lg:text-[6rem] leading-[1.08] font-serif italic font-light tracking-tighter"
-                initial={{ y: "100%", opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
+          <div className="overflow-hidden min-h-[140px] sm:min-h-[160px] md:min-h-[220px] flex flex-col justify-center">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={`title-${wallpaperOfTheDay.id}-${activeDevice}`}
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -30 }}
                 transition={{
-                  duration: 1.2,
-                  delay: 0.3 + i * 0.1,
+                  duration: 0.7,
                   ease: [0.21, 0.47, 0.32, 0.98],
                 }}
               >
-                {line}
-              </motion.h1>
-            ))}
+                {titleLines.map((line, i) => (
+                  <h1
+                    key={i}
+                    className="text-4xl sm:text-5xl md:text-7xl lg:text-[6rem] leading-[1.08] font-serif italic font-light tracking-tighter"
+                  >
+                    {line}
+                  </h1>
+                ))}
+              </motion.div>
+            </AnimatePresence>
           </div>
 
-          <motion.p
-            className="text-xs sm:text-sm md:text-base opacity-50 max-w-md mt-4 sm:mt-6 md:mt-8 leading-relaxed font-light"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.5 }}
-          >
-            Curated minimalist captures designed to disappear into your
-            interface. Focus on negative space and subtle gradients.
-          </motion.p>
+          <AnimatePresence mode="wait">
+            <motion.p
+              key={`desc-${wallpaperOfTheDay.id}-${activeDevice}`}
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              className="text-xs sm:text-sm md:text-base opacity-50 max-w-md mt-4 sm:mt-6 md:mt-8 leading-relaxed font-light"
+            >
+              {getHeroDescription(wallpaperOfTheDay, activeDevice)}
+            </motion.p>
+          </AnimatePresence>
         </motion.div>
 
         <motion.div
@@ -345,41 +446,134 @@ function Hero({
                   </span>
                 </div>
 
-                {/* Top Right Device Badge */}
-                <div className="absolute top-3 right-3 sm:top-4 sm:right-4 z-30 flex items-center gap-2 pointer-events-none">
-                  <span className="spec-badge text-[9px] sm:text-[10px] font-mono px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-white/80 tracking-widest uppercase bg-black/80 backdrop-blur-md border border-white/20 shadow-xl flex items-center gap-1">
-                    {wallpaperOfTheDay.device === "desktop" ? <Monitor size={10} /> : <Smartphone size={10} />}
-                    {wallpaperOfTheDay.format || (wallpaperOfTheDay.device === "desktop" ? "8K MASTER" : "4K MOBILE")}
+                {/* Top Right Device Switcher */}
+                <div
+                  className="absolute top-3 right-3 sm:top-4 sm:right-4 z-30 flex items-center gap-2 pointer-events-auto"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="bg-black/85 backdrop-blur-md border border-white/20 p-1 rounded-full shadow-2xl flex items-center gap-1">
+                    <button
+                      type="button"
+                      aria-label="Show Desktop Wallpaper of the Day"
+                      onClick={() => {
+                        if (activeDevice !== "desktop") {
+                          sound.playTap();
+                          setActiveDevice("desktop");
+                        }
+                      }}
+                      className={`px-2.5 sm:px-3 py-1 text-[9px] sm:text-[10px] font-mono uppercase tracking-widest rounded-full transition-all duration-300 flex items-center gap-1.5 cursor-pointer ${
+                        activeDevice === "desktop"
+                          ? "bg-white text-black font-bold shadow-[0_0_15px_rgba(255,255,255,0.4)]"
+                          : "text-white/60 hover:text-white hover:bg-white/10"
+                      }`}
+                    >
+                      <Monitor size={11} />
+                      <span>Desktop</span>
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="Show Phone Wallpaper of the Day"
+                      onClick={() => {
+                        if (activeDevice !== "mobile") {
+                          sound.playTap();
+                          setActiveDevice("mobile");
+                        }
+                      }}
+                      className={`px-2.5 sm:px-3 py-1 text-[9px] sm:text-[10px] font-mono uppercase tracking-widest rounded-full transition-all duration-300 flex items-center gap-1.5 cursor-pointer ${
+                        activeDevice === "mobile"
+                          ? "bg-white text-black font-bold shadow-[0_0_15px_rgba(255,255,255,0.4)]"
+                          : "text-white/60 hover:text-white hover:bg-white/10"
+                      }`}
+                    >
+                      <Smartphone size={11} />
+                      <span>Phone</span>
+                    </button>
+                  </div>
+
+                  <span className="hidden sm:flex spec-badge text-[9px] sm:text-[10px] font-mono px-2.5 sm:px-3 py-1.5 rounded-full text-white/80 tracking-widest uppercase bg-black/80 backdrop-blur-md border border-white/20 shadow-xl items-center gap-1 pointer-events-none">
+                    {wallpaperOfTheDay.format ||
+                      (activeDevice === "desktop" ? "8K MASTER" : "4K OLED")}
                   </span>
                 </div>
 
-                {/* Main Hero Wallpaper Image */}
-                <OptimizedImage
-                  src={wallpaperOfTheDay.previewUrl}
-                  placeholder={wallpaperOfTheDay.tinyUrl}
-                  fallbackSrc={wallpaperOfTheDay.fallbackUrl || wallpaperOfTheDay.previewUrl}
-                  alt={wallpaperOfTheDay.title}
-                  priority={true}
-                  animate={{
-                    scale:
-                      1.05 +
-                      (Math.abs(mousePos.x) + Math.abs(mousePos.y)) * 0.05,
-                    x: mousePos.x * -20,
-                    y: mousePos.y * -20,
-                  }}
-                  transition={{ duration: 0.3, ease: "easeOut" }}
-                  className={`filter brightness-80 group-hover:brightness-95 transition-all duration-300 ease-out ${isOledOptimized ? "oled-image" : ""}`}
-                  containerClassName="w-full h-full"
-                />
+                {/* Main Hero Wallpaper Canvas (Adaptive Desktop Panorama vs. Phone Mockup) */}
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={`hero-canvas-${wallpaperOfTheDay.id}-${activeDevice}`}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.35 }}
+                    className="w-full h-full relative flex items-center justify-center overflow-hidden"
+                  >
+                    {activeDevice === "mobile" ? (
+                      <div className="relative w-full h-full flex items-center justify-center p-2 sm:p-4">
+                        {/* Subtle ambient blurred backing within the card */}
+                        <div
+                          className="absolute inset-0 bg-cover bg-center blur-2xl opacity-40 scale-125 transition-all duration-700 pointer-events-none"
+                          style={{ backgroundImage: `url(${wallpaperOfTheDay.previewUrl})` }}
+                        />
+                        <div className="absolute inset-0 bg-black/50 backdrop-blur-xs pointer-events-none" />
+
+                        {/* Centered Phone Canvas Frame */}
+                        <div className="relative z-10 h-[86%] sm:h-[88%] md:h-[90%] max-h-[500px] aspect-[9/19.5] rounded-2xl overflow-hidden shadow-[0_30px_70px_rgba(0,0,0,0.95)] ring-1 ring-white/25 bg-black flex items-center justify-center group-hover:scale-[1.02] transition-transform duration-500 ease-out">
+                          <OptimizedImage
+                            src={wallpaperOfTheDay.previewUrl}
+                            placeholder={wallpaperOfTheDay.tinyUrl}
+                            fallbackSrc={wallpaperOfTheDay.fallbackUrl || wallpaperOfTheDay.previewUrl}
+                            alt={wallpaperOfTheDay.title}
+                            priority={true}
+                            animate={{
+                              scale:
+                                1.05 +
+                                (Math.abs(mousePos.x) + Math.abs(mousePos.y)) * 0.05,
+                              x: mousePos.x * -15,
+                              y: mousePos.y * -15,
+                            }}
+                            transition={{ duration: 0.3, ease: "easeOut" }}
+                            className={`w-full h-full object-cover filter brightness-85 group-hover:brightness-100 transition-all duration-300 ease-out ${
+                              isOledOptimized ? "oled-image" : ""
+                            }`}
+                            containerClassName="w-full h-full"
+                          />
+                          {/* Phone Screen Glare */}
+                          <div className="absolute inset-0 bg-gradient-to-tr from-white/[0.08] via-transparent to-transparent pointer-events-none z-20" />
+                          {/* Phone Dynamic Island pill */}
+                          <div className="absolute top-2 left-1/2 -translate-x-1/2 w-9 h-2.5 rounded-full bg-black/90 border border-white/10 z-30 pointer-events-none" />
+                        </div>
+                      </div>
+                    ) : (
+                      <OptimizedImage
+                        src={wallpaperOfTheDay.previewUrl}
+                        placeholder={wallpaperOfTheDay.tinyUrl}
+                        fallbackSrc={wallpaperOfTheDay.fallbackUrl || wallpaperOfTheDay.previewUrl}
+                        alt={wallpaperOfTheDay.title}
+                        priority={true}
+                        animate={{
+                          scale:
+                            1.05 +
+                            (Math.abs(mousePos.x) + Math.abs(mousePos.y)) * 0.05,
+                          x: mousePos.x * -20,
+                          y: mousePos.y * -20,
+                        }}
+                        transition={{ duration: 0.3, ease: "easeOut" }}
+                        className={`w-full h-full filter brightness-80 group-hover:brightness-95 transition-all duration-300 ease-out ${
+                          isOledOptimized ? "oled-image" : ""
+                        }`}
+                        containerClassName="w-full h-full"
+                      />
+                    )}
+                  </motion.div>
+                </AnimatePresence>
 
                 {/* Dark Vignette Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent pointer-events-none z-20" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/35 to-transparent pointer-events-none z-20" />
 
                 {/* Bottom Wallpaper Detail Strip */}
                 <div className="absolute bottom-0 inset-x-0 p-4 sm:p-6 z-30 flex flex-col sm:flex-row justify-between sm:items-end gap-3 sm:gap-4 pointer-events-none">
                   <div className="pointer-events-auto">
                     <span className="text-[9px] sm:text-[10px] text-white/60 uppercase tracking-[0.25em] font-mono mb-1 block drop-shadow-md">
-                      {wallpaperOfTheDay.serial} // {wallpaperOfTheDay.category || "Wallpaper of the Day"}
+                      {wallpaperOfTheDay.serial} // {activeDevice === "desktop" ? "Desktop Edition" : "Mobile Edition"}
                     </span>
                     <h3 className="text-xl sm:text-2xl md:text-3xl font-serif italic tracking-tight text-white drop-shadow-xl group-hover:text-white/90 transition-colors">
                       {wallpaperOfTheDay.title}
@@ -413,19 +607,33 @@ function Hero({
             <span className="text-[9px] sm:text-[10px] opacity-40 uppercase tracking-widest mb-1">
               Resolution
             </span>
-            <span className="text-xs font-mono">8192 &times; 4608</span>
+            <span className="text-xs font-mono">
+              {activeDevice === "desktop" ? "8192 × 4608 (8K)" : "2160 × 3840 (4K)"}
+            </span>
           </div>
           <div className="flex flex-col whitespace-nowrap">
             <span className="text-[9px] sm:text-[10px] opacity-40 uppercase tracking-widest mb-1">
               Format
             </span>
-            <span className="text-xs font-mono">RAW / AVIF</span>
+            <span className="text-xs font-mono">
+              {activeDevice === "desktop" ? "RAW / AVIF Lossless" : "OLED / Ultra HDR"}
+            </span>
           </div>
           <div className="flex flex-col whitespace-nowrap">
             <span className="text-[9px] sm:text-[10px] opacity-40 uppercase tracking-widest mb-1">
               Color Depth
             </span>
-            <span className="text-xs font-mono">14 BIT</span>
+            <span className="text-xs font-mono">
+              {activeDevice === "desktop" ? "14 BIT True Color" : "10 BIT DCI-P3"}
+            </span>
+          </div>
+          <div className="flex flex-col whitespace-nowrap">
+            <span className="text-[9px] sm:text-[10px] opacity-40 uppercase tracking-widest mb-1">
+              Aspect Ratio
+            </span>
+            <span className="text-xs font-mono">
+              {activeDevice === "desktop" ? "16:9 Cinema" : "9:19.5 Mobile"}
+            </span>
           </div>
         </div>
         <div className="mt-3 md:mt-0 ml-auto md:ml-0">
@@ -441,9 +649,10 @@ function Hero({
                   ?.scrollIntoView({ behavior: "smooth" });
               }, 100);
             }}
-            className="text-[10px] uppercase font-bold tracking-widest hover:text-white/50 transition-colors"
+            className="text-[10px] font-mono uppercase tracking-[0.25em] opacity-40 hover:opacity-100 transition-opacity flex items-center gap-1.5"
           >
-            Scroll to explore &darr;
+            <span>Scroll to explore</span>
+            <span>&darr;</span>
           </a>
         </div>
       </motion.div>
