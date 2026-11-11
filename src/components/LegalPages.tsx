@@ -1,43 +1,117 @@
 import MotionGraphic from "./MotionGraphic";
-import { ArrowLeft, Shield, FileText, Lock, Cookie, RotateCcw, AlertTriangle } from "lucide-react";
-import { ReactNode } from "react";
-
-interface LegalLayoutProps {
-  title: string;
-  activeSlug: "privacy" | "terms" | "license" | "cookies" | "refunds" | "dmca";
-  lastUpdated: string;
-  children: ReactNode;
-}
+import React, { ReactNode, useLayoutEffect, useRef } from "react";
+import { motion } from "motion/react";
+import gsap from "gsap";
+import { useVisualEffects } from "../hooks/useVisualEffects";
 
 const LEGAL_TABS = [
-  { slug: "privacy", label: "Privacy Policy", icon: Lock, path: "/privacy" },
-  { slug: "terms", label: "Terms of Service", icon: FileText, path: "/terms" },
-  { slug: "license", label: "License", icon: Shield, path: "/license" },
-  { slug: "cookies", label: "Cookie Policy", icon: Cookie, path: "/cookies" },
-  { slug: "refunds", label: "Refund Policy", icon: RotateCcw, path: "/refunds" },
-  { slug: "dmca", label: "DMCA & Copyright", icon: AlertTriangle, path: "/dmca" },
-];
+  { slug: "privacy", label: "Privacy Policy", title: "Privacy Policy", path: "/privacy", Content: PrivacyPolicy },
+  { slug: "terms", label: "Terms of Service", title: "Terms of Service", path: "/terms", Content: TermsOfService },
+  { slug: "license", label: "License", title: "Personal Use License", path: "/license", Content: License },
+  { slug: "cookies", label: "Cookie Policy", title: "Cookie & Storage Policy", path: "/cookies", Content: CookiePolicy },
+  { slug: "refunds", label: "Refund Policy", title: "Refund & Digital Goods Policy", path: "/refunds", Content: RefundPolicy },
+  { slug: "dmca", label: "DMCA & Copyright", title: "DMCA & Copyright Policy", path: "/dmca", Content: DMCAPolicy },
+] as const;
 
-const LegalLayout = ({
-  title,
-  activeSlug,
-  children,
-  lastUpdated,
-}: LegalLayoutProps) => {
-  const handleNavigate = (path: string) => {
+export const isLegalPath = (path: string) => LEGAL_TABS.some(tab => tab.path === path);
+
+/** One mounted reading workspace for every policy, including browser back/forward. */
+export function LegalDocuments({ path }: { path: string }) {
+  const document = LEGAL_TABS.find(tab => tab.path === path) ?? LEGAL_TABS[0];
+  const { Content } = document;
+  return <LegalLayout activeSlug={document.slug}><Content /></LegalLayout>;
+}
+
+function LegalLayout({ activeSlug, children }: {
+  activeSlug: typeof LEGAL_TABS[number]["slug"];
+  children: ReactNode;
+}) {
+  const { reduceMotion, motionPaused } = useVisualEffects();
+  const still = reduceMotion || motionPaused;
+  const root = useRef<HTMLElement>(null);
+  const readingArea = useRef<HTMLDivElement>(null);
+  const previousSlug = useRef(activeSlug);
+
+  useLayoutEffect(() => {
+    const changed = previousSlug.current !== activeSlug;
+    previousSlug.current = activeSlug;
+    if (!changed || !root.current || !readingArea.current) return;
+
+    // Stay in the reading workspace; a deeply scrolled document starts at its
+    // first section rather than landing halfway through the next policy.
+    const readingTop = readingArea.current.getBoundingClientRect().top + window.scrollY;
+    if (window.scrollY > readingTop - 108) {
+      const workspace = root.current.querySelector(".vw-document-layout");
+      const workspaceTop = (workspace?.getBoundingClientRect().top ?? 0) + window.scrollY;
+      window.scrollTo({ top: Math.max(0, workspaceTop - 108), behavior: "instant" });
+    }
+    const activeLink = root.current.querySelector<HTMLAnchorElement>('[aria-current="page"]');
+    const nav = activeLink?.parentElement;
+    if (nav && activeLink && nav.scrollWidth > nav.clientWidth) {
+      const left = activeLink.getBoundingClientRect().left - nav.getBoundingClientRect().left + nav.scrollLeft;
+      const right = left + activeLink.offsetWidth;
+      if (left < nav.scrollLeft || right > nav.scrollLeft + nav.clientWidth) {
+        nav.scrollTo({ left: left - (nav.clientWidth - activeLink.offsetWidth) / 2, behavior: still ? "instant" : "smooth" });
+      }
+    }
+    if (still) return;
+    const context = gsap.context(() => {
+      gsap.fromTo(".vw-document-content", { opacity: 0.45, y: 8 }, {
+        opacity: 1, y: 0, duration: 0.34, ease: "power2.out", clearProps: "opacity,transform",
+      });
+      gsap.fromTo(".vw-document-title-current, .vw-heading-graphic", { opacity: 0.5 }, {
+        opacity: 1, duration: 0.3, ease: "power2.out", clearProps: "opacity",
+      });
+    }, root);
+    return () => context.revert();
+  }, [activeSlug, still]);
+
+  const handleNavigate = (event: React.MouseEvent<HTMLAnchorElement>, path: string) => {
+    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
+    if (window.location.pathname === path) return;
     window.history.pushState(null, "", path);
     window.dispatchEvent(new Event("popstate"));
   };
 
-  return <section className="vw-page vw-document page-shell"><header className="vw-page-heading"><MotionGraphic variant={activeSlug === "dmca" ? "copyright" : activeSlug} className="vw-heading-graphic" /><span className="micro-label">Voidwallz / information</span><h1>{title}<span className="vw-period">.</span></h1><p className="micro-label">Last updated: {lastUpdated}</p></header><div className="vw-document-layout"><nav aria-label="Legal documents" className="vw-document-nav">{LEGAL_TABS.map((tab) => <a key={tab.slug} href={tab.path} aria-current={tab.slug === activeSlug ? "page" : undefined} onClick={(event) => { if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return; event.preventDefault(); handleNavigate(tab.path); }}>{tab.label}</a>)}</nav><div><div className="vw-document-body">{children}</div><div className="vw-document-contact"><span className="micro-label">Questions about this policy?</span><a className="text-link" href="mailto:voidwallzbusiness@gmail.com">voidwallzbusiness@gmail.com</a></div></div></div></section>;
-};
+  return <section ref={root} className="vw-page vw-document page-shell">
+    <header className="vw-page-heading">
+      <MotionGraphic variant={activeSlug === "dmca" ? "copyright" : activeSlug} className="vw-heading-graphic" />
+      <span className="micro-label">Voidwallz / information</span>
+      <h1 className="vw-document-title">{LEGAL_TABS.map(tab => <span key={tab.slug}
+        className={tab.slug === activeSlug ? "vw-document-title-current" : "vw-document-title-measure"}
+        aria-hidden={tab.slug !== activeSlug || undefined}>
+        {tab.title}<span className="vw-period">.</span>
+      </span>)}</h1>
+      <p className="micro-label">Last updated: September 2026</p>
+    </header>
+    <div className="vw-document-layout">
+      <nav aria-label="Legal documents" className="vw-document-nav">
+        {LEGAL_TABS.map(tab => <a key={tab.slug} href={tab.path}
+          aria-current={tab.slug === activeSlug ? "page" : undefined}
+          onClick={event => handleNavigate(event, tab.path)}>
+          {tab.slug === activeSlug && <motion.span aria-hidden="true" className="vw-document-tab-highlight"
+            layoutId="legal-active-policy" transition={still ? { duration: 0 } : { type: "spring", stiffness: 420, damping: 38 }} />}
+          <span className="vw-document-tab-label">{tab.label}</span>
+        </a>)}
+      </nav>
+      <div ref={readingArea} className="vw-document-content">
+        <span className="sr-only" role="status">{LEGAL_TABS.find(tab => tab.slug === activeSlug)?.title}</span>
+        <div className="vw-document-body">{children}</div>
+        <div className="vw-document-contact"><span className="micro-label">Questions about this policy?</span>
+          <a className="text-link" href="mailto:voidwallzbusiness@gmail.com">voidwallzbusiness@gmail.com</a>
+        </div>
+      </div>
+    </div>
+  </section>;
+}
 
 /* =========================================================================
    1. PRIVACY POLICY
    ========================================================================= */
 export function PrivacyPolicy() {
   return (
-    <LegalLayout title="Privacy Policy" activeSlug="privacy" lastUpdated="September 2026">
+    <>
       <section className="space-y-3">
         <h2 className="text-white text-xl font-serif italic">1. Commitment to Minimalist Privacy</h2>
         <p>
@@ -87,7 +161,7 @@ export function PrivacyPolicy() {
           If you have questions about this privacy statement or wish to exercise statutory data rights, transmit an inquiry to our Data Protection Liaison at <a href="mailto:voidwallzbusiness@gmail.com" className="text-white underline">voidwallzbusiness@gmail.com</a>.
         </p>
       </section>
-    </LegalLayout>
+    </>
   );
 }
 
@@ -96,7 +170,7 @@ export function PrivacyPolicy() {
    ========================================================================= */
 export function TermsOfService() {
   return (
-    <LegalLayout title="Terms of Service" activeSlug="terms" lastUpdated="September 2026">
+    <>
       <section className="space-y-3">
         <h2 className="text-white text-xl font-serif italic">1. Agreement to Terms</h2>
         <p>
@@ -145,7 +219,7 @@ export function TermsOfService() {
           To the maximum extent permitted by applicable law, in no event shall Voidwallz, its directors, employees, or contributors be liable for any indirect, punitive, incidental, or consequential damages resulting from your access to or inability to access the Platform.
         </p>
       </section>
-    </LegalLayout>
+    </>
   );
 }
 
@@ -154,7 +228,7 @@ export function TermsOfService() {
    ========================================================================= */
 export function License() {
   return (
-    <LegalLayout title="Personal Use License" activeSlug="license" lastUpdated="September 2026">
+    <>
       <section className="space-y-3">
         <h2 className="text-white text-xl font-serif italic">Grant of License</h2>
         <p>
@@ -193,7 +267,7 @@ export function License() {
           For studio installations, brand licensing, or commercial distribution inquiries, contact our team at <a href="mailto:voidwallzbusiness@gmail.com" className="text-white underline">voidwallzbusiness@gmail.com</a>.
         </p>
       </section>
-    </LegalLayout>
+    </>
   );
 }
 
@@ -202,7 +276,7 @@ export function License() {
    ========================================================================= */
 export function CookiePolicy() {
   return (
-    <LegalLayout title="Cookie & Storage Policy" activeSlug="cookies" lastUpdated="September 2026">
+    <>
       <section className="space-y-3">
         <h2 className="text-white text-xl font-serif italic">1. What Technologies We Use</h2>
         <p>
@@ -258,7 +332,7 @@ export function CookiePolicy() {
           You have full autonomy over client storage. You may delete all stored data at any time through your browser's Developer Tools or Privacy Settings ("Clear Browsing Data" / "Site Data"). Doing so will reset your atmosphere and favorites back to factory defaults without affecting platform access.
         </p>
       </section>
-    </LegalLayout>
+    </>
   );
 }
 
@@ -267,7 +341,7 @@ export function CookiePolicy() {
    ========================================================================= */
 export function RefundPolicy() {
   return (
-    <LegalLayout title="Refund & Digital Goods Policy" activeSlug="refunds" lastUpdated="September 2026">
+    <>
       <section className="space-y-3">
         <h2 className="text-white text-xl font-serif italic">1. Nature of Free Digital Assets</h2>
         <p>
@@ -286,7 +360,7 @@ export function RefundPolicy() {
           <li><strong>Satisfaction Review:</strong> If you encounter genuine dissatisfaction with an authorized transaction, contact <a href="mailto:voidwallzbusiness@gmail.com" className="text-white underline">voidwallzbusiness@gmail.com</a> within 14 days of purchase with your transaction identifier for review on a case-by-case basis.</li>
         </ul>
       </section>
-    </LegalLayout>
+    </>
   );
 }
 
@@ -295,7 +369,7 @@ export function RefundPolicy() {
    ========================================================================= */
 export function DMCAPolicy() {
   return (
-    <LegalLayout title="DMCA & Copyright Policy" activeSlug="dmca" lastUpdated="September 2026">
+    <>
       <section className="space-y-3">
         <h2 className="text-white text-xl font-serif italic">1. Notice and Takedown Protocol (17 U.S.C. § 512)</h2>
         <p>
@@ -327,6 +401,6 @@ export function DMCAPolicy() {
           <p className="text-white/40 mt-2 text-[10px]">Turnaround Commitment: We review and action verified takedown notices within 24 to 48 business hours.</p>
         </div>
       </section>
-    </LegalLayout>
+    </>
   );
 }

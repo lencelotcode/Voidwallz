@@ -419,7 +419,7 @@ button:disabled { cursor: not-allowed; }
 .vw-document-layout { display: grid; grid-template-columns: minmax(180px, 1fr) minmax(0, 3fr); border-top: 1px solid var(--ink); gap: clamp(32px, 7vw, 112px); padding-top: 36px; }
 .vw-document-nav { display: flex; flex-direction: column; align-self: start; position: sticky; top: 108px; }
 .vw-document-nav a { font-size: 13px; padding: 16px 12px; border-bottom: 1px solid var(--line); }
-.vw-document-nav a[aria-current] { background: var(--accent); color: #10110e; font-weight: 600; }
+.vw-document-nav a[aria-current] { background: transparent; color: #10110e; font-weight: 600; }
 .vw-document-body { max-width: 760px; font-size: 15px; line-height: 1.85; }
 .vw-document-body > section + section { margin-top: 44px; }
 .vw-document-body h2 { font-size: clamp(22px, 2.3vw, 30px); line-height: 1.2; font-weight: 750; letter-spacing: -.03em; margin-bottom: 20px; color: var(--ink); font-style: normal; }
@@ -560,3 +560,13 @@ button:disabled { cursor: not-allowed; }
 .vw-license-rules > div:first-child h3 > span { background: #c8ff00; color: #10110e; }
 .vw-document-body .vw-license-rules ul { font-family: var(--font-text); font-size: 14px; line-height: 1.8; color: var(--ink); }
 @media (max-width: 639px) { .vw-document-body .vw-document-panel { padding: 20px; } }
+
+/* Keep policy navigation and heading dimensions steady while content changes. */
+.vw-document-title { display: grid; }
+.vw-document-title > span { grid-area: 1 / 1; }
+.vw-document-title-measure { visibility: hidden; pointer-events: none; }
+.vw-document-nav { isolation: isolate; }
+.vw-document-nav a { position: relative; transition: color .2s ease; }
+.vw-document-tab-highlight { position: absolute; inset: 0; background: var(--accent); z-index: -1; pointer-events: none; }
+.vw-document-tab-label { position: relative; }
+.vw-document-content { min-width: 0; min-height: 65svh; }

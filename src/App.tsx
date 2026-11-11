@@ -22,14 +22,7 @@ import NotFoundPage from "./components/NotFoundPage";
 import { useDialogCount } from "./lib/dialogState";
 import { setPageMeta, DEFAULT_TITLE, DEFAULT_DESCRIPTION } from "./lib/seo";
 import { closeWallpaper, collectionLocation, openWallpaper, WALLPAPER_ROUTE_PATTERN } from "./lib/wallpaperNavigation";
-import {
-  PrivacyPolicy,
-  TermsOfService,
-  License,
-  CookiePolicy,
-  RefundPolicy,
-  DMCAPolicy,
-} from "./components/LegalPages";
+import { LegalDocuments, isLegalPath } from "./components/LegalPages";
 
 const VoidPacks = lazy(() => import("./components/VoidPacks"));
 const PackModal = lazy(() => import("./components/PackModal"));
@@ -181,7 +174,7 @@ export default function App() {
       const contentLocation = collectionLocation();
       setHash(contentLocation.hash);
       setPath(contentLocation.pathname);
-      if (!previewReturn && !WALLPAPER_ROUTE_PATTERN.test(nextPath) && nextPath !== previousPath && !window.location.hash) {
+      if (!previewReturn && !WALLPAPER_ROUTE_PATTERN.test(nextPath) && nextPath !== previousPath && !(isLegalPath(previousPath) && isLegalPath(nextPath)) && !window.location.hash) {
         window.scrollTo({ top: 0, behavior: "instant" });
       }
     };
@@ -321,28 +314,8 @@ export default function App() {
       );
     }
 
-    if (path === "/privacy") {
-      return <PrivacyPolicy key="privacy" />;
-    }
-
-    if (path === "/terms") {
-      return <TermsOfService key="terms" />;
-    }
-
-    if (path === "/license") {
-      return <License key="license" />;
-    }
-
-    if (path === "/cookies") {
-      return <CookiePolicy key="cookies" />;
-    }
-
-    if (path === "/refunds") {
-      return <RefundPolicy key="refunds" />;
-    }
-
-    if (path === "/dmca") {
-      return <DMCAPolicy key="dmca" />;
+    if (isLegalPath(path)) {
+      return <LegalDocuments path={path} />;
     }
 
     if (path === "/report") {
