@@ -1,3 +1,4 @@
+import DownloadFeedback from "./components/DownloadFeedback";
 import {
   AnimatePresence,
   motion,
@@ -472,6 +473,7 @@ export default function App() {
       <main id="main-content" tabIndex={-1} ><Suspense fallback={<div className="route-pending page-shell" role="status"><span className="micro-label">Finding your next view…</span></div>}><AnimatePresence mode="wait">{renderContent()}</AnimatePresence></Suspense></main>
       <Footer />
       <CookieConsent />
+      <DownloadFeedback />
     </div>
     </VisualEffectsProvider>
   );

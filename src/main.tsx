@@ -6,6 +6,7 @@ import './index.css';
 import './design.css';
 import './motion.css';
 import './brand.css';
+import './download.css';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

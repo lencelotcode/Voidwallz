@@ -47,7 +47,7 @@ const WallpaperCard: React.FC<WallpaperCardProps> = ({ wallpaper, onOpenModal, i
         </button>
       </div>
       <p className={`art-card-status ${downloadState === "error" ? "text-red-300" : ""}`} role="status" aria-live="polite">
-        {downloadState === "error" ? "Download failed. Try again or open the preview." : downloadState === "loading" ? "Preparing your download…" : downloadState === "done" ? "Download ready." : ""}
+        {downloadState === "error" ? "Download failed. Try again or open the preview." : downloadState === "loading" ? "Preparing your download…" : downloadState === "done" ? "Download complete." : ""}
       </p>
     </article>
   );

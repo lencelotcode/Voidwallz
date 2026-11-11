@@ -1,3 +1,11 @@
+import { beginDownload, finishDownload } from "./downloadFeedback";
+
+async function assertPng(blob: Blob) {
+  const bytes = new Uint8Array(await blob.slice(0, 8).arrayBuffer());
+  const signature = [137, 80, 78, 71, 13, 10, 26, 10];
+  if (!signature.every((value, index) => bytes[index] === value)) throw new Error("Invalid PNG image");
+}
+
 // High-Reliability Wallpaper PNG Downloader
 // Ensures all downloads output genuine lossless PNG files, handles CORS & canvas conversion seamlessly
 
@@ -51,7 +59,7 @@ function imageToPngBlob(img: HTMLImageElement): Promise<Blob> {
 /**
  * Downloads any wallpaper URL as a guaranteed high-resolution .PNG file
  */
-export async function downloadWallpaperAsPng(
+async function performWallpaperDownload(
   imageUrl: string,
   rawTitle: string,
   fallbackUrl?: string
@@ -77,6 +85,7 @@ export async function downloadWallpaperAsPng(
 
         // If already png, download directly
         if (originalBlob.type === "image/png") {
+          await assertPng(originalBlob);
           triggerBlobDownload(originalBlob, filename);
           return true;
         }
@@ -90,11 +99,8 @@ export async function downloadWallpaperAsPng(
           triggerBlobDownload(pngBlob, filename);
           return true;
         } catch (_) {
-          // If canvas fails on blob, force-save with .png extension
-          const forcedPngBlob = new Blob([originalBlob], { type: "image/png" });
-          triggerBlobDownload(forcedPngBlob, filename);
+          // Invalid/unreadable content must not be renamed to PNG or reported as success.
           URL.revokeObjectURL(blobUrl);
-          return true;
         }
       } else {
         console.warn(`HTTP ${res.status} returned for ${url}. Trying next strategy/fallback.`);
@@ -173,6 +179,7 @@ export async function fetchImageAsPngArrayBuffer(
       if (res.ok) {
         const blob = await res.blob();
         if (blob.type === "image/png") {
+          await assertPng(blob);
           return await blob.arrayBuffer();
         }
         const blobUrl = URL.createObjectURL(blob);
@@ -183,7 +190,6 @@ export async function fetchImageAsPngArrayBuffer(
           return await pngBlob.arrayBuffer();
         } catch {
           URL.revokeObjectURL(blobUrl);
-          return await blob.arrayBuffer();
         }
       }
     } catch (fetchErr) {
@@ -198,4 +204,17 @@ export async function fetchImageAsPngArrayBuffer(
   }
 
   throw new Error(`Failed to fetch image buffer for: ${imageUrl}`);
+}
+
+/** Shared feedback covers downloads from both cards and previews. */
+export async function downloadWallpaperAsPng(imageUrl: string, rawTitle: string, fallbackUrl?: string): Promise<boolean> {
+  const activity = beginDownload(rawTitle, fallbackUrl || imageUrl);
+  try {
+    const success = await performWallpaperDownload(imageUrl, rawTitle, fallbackUrl);
+    finishDownload(activity, success);
+    return success;
+  } catch {
+    finishDownload(activity, false);
+    return false;
+  }
 }
