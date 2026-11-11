@@ -14,7 +14,7 @@ export default function Hero({ onOpenModal, isOledOptimized, introReady = true }
   introReady?: boolean;
 }) {
   const { desktopWallpapers, mobileWallpapers, loading } = useWallpapers();
-  const [device, setDevice] = useState<"desktop" | "mobile">("desktop");
+  const [device, setDevice] = useState<"desktop" | "mobile">(() => window.matchMedia("(max-width: 760px)").matches ? "mobile" : "desktop");
   const rootRef = useRef<HTMLElement>(null);
   const previewRef = useRef<HTMLDivElement>(null);
   const { reduceMotion, motionPaused } = useVisualEffects();
@@ -60,7 +60,7 @@ export default function Hero({ onOpenModal, isOledOptimized, introReady = true }
         <div className="vw-specimen">
           <div className="vw-specimen-top"><span className="micro-label">Featured wallpaper</span><ArrowUpRight size={20} /></div>
           <div className={`vw-specimen-stage ${device === "mobile" ? "vw-specimen-phone" : ""}`} ref={previewRef}>
-            <MotionGraphic variant="screens" className="vw-hero-graphic" /><span className="vw-register vw-register-tl" aria-hidden="true" /><span className="vw-register vw-register-br" aria-hidden="true" />
+            <MotionGraphic variant={device === "mobile" ? "phone-preview" : "desktop-preview"} className="vw-hero-graphic" /><span className="vw-register vw-register-tl" aria-hidden="true" /><span className="vw-register vw-register-br" aria-hidden="true" />
             {loading ? <div className="vw-feature-skeleton" role="status">Loading the collection…</div> : wallpaper ? <button className="vw-wallpaper-display m-zoom" type="button" onClick={() => { sound.playOpenModal(); onOpenModal(wallpaper); }} aria-label={`Preview ${wallpaper.title}`}>
               <OptimizedImage src={wallpaper.previewUrl} placeholder={wallpaper.tinyUrl} fallbackSrc={wallpaper.fallbackUrl} alt={wallpaper.title} priority containerClassName="vw-feature-image" className={isOledOptimized ? "oled-image" : ""} />
               <span className="vw-preview-corner"><ArrowUpRight size={20} /></span>

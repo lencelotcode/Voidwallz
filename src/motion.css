@@ -288,3 +288,33 @@ html[data-motion-state="paused"] .text-link > svg { transform: none !important; 
   .vw-login-poster > .vw-login-illustration { grid-column: 2; grid-row: 1 / span 2; margin: 0; width: 100%; }
 }
 @media (prefers-reduced-motion: reduce) { .vw-login-illustration * { animation: none !important; } }
+
+/* Featured artwork has a definite stage size at every breakpoint. Size frames
+   from that stage, not percentage heights inside an intrinsic grid track. */
+.vw-specimen { height: auto; }
+.vw-specimen-stage {
+  --featured-stage-height: clamp(250px, 38svh, 400px);
+  height: var(--featured-stage-height); flex: none; padding: 20px;
+  display: flex; align-items: center; justify-content: center;
+  background-image: linear-gradient(#f4f4ef05 1px, transparent 1px), linear-gradient(90deg,#f4f4ef05 1px, transparent 1px);
+}
+.vw-specimen-stage .vw-wallpaper-display {
+  width: min(100%, calc((var(--featured-stage-height) - 40px) * 16 / 9));
+  height: auto; max-height: none; aspect-ratio: 16 / 9; flex-shrink: 0;
+  isolation: isolate;
+}
+.vw-specimen-stage .vw-feature-image { position: absolute; inset: 0; width: 100%; height: 100%; }
+.vw-feature-image > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.vw-specimen-phone .vw-wallpaper-display {
+  width: min(100%, calc((var(--featured-stage-height) - 40px) * 9 / 16));
+  height: auto; aspect-ratio: 9 / 16; border: 5px solid #35392f;
+  border-radius: 23px; background: #10110e;
+}
+.vw-specimen-phone .vw-feature-image { border-radius: 18px; clip-path: inset(0 round 18px); }
+.vw-specimen-phone .vw-preview-corner { width: 34px; height: 34px; border-radius: 10px 0 15px 0; }
+.vw-hero-graphic { width: 84px; right: 12px; top: 12px; opacity: .13; }
+@media (max-width: 639px) {
+  .vw-specimen-stage { --featured-stage-height: clamp(300px, 82vw, 360px); }
+  .vw-specimen-name { flex: 1; }
+  .vw-specimen-name strong { font-size: 14px; line-height: 1.35; }
+}
