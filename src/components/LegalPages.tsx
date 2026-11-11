@@ -1,5 +1,5 @@
+import MotionGraphic from "./MotionGraphic";
 import { ArrowLeft, Shield, FileText, Lock, Cookie, RotateCcw, AlertTriangle } from "lucide-react";
-import { motion } from "motion/react";
 import { ReactNode } from "react";
 
 interface LegalLayoutProps {
@@ -29,79 +29,7 @@ const LegalLayout = ({
     window.dispatchEvent(new Event("popstate"));
   };
 
-  return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="min-h-screen bg-void-black text-void-light pt-24 sm:pt-28 md:pt-32 pb-20 sm:pb-32 px-4 sm:px-6 md:px-10 relative z-[70]"
-    >
-      <div className="max-w-4xl mx-auto">
-        {/* Top Back Nav */}
-        <button
-          onClick={() => handleNavigate("/")}
-          className="inline-flex items-center gap-2 text-[10px] font-mono uppercase tracking-widest opacity-50 hover:opacity-100 transition-opacity mb-8 sm:mb-12 hover-trigger cursor-pointer"
-        >
-          <ArrowLeft size={14} />
-          Return to Terminal
-        </button>
-
-        {/* Header Block */}
-        <div className="border-b border-white/10 pb-6 mb-8">
-          <div className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-widest text-white/40 mb-2">
-            <span>Voidwallz Compliance & Legal Portal</span>
-            <span>//</span>
-            <span>Document {activeSlug.toUpperCase()}</span>
-          </div>
-          <h1 className="text-3xl sm:text-5xl md:text-6xl font-serif italic tracking-tighter mb-3 text-white">
-            {title}
-          </h1>
-          <p className="font-mono text-[10px] uppercase tracking-widest opacity-40">
-            Last Reviewed & Enforced: {lastUpdated}
-          </p>
-        </div>
-
-        {/* Tab Navigation Pill Strip */}
-        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-4 mb-10 border-b border-white/5">
-          {LEGAL_TABS.map((tab) => {
-            const Icon = tab.icon;
-            const isActive = tab.slug === activeSlug;
-            return (
-              <button
-                key={tab.slug}
-                onClick={() => handleNavigate(tab.path)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-mono uppercase tracking-wider transition-all whitespace-nowrap cursor-pointer shrink-0 ${
-                  isActive
-                    ? "bg-white text-black font-bold shadow-md"
-                    : "bg-white/5 text-white/60 hover:text-white hover:bg-white/10 border border-white/5"
-                }`}
-              >
-                <Icon size={12} />
-                <span>{tab.label}</span>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Document Content Stream */}
-        <div className="space-y-12 text-sm leading-relaxed opacity-85 text-white/80 font-sans">
-          {children}
-        </div>
-
-        {/* Bottom Operator & Contact Sign-off */}
-        <div className="mt-16 pt-8 border-t border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs font-mono text-white/50">
-          <div>
-            <span className="block text-white font-semibold">Operator: Voidwallz Digital Design Collective</span>
-            <span>Registered Digital Presence // Worldwide Electronic Services</span>
-          </div>
-          <div className="text-left sm:text-right">
-            <span className="block">Business & Legal: <a href="mailto:voidwallzbusiness@gmail.com" className="text-white hover:underline">voidwallzbusiness@gmail.com</a></span>
-            <span>DMCA & Support: <a href="mailto:voidwallzbusiness@gmail.com" className="text-white hover:underline">voidwallzbusiness@gmail.com</a></span>
-          </div>
-        </div>
-      </div>
-    </motion.div>
-  );
+  return <section className="vw-page vw-document page-shell"><header className="vw-page-heading"><MotionGraphic variant={activeSlug === "dmca" ? "copyright" : activeSlug} className="vw-heading-graphic" /><span className="micro-label">Voidwallz / information</span><h1>{title}<span className="vw-period">.</span></h1><p className="micro-label">Last updated: {lastUpdated}</p></header><div className="vw-document-layout"><nav aria-label="Legal documents" className="vw-document-nav">{LEGAL_TABS.map((tab) => <a key={tab.slug} href={tab.path} aria-current={tab.slug === activeSlug ? "page" : undefined} onClick={(event) => { if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return; event.preventDefault(); handleNavigate(tab.path); }}>{tab.label}</a>)}</nav><div><div className="vw-document-body">{children}</div><div className="vw-document-contact"><span className="micro-label">Questions about this policy?</span><a className="text-link" href="mailto:voidwallzbusiness@gmail.com">voidwallzbusiness@gmail.com</a></div></div></div></section>;
 };
 
 /* =========================================================================

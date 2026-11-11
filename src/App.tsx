@@ -1,33 +1,26 @@
-import { Instagram, Twitter, ArrowUpRight, Monitor, Smartphone } from "lucide-react";
 import {
   AnimatePresence,
   motion,
-  useScroll,
-  useTransform,
-  useMotionValue,
-  useSpring,
 } from "motion/react";
-import React, { useEffect, useState, useRef } from "react";
-import Cursor from "./components/Cursor";
-import OptimizedImage from "./components/OptimizedImage";
+import React, { lazy, Suspense, useEffect, useState, useRef } from "react";
+import { KineticRibbon } from "./components/MotionGraphic";
+import Hero from "./components/Hero";
+import Footer from "./components/Footer";
+import ScreenStatement from "./components/ScreenStatement";
 import Gallery from "./components/Gallery";
 import LatestUploads from "./components/LatestUploads";
-import Loader from "./components/Loader";
 import Navbar from "./components/Navbar";
-import ReportPage from "./components/ReportPage";
+import Loader from "./components/Loader";
 import WallpaperModal from "./components/WallpaperModal";
-import VoidPacks from "./components/VoidPacks";
-import PackModal from "./components/PackModal";
-import UpdatesPage from "./components/UpdatesPage";
-import AdminPackUpload from "./components/AdminPackUpload";
+import AuthModal from "./components/AuthModal";
 import { Wallpaper, VoidPack } from "./types";
 import { useWallpapers } from "./hooks/useWallpapers";
-import { useWallpaperStats } from "./hooks/useWallpaperStats";
 import { VisualEffectsProvider } from "./hooks/useVisualEffects";
-import { sound } from "./lib/soundEffects";
 import CookieConsent from "./components/CookieConsent";
 import NotFoundPage from "./components/NotFoundPage";
+import { useDialogCount } from "./lib/dialogState";
 import { setPageMeta, DEFAULT_TITLE, DEFAULT_DESCRIPTION } from "./lib/seo";
+import { closeWallpaper, collectionLocation, openWallpaper, WALLPAPER_ROUTE_PATTERN } from "./lib/wallpaperNavigation";
 import {
   PrivacyPolicy,
   TermsOfService,
@@ -37,12 +30,22 @@ import {
   DMCAPolicy,
 } from "./components/LegalPages";
 
+const VoidPacks = lazy(() => import("./components/VoidPacks"));
+const PackModal = lazy(() => import("./components/PackModal"));
+const ReportPage = lazy(() => import("./components/ReportPage"));
+const UpdatesPage = lazy(() => import("./components/UpdatesPage"));
+const AuthPage = lazy(() => import("./components/AuthPage"));
+const AdminPackUpload = lazy(() => import("./components/AdminPackUpload"));
+
 const KNOWN_PATHS = [
   "/",
   "/packs",
   "/desktop",
   "/mobile",
   "/updates",
+  "/login",
+  "/signup",
+  "/trial",
   "/privacy",
   "/terms",
   "/license",
@@ -53,41 +56,26 @@ const KNOWN_PATHS = [
   "/admin",
 ];
 
-const WALLPAPER_ROUTE_PATTERN = /^\/(desktop|mobile)\/([^/]+)\/?$/;
-
 const STATIC_META: Record<string, { title: string; description: string }> = {
   "/": { title: DEFAULT_TITLE, description: DEFAULT_DESCRIPTION },
-  "/packs": {
-    title: "Void Packs — Curated Wallpaper Suites | Voidwallz",
-    description:
-      "Thematic 5-piece wallpaper suites for desktop and phone. Download complete .ZIP packages or individual master files.",
-  },
-  "/desktop": {
-    title: "Desktop Archives — 8K & 6K Minimal Wallpapers | Voidwallz",
-    description:
-      "Ultra high resolution 8K and 6K minimalist desktop wallpapers, mastered in RAW and AVIF.",
-  },
-  "/mobile": {
-    title: "Phone Archives — OLED 4K Wallpapers | Voidwallz",
-    description:
-      "OLED-optimized 4K wallpapers for iOS and Android. Deep blacks, minimal compositions, native resolutions.",
-  },
-  "/updates": {
-    title: "System Logs — Changelog | Voidwallz",
-    description:
-      "Chronological log of visual architectural evolutions, new protocol features, and rendering pipeline enhancements.",
-  },
-  "/report": {
-    title: "Report Anomaly | Voidwallz",
-    description: "Report a copyright concern or an issue with a wallpaper.",
-  },
+  "/packs": { title: "Wallpaper Packs | Voidwallz", description: "Browse coordinated wallpaper collections for desktop and phone. Preview each image and download the full pack or a single image." },
+  "/desktop": { title: "Desktop Wallpapers | Voidwallz", description: "Browse, save and download wallpapers for desktop and laptop screens. Preview the artwork before you download." },
+  "/mobile": { title: "Phone Wallpapers | Voidwallz", description: "Browse portrait wallpapers for your phone. Preview the artwork and download the original image." },
+  "/updates": { title: "Journal & Updates | Voidwallz", description: "A record of features, experiments and visual changes at Voidwallz." },
+  "/login": { title: "Sign In | Voidwallz", description: "Sign in to your Voidwallz account." },
+  "/signup": { title: "Create an Account | Voidwallz", description: "Create your Voidwallz account and explore the wallpaper collection." },
+  "/trial": { title: "Create an Account | Voidwallz", description: "Join Voidwallz and explore the wallpaper collection." },
+  "/report": { title: "Report an Issue | Voidwallz", description: "Tell us about a problem with Voidwallz so we can help fix it." },
+  "/privacy": { title: "Privacy Policy | Voidwallz", description: "How Voidwallz handles your information." },
+  "/terms": { title: "Terms of Service | Voidwallz", description: "Terms for using Voidwallz and its wallpaper collection." },
+  "/license": { title: "Image Licence | Voidwallz", description: "Personal use terms for Voidwallz wallpapers." },
+  "/cookies": { title: "Cookie & Storage Policy | Voidwallz", description: "How Voidwallz uses cookies and local device storage." },
+  "/refunds": { title: "Refund Policy | Voidwallz", description: "Voidwallz refund and digital goods policy." },
+  "/dmca": { title: "Copyright Policy | Voidwallz", description: "Copyright information and contact details for Voidwallz." },
+  "/admin": { title: "Publishing Studio | Voidwallz", description: "Voidwallz pack publishing tools." },
 };
 
-export const navigateToWallpaper = (wp: Wallpaper) => {
-  const slug = wp.title.toLowerCase().replace(/\s+/g, "-");
-  window.history.pushState(null, "", `/${wp.device}/${slug}/`);
-  window.dispatchEvent(new Event("wallpaper-navigate"));
-};
+export const navigateToWallpaper = openWallpaper;
 
 function WallpaperRouteManager({
   isOledOptimized,
@@ -106,9 +94,13 @@ function WallpaperRouteManager({
       if (match) {
         const device = match[1];
         const rawSlug = match[2];
-        const slug = decodeURIComponent(rawSlug)
-          .toLowerCase()
-          .replace(/\s+/g, "-");
+        let slug: string;
+        try {
+          slug = decodeURIComponent(rawSlug).toLowerCase().replace(/\s+/g, "-");
+        } catch {
+          setSelectedWp(null);
+          return;
+        }
 
         const allWallpapers =
           device === "desktop" ? desktopWallpapers : mobileWallpapers;
@@ -140,888 +132,35 @@ function WallpaperRouteManager({
 
   // Per-wallpaper link-preview metadata for detail routes
   useEffect(() => {
-    if (!selectedWp) return;
+    if (!selectedWp) {
+      const meta = STATIC_META[window.location.pathname];
+      if (meta) setPageMeta(meta);
+      return;
+    }
     setPageMeta({
       title: `${selectedWp.title} — ${selectedWp.device === "desktop" ? "Desktop" : "Phone"} Wallpaper | Voidwallz`,
-      description: `${selectedWp.title} — a curated ${selectedWp.device === "desktop" ? "8K desktop" : "OLED 4K phone"} wallpaper by Voidwallz. Free to download in lossless PNG.`,
+      description: `${selectedWp.title} — a ${selectedWp.device === "desktop" ? "desktop" : "phone"} wallpaper by Voidwallz. Preview the artwork and download the original image.`,
       image: selectedWp.previewUrl,
       url: window.location.href,
     });
   }, [selectedWp]);
 
-  const handleClose = () => {
-    const path = window.location.pathname;
-    const match = path.match(WALLPAPER_ROUTE_PATTERN);
-
-    if (match) {
-      const device = match[1];
-      // Navigate back to the parent category path
-      window.history.pushState(null, "", `/${device}`);
-    } else {
-      // Default fallback to home
-      window.history.pushState(null, "", "/");
-    }
-
-    window.dispatchEvent(new Event("popstate"));
-    window.dispatchEvent(new Event("wallpaper-navigate"));
-  };
-
   return (
     <WallpaperModal
       selectedWp={selectedWp}
-      onClose={handleClose}
+      onClose={closeWallpaper}
       isOledOptimized={isOledOptimized}
     />
   );
 }
 
-const fallbackWallpaperOfTheDay: Wallpaper = {
-  id: "desktop-liquid-void",
-  title: "Liquid Void",
-  serial: "ID: V-142",
-  category: "Wallpaper of the Day",
-  format: "8K AVIF",
-  downloads: 48920,
-  previewUrl:
-    "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=1600",
-  tinyUrl:
-    "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=20&w=50&h=50",
-  originalUrl:
-    "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=100",
-  device: "desktop",
-};
-
-const fallbackMobileWallpaperOfTheDay: Wallpaper = {
-  id: "mobile-void-aura",
-  title: "Void Aura",
-  serial: "ID: V-505",
-  category: "Wallpaper of the Day",
-  format: "4K OLED",
-  downloads: 36240,
-  previewUrl:
-    "https://images.unsplash.com/photo-1557672172-298e090bd0f1?auto=format&fit=crop&q=95&w=1440&h=2560",
-  tinyUrl:
-    "https://images.unsplash.com/photo-1557672172-298e090bd0f1?auto=format&fit=crop&q=20&w=50&h=89",
-  originalUrl:
-    "https://images.unsplash.com/photo-1557672172-298e090bd0f1?auto=format&fit=crop&q=100&w=2160&h=3840",
-  device: "mobile",
-};
-
-function Hero({
-  onOpenModal,
-  isOledOptimized,
-}: {
-  onOpenModal: (wp: Wallpaper) => void;
-  isOledOptimized: boolean;
-}) {
-  const { desktopWallpapers, mobileWallpapers, loading } = useWallpapers();
-  const { getDownloads } = useWallpaperStats();
-  const { scrollY } = useScroll();
-  const yText = useTransform(scrollY, [0, 1000], [0, 150]);
-  const yImage = useTransform(scrollY, [0, 1000], [0, -100]);
-
-  // Active device tab: "desktop" or "mobile"
-  const [activeDevice, setActiveDevice] = useState<"desktop" | "mobile">(() => {
-    if (typeof window !== "undefined" && window.innerWidth < 768) {
-      return "mobile";
-    }
-    return "desktop";
-  });
-
-  // Mouse parallax state
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const heroRef = useRef<HTMLDivElement>(null);
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!heroRef.current) return;
-    const { left, top, width, height } =
-      heroRef.current.getBoundingClientRect();
-    const x = (e.clientX - left) / width - 0.5;
-    const y = (e.clientY - top) / height - 0.5;
-    setMousePos({ x, y });
-  };
-
-  const handleMouseLeave = () => {
-    setMousePos({ x: 0, y: 0 });
-  };
-
-  // Dynamically select desktop or mobile wallpaper of the day
-  const desktopWp = desktopWallpapers[0]
-    ? { ...desktopWallpapers[0], category: desktopWallpapers[0].category || "Wallpaper of the Day" }
-    : fallbackWallpaperOfTheDay;
-
-  const mobileWp = mobileWallpapers[0]
-    ? { ...mobileWallpapers[0], category: mobileWallpapers[0].category || "Wallpaper of the Day" }
-    : fallbackMobileWallpaperOfTheDay;
-
-  const wallpaperOfTheDay = activeDevice === "desktop" ? desktopWp : mobileWp;
-
-  // Split title dynamically into two editorial, poetic lines
-  const getTitleLines = (title: string): [string, string] => {
-    if (!title) return ["The Ethereal", "Monochrome"];
-    const cleaned = title.replace(/^ID:\s*V-\d+\s*\/\/\s*/i, "").trim();
-    const words = cleaned.split(/\s+/);
-    if (words.length === 1) {
-      return ["The", words[0]];
-    }
-    if (words.length === 2) {
-      return words[0].toLowerCase() === "the"
-        ? [words[0], words[1]]
-        : [`The ${words[0]}`, words[1]];
-    }
-    const mid = Math.ceil(words.length / 2);
-    const firstPart = words.slice(0, mid).join(" ");
-    const secondPart = words.slice(mid).join(" ");
-    return [
-      firstPart.toLowerCase().startsWith("the") ? firstPart : `The ${firstPart}`,
-      secondPart,
-    ];
-  };
-
-  const titleLines = getTitleLines(wallpaperOfTheDay.title);
-
-  const getHeroDescription = (wp: Wallpaper, device: "desktop" | "mobile") => {
-    if (device === "desktop") {
-      const cat =
-        wp.category && wp.category !== "Wallpaper of the Day"
-          ? wp.category.toLowerCase()
-          : "minimalist architectural";
-      return `Curated ${cat} capture designed for high-resolution desktop architecture. Lossless 8K master crafted for deep focus, negative space, and subtle gradients.`;
-    }
-    const cat =
-      wp.category && wp.category !== "Wallpaper of the Day"
-        ? wp.category.toLowerCase()
-        : "ultra-deep OLED";
-    return `Curated ${cat} capture tailored for modern edge-to-edge mobile screens. Tuned for pure black levels, battery efficiency, and distraction-free lock screens.`;
-  };
-
-  return (
-    <section
-      ref={heroRef}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-      className="relative min-h-[100dvh] flex flex-col justify-center px-4 sm:px-6 md:px-10 pt-24 sm:pt-28 md:pt-32 pb-12 md:pb-16 overflow-hidden border-b border-white/5"
-    >
-      <div className="absolute inset-0 bg-void-black z-0 pointer-events-none" />
-
-      {/* Dynamic Ambient Color Aura from Featured Wallpaper */}
-      {!isOledOptimized && (
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={`ambient-${wallpaperOfTheDay.id}-${activeDevice}`}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 0.26 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 1.2, ease: "easeOut" }}
-            className="absolute inset-0 z-0 pointer-events-none overflow-hidden"
-          >
-            <div
-              className="absolute -top-1/4 -right-1/4 w-[130%] h-[130%] bg-cover bg-center blur-[140px] opacity-75 scale-110"
-              style={{ backgroundImage: `url(${wallpaperOfTheDay.previewUrl})` }}
-            />
-            {/* Soft dark vignette to keep typography razor-sharp */}
-            <div className="absolute inset-0 bg-gradient-to-r from-void-black via-void-black/75 to-transparent" />
-            <div className="absolute inset-0 bg-gradient-to-t from-void-black via-void-black/35 to-void-black/80" />
-          </motion.div>
-        </AnimatePresence>
-      )}
-
-      {/* Interactive mouse parallax ambient element */}
-      <motion.div
-        animate={{
-          x: mousePos.x * 50,
-          y: mousePos.y * 50,
-        }}
-        transition={{ type: "spring", damping: 30, stiffness: 50 }}
-        className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-white/[0.012] rounded-full blur-[120px] pointer-events-none"
-      />
-
-      <div className="relative z-10 w-full max-w-[1600px] mx-auto flex flex-col md:flex-row items-center justify-between gap-10 md:gap-16 pb-6 md:pb-16 mt-4 md:mt-0">
-        <motion.div
-          style={{ y: yText }}
-          className="flex flex-col w-full md:w-5/12"
-        >
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="mb-4 sm:mb-8 flex flex-wrap items-center gap-2.5"
-          >
-            <span className="text-[10px] opacity-40 uppercase tracking-[0.3em] font-mono">
-              Selection 01 // {activeDevice === "desktop" ? "Desktop Edition" : "Mobile Edition"}
-            </span>
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400/80 animate-pulse" />
-            <span className="text-[10px] font-mono text-white/50 uppercase tracking-widest">
-              {wallpaperOfTheDay.serial}
-            </span>
-          </motion.div>
-
-          <div className="overflow-hidden min-h-[140px] sm:min-h-[160px] md:min-h-[220px] flex flex-col justify-center">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={`title-${wallpaperOfTheDay.id}-${activeDevice}`}
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -30 }}
-                transition={{
-                  duration: 0.7,
-                  ease: [0.21, 0.47, 0.32, 0.98],
-                }}
-              >
-                {titleLines.map((line, i) => (
-                  <h1
-                    key={i}
-                    className="text-4xl sm:text-5xl md:text-7xl lg:text-[6rem] leading-[1.08] font-serif italic font-light tracking-tighter"
-                  >
-                    {line}
-                  </h1>
-                ))}
-              </motion.div>
-            </AnimatePresence>
-          </div>
-
-          <AnimatePresence mode="wait">
-            <motion.p
-              key={`desc-${wallpaperOfTheDay.id}-${activeDevice}`}
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -15 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-              className="text-xs sm:text-sm md:text-base opacity-50 max-w-md mt-4 sm:mt-6 md:mt-8 leading-relaxed font-light"
-            >
-              {getHeroDescription(wallpaperOfTheDay, activeDevice)}
-            </motion.p>
-          </AnimatePresence>
-        </motion.div>
-
-        <motion.div
-          style={{ y: yImage }}
-          animate={{
-            rotateX: mousePos.y * -10,
-            rotateY: mousePos.x * 10,
-            opacity: 1,
-            scale: 1,
-          }}
-          onClick={() => {
-            if (!loading) {
-              sound.playOpenModal();
-              onOpenModal(wallpaperOfTheDay);
-            }
-          }}
-          onKeyDown={(e) => {
-            if ((e.key === "Enter" || e.key === " ") && !loading) {
-              e.preventDefault();
-              sound.playOpenModal();
-              onOpenModal(wallpaperOfTheDay);
-            }
-          }}
-          role="button"
-          tabIndex={0}
-          aria-label={`Preview wallpaper of the day: ${wallpaperOfTheDay.title}`}
-          className="w-full md:w-7/12 h-[340px] sm:h-[420px] md:h-[65vh] relative group cursor-pointer hover-trigger perspective-1000"
-          initial={{ opacity: 0, scale: 0.95 }}
-        >
-          <div className="w-full h-full border border-white/10 p-2 relative overflow-hidden bg-white/5 shadow-2xl luxury-border-glow isolate glass-sheen">
-            {loading ? (
-              <div className="w-full h-full bg-[#050505] flex items-center justify-center relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/[0.03] to-transparent animate-pulse" />
-                <div className="relative flex flex-col items-center gap-6">
-                  <div className="relative flex items-center justify-center w-12 h-12">
-                    <div className="absolute inset-0 rounded-full border-t border-white/60 border-r border-transparent animate-spin" style={{ animationDuration: '1.2s' }} />
-                    <div className="absolute inset-[3px] rounded-full border-b border-white/30 border-l border-transparent animate-spin" style={{ animationDuration: '1.8s', animationDirection: 'reverse' }} />
-                    <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
-                  </div>
-                  <span className="text-[9px] font-mono uppercase tracking-[0.4em] text-white/50">
-                    Syncing...
-                  </span>
-                </div>
-              </div>
-            ) : (
-              <>
-                {/* Top Left Floating Tag */}
-                <div className="absolute top-3 left-3 sm:top-4 sm:left-4 z-30 flex items-center gap-2 pointer-events-none">
-                  <span className="spec-badge text-[9px] sm:text-[10px] font-mono px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-white/90 tracking-widest uppercase bg-black/80 backdrop-blur-md border border-white/20 shadow-xl flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                    WALLPAPER OF THE DAY
-                  </span>
-                </div>
-
-                {/* Top Right Device Switcher */}
-                <div
-                  className="absolute top-3 right-3 sm:top-4 sm:right-4 z-30 flex items-center gap-2 pointer-events-auto"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <div className="bg-black/85 backdrop-blur-md border border-white/20 p-1 rounded-full shadow-2xl flex items-center gap-1">
-                    <button
-                      type="button"
-                      aria-label="Show Desktop Wallpaper of the Day"
-                      onClick={() => {
-                        if (activeDevice !== "desktop") {
-                          sound.playTap();
-                          setActiveDevice("desktop");
-                        }
-                      }}
-                      className={`px-2.5 sm:px-3 py-1 text-[9px] sm:text-[10px] font-mono uppercase tracking-widest rounded-full transition-all duration-300 flex items-center gap-1.5 cursor-pointer ${
-                        activeDevice === "desktop"
-                          ? "bg-white text-black font-bold shadow-[0_0_15px_rgba(255,255,255,0.4)]"
-                          : "text-white/60 hover:text-white hover:bg-white/10"
-                      }`}
-                    >
-                      <Monitor size={11} />
-                      <span>Desktop</span>
-                    </button>
-                    <button
-                      type="button"
-                      aria-label="Show Phone Wallpaper of the Day"
-                      onClick={() => {
-                        if (activeDevice !== "mobile") {
-                          sound.playTap();
-                          setActiveDevice("mobile");
-                        }
-                      }}
-                      className={`px-2.5 sm:px-3 py-1 text-[9px] sm:text-[10px] font-mono uppercase tracking-widest rounded-full transition-all duration-300 flex items-center gap-1.5 cursor-pointer ${
-                        activeDevice === "mobile"
-                          ? "bg-white text-black font-bold shadow-[0_0_15px_rgba(255,255,255,0.4)]"
-                          : "text-white/60 hover:text-white hover:bg-white/10"
-                      }`}
-                    >
-                      <Smartphone size={11} />
-                      <span>Phone</span>
-                    </button>
-                  </div>
-
-                  <span className="hidden sm:flex spec-badge text-[9px] sm:text-[10px] font-mono px-2.5 sm:px-3 py-1.5 rounded-full text-white/80 tracking-widest uppercase bg-black/80 backdrop-blur-md border border-white/20 shadow-xl items-center gap-1 pointer-events-none">
-                    {wallpaperOfTheDay.format ||
-                      (activeDevice === "desktop" ? "8K MASTER" : "4K OLED")}
-                  </span>
-                </div>
-
-                {/* Main Hero Wallpaper Canvas (Adaptive Desktop Panorama vs. Phone Mockup) */}
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={`hero-canvas-${wallpaperOfTheDay.id}-${activeDevice}`}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.35 }}
-                    className="w-full h-full relative flex items-center justify-center overflow-hidden"
-                  >
-                    {activeDevice === "mobile" ? (
-                      <div className="relative w-full h-full flex items-center justify-center p-2 sm:p-4">
-                        {/* Subtle ambient blurred backing within the card */}
-                        <div
-                          className="absolute inset-0 bg-cover bg-center blur-2xl opacity-40 scale-125 transition-all duration-700 pointer-events-none"
-                          style={{ backgroundImage: `url(${wallpaperOfTheDay.previewUrl})` }}
-                        />
-                        <div className="absolute inset-0 bg-black/50 backdrop-blur-xs pointer-events-none" />
-
-                        {/* Centered Phone Canvas Frame */}
-                        <div className="relative z-10 h-[86%] sm:h-[88%] md:h-[90%] max-h-[500px] aspect-[9/19.5] rounded-2xl overflow-hidden shadow-[0_30px_70px_rgba(0,0,0,0.95)] ring-1 ring-white/25 bg-black flex items-center justify-center group-hover:scale-[1.02] transition-transform duration-500 ease-out">
-                          <OptimizedImage
-                            src={wallpaperOfTheDay.previewUrl}
-                            placeholder={wallpaperOfTheDay.tinyUrl}
-                            fallbackSrc={wallpaperOfTheDay.fallbackUrl || wallpaperOfTheDay.previewUrl}
-                            alt={wallpaperOfTheDay.title}
-                            priority={true}
-                            animate={{
-                              scale:
-                                1.05 +
-                                (Math.abs(mousePos.x) + Math.abs(mousePos.y)) * 0.05,
-                              x: mousePos.x * -15,
-                              y: mousePos.y * -15,
-                            }}
-                            transition={{ duration: 0.3, ease: "easeOut" }}
-                            className={`w-full h-full object-cover filter brightness-85 group-hover:brightness-100 transition-all duration-300 ease-out ${
-                              isOledOptimized ? "oled-image" : ""
-                            }`}
-                            containerClassName="w-full h-full"
-                          />
-                          {/* Phone Screen Glare */}
-                          <div className="absolute inset-0 bg-gradient-to-tr from-white/[0.08] via-transparent to-transparent pointer-events-none z-20" />
-                          {/* Phone Dynamic Island pill */}
-                          <div className="absolute top-2 left-1/2 -translate-x-1/2 w-9 h-2.5 rounded-full bg-black/90 border border-white/10 z-30 pointer-events-none" />
-                        </div>
-                      </div>
-                    ) : (
-                      <OptimizedImage
-                        src={wallpaperOfTheDay.previewUrl}
-                        placeholder={wallpaperOfTheDay.tinyUrl}
-                        fallbackSrc={wallpaperOfTheDay.fallbackUrl || wallpaperOfTheDay.previewUrl}
-                        alt={wallpaperOfTheDay.title}
-                        priority={true}
-                        animate={{
-                          scale:
-                            1.05 +
-                            (Math.abs(mousePos.x) + Math.abs(mousePos.y)) * 0.05,
-                          x: mousePos.x * -20,
-                          y: mousePos.y * -20,
-                        }}
-                        transition={{ duration: 0.3, ease: "easeOut" }}
-                        className={`w-full h-full filter brightness-80 group-hover:brightness-95 transition-all duration-300 ease-out ${
-                          isOledOptimized ? "oled-image" : ""
-                        }`}
-                        containerClassName="w-full h-full"
-                      />
-                    )}
-                  </motion.div>
-                </AnimatePresence>
-
-                {/* Dark Vignette Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/35 to-transparent pointer-events-none z-20" />
-
-                {/* Bottom Wallpaper Detail Strip */}
-                <div className="absolute bottom-0 inset-x-0 p-4 sm:p-6 z-30 flex flex-col sm:flex-row justify-between sm:items-end gap-3 sm:gap-4 pointer-events-none">
-                  <div className="pointer-events-auto">
-                    <span className="text-[9px] sm:text-[10px] text-white/60 uppercase tracking-[0.25em] font-mono mb-1 block drop-shadow-md">
-                      {wallpaperOfTheDay.serial} // {activeDevice === "desktop" ? "Desktop Edition" : "Mobile Edition"}
-                    </span>
-                    <h3 className="text-xl sm:text-2xl md:text-3xl font-serif italic tracking-tight text-white drop-shadow-xl group-hover:text-white/90 transition-colors">
-                      {wallpaperOfTheDay.title}
-                    </h3>
-                  </div>
-
-                  <div className="flex items-center gap-2 pointer-events-auto">
-                    <span className="text-[9px] sm:text-[10px] font-mono text-white/80 bg-black/80 backdrop-blur-md border border-white/20 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full shadow-lg">
-                      {getDownloads(wallpaperOfTheDay.id, wallpaperOfTheDay.device).toLocaleString()} DL
-                    </span>
-                    <span className="text-[9px] sm:text-[10px] font-mono font-bold uppercase tracking-wider text-black bg-white px-3 sm:px-3.5 py-1 sm:py-1.5 rounded-full shadow-[0_0_20px_rgba(255,255,255,0.4)] flex items-center gap-1.5 group-hover:scale-105 transition-transform duration-300">
-                      <span>PREVIEW</span>
-                      <ArrowUpRight size={12} />
-                    </span>
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
-        </motion.div>
-      </div>
-
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1.2, delay: 0.8 }}
-        className="relative md:absolute md:bottom-8 left-0 right-0 md:left-10 md:right-10 flex flex-col md:flex-row justify-between items-start md:items-end border-t border-white/5 pt-4 mt-8 md:mt-0 z-20"
-      >
-        <div className="flex gap-6 sm:gap-8 md:gap-12 w-full md:w-auto overflow-x-auto pb-3 md:pb-0 scrollbar-hide">
-          <div className="flex flex-col whitespace-nowrap">
-            <span className="text-[9px] sm:text-[10px] opacity-40 uppercase tracking-widest mb-1">
-              Resolution
-            </span>
-            <span className="text-xs font-mono">
-              {activeDevice === "desktop" ? "8192 × 4608 (8K)" : "2160 × 3840 (4K)"}
-            </span>
-          </div>
-          <div className="flex flex-col whitespace-nowrap">
-            <span className="text-[9px] sm:text-[10px] opacity-40 uppercase tracking-widest mb-1">
-              Format
-            </span>
-            <span className="text-xs font-mono">
-              {activeDevice === "desktop" ? "RAW / AVIF Lossless" : "OLED / Ultra HDR"}
-            </span>
-          </div>
-          <div className="flex flex-col whitespace-nowrap">
-            <span className="text-[9px] sm:text-[10px] opacity-40 uppercase tracking-widest mb-1">
-              Color Depth
-            </span>
-            <span className="text-xs font-mono">
-              {activeDevice === "desktop" ? "14 BIT True Color" : "10 BIT DCI-P3"}
-            </span>
-          </div>
-          <div className="flex flex-col whitespace-nowrap">
-            <span className="text-[9px] sm:text-[10px] opacity-40 uppercase tracking-widest mb-1">
-              Aspect Ratio
-            </span>
-            <span className="text-xs font-mono">
-              {activeDevice === "desktop" ? "16:9 Cinema" : "9:19.5 Mobile"}
-            </span>
-          </div>
-        </div>
-        <div className="mt-3 md:mt-0 ml-auto md:ml-0">
-          <a
-            href="/"
-            onClick={(e) => {
-              e.preventDefault();
-              window.history.pushState(null, "", "/");
-              window.dispatchEvent(new Event("popstate"));
-              setTimeout(() => {
-                document
-                  .getElementById("gallery")
-                  ?.scrollIntoView({ behavior: "smooth" });
-              }, 100);
-            }}
-            className="text-[10px] font-mono uppercase tracking-[0.25em] opacity-40 hover:opacity-100 transition-opacity flex items-center gap-1.5"
-          >
-            <span>Scroll to explore</span>
-            <span>&darr;</span>
-          </a>
-        </div>
-      </motion.div>
-    </section>
-  );
-}
-
-function Marquee() {
-  const words = [
-    "VOIDWALLZ",
-    "MONOCHROME",
-    "ETHEREAL",
-    "VORTEX",
-    "SINGULARITY",
-  ];
-  return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      whileInView={{ opacity: 1 }}
-      viewport={{ once: true }}
-      className="py-4 border-y border-white/5 bg-void-black marquee-container"
-    >
-      <div className="marquee-content flex items-center gap-16 font-serif italic text-3xl opacity-20">
-        {[...words, ...words, ...words].map((word, i) => (
-          <span key={i}>{word}</span>
-        ))}
-      </div>
-    </motion.div>
-  );
-}
-
-function Manifesto() {
-  const ref = useRef(null);
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["start end", "end start"],
-  });
-
-  // Parallax effects
-  const yText = useTransform(scrollYProgress, [0, 1], [50, -50]);
-  const ySteps = useTransform(scrollYProgress, [0, 1], [150, -150]);
-
-  const steps = [
-    {
-      num: "01",
-      title: "Discover",
-      desc: "We explore emerging digital aesthetics to uncover atmospheric compositions shaped through modern visual creation and cinematic design.",
-    },
-    {
-      num: "02",
-      title: "Refine",
-      desc: "Every wallpaper is carefully refined, color-balanced, and optimized to preserve depth, clarity, and visual harmony across modern displays.",
-    },
-    {
-      num: "03",
-      title: "Elevate",
-      desc: "Prepared in native resolutions from mobile to 8K, each piece is designed to transform everyday screens into immersive digital environments.",
-    },
-  ];
-
-  return (
-    <section
-      id="about"
-      ref={ref}
-      className="py-20 sm:py-28 md:py-48 px-4 sm:px-6 md:px-10 border-t border-white/5 bg-void-black relative overflow-hidden"
-    >
-      {/* Ambient background glow */}
-      <div className="absolute top-1/2 left-1/4 w-[400px] h-[400px] bg-white/[0.015] rounded-full blur-[100px] pointer-events-none -translate-y-1/2 mix-blend-screen" />
-
-      <div className="max-w-[1400px] mx-auto flex flex-col lg:flex-row gap-12 sm:gap-16 lg:gap-32 justify-between relative z-10">
-        <motion.div
-          style={{ y: yText }}
-          className="lg:w-5/12 flex flex-col justify-start"
-        >
-          <motion.p
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-            className="text-[10px] text-white/40 uppercase tracking-[0.4em] mb-4 sm:mb-8 font-mono"
-          >
-            Philosophy
-          </motion.p>
-          <motion.h2
-            initial={{ opacity: 0, y: 20, filter: "blur(8px)" }}
-            whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 1.2, ease: [0.21, 0.47, 0.32, 0.98] }}
-            className="text-3xl sm:text-4xl md:text-6xl lg:text-[5rem] font-serif italic font-light tracking-tighter leading-[1.08] max-w-[14ch] text-white/90 drop-shadow-sm"
-          >
-            How we craft our voids.
-          </motion.h2>
-        </motion.div>
-
-        <motion.div
-          style={{ y: ySteps }}
-          className="lg:w-7/12 relative pl-6 sm:pl-8 md:pl-16"
-        >
-          {/* Animated Vertical Line */}
-          <motion.div
-            initial={{ height: 0 }}
-            whileInView={{ height: "100%" }}
-            viewport={{ once: true }}
-            transition={{ duration: 1.5, ease: "easeInOut" }}
-            className="absolute top-0 left-0 w-px bg-gradient-to-b from-white/20 via-white/5 to-transparent"
-          />
-
-          <div className="flex flex-col gap-12 sm:gap-16 md:gap-24">
-            {steps.map((step, i) => (
-              <motion.div
-                key={step.num}
-                initial={{ opacity: 0, x: -20, filter: "blur(4px)" }}
-                whileInView={{ opacity: 1, x: 0, filter: "blur(0px)" }}
-                viewport={{ once: true, margin: "-100px" }}
-                transition={{
-                  duration: 1,
-                  delay: i * 0.2,
-                  ease: [0.21, 0.47, 0.32, 0.98],
-                }}
-                className="group cursor-default relative"
-              >
-                {/* Node on the timeline */}
-                <motion.div
-                  initial={{ scale: 0, opacity: 0 }}
-                  whileInView={{ scale: 1, opacity: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: i * 0.2 + 0.6 }}
-                  className="absolute top-2 -left-[27px] sm:-left-[35px] md:-left-[67px] w-1.5 h-1.5 bg-white/40 rounded-full group-hover:bg-white/90 transition-colors duration-500 shadow-[0_0_12px_rgba(255,255,255,0.3)]"
-                />
-
-                <div className="flex items-center gap-3 sm:gap-4 mb-3 sm:mb-4 md:mb-6">
-                  <span className="text-[10px] text-white/30 font-mono tracking-widest">
-                    {step.num}
-                  </span>
-                  <span className="w-6 sm:w-8 h-px bg-white/10 group-hover:w-12 transition-all duration-700 ease-out" />
-                  <span className="text-[10px] text-white/60 font-mono tracking-widest uppercase">
-                    {step.title}
-                  </span>
-                </div>
-                <p className="text-xs sm:text-sm md:text-base text-white/50 leading-[1.8] group-hover:text-white/70 transition-colors duration-500 max-w-lg font-light">
-                  {step.desc}
-                </p>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
-      </div>
-    </section>
-  );
-}
-
-function Footer() {
-  return (
-    <footer className="bg-void-black border-t border-white/5 pt-20 sm:pt-28 md:pt-32 pb-12 px-4 sm:px-6 md:px-10 overflow-hidden relative">
-      <div className="mx-auto grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16 mb-16 md:mb-24">
-        <div>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif italic tracking-tighter mb-6 md:mb-8 leading-tight">
-            Embrace the <br /> void.
-          </h2>
-        </div>
-
-        <div className="grid grid-cols-2 sm:flex sm:flex-row justify-start md:justify-end gap-8 sm:gap-16 md:gap-32">
-          <div className="flex flex-col gap-6">
-            <span className="text-[10px] opacity-30 uppercase tracking-[0.2em] font-mono mb-2 block">
-              Social
-            </span>
-            <a
-              href="https://www.instagram.com/voidwallz/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-3 text-sm opacity-60 hover:opacity-100 transition-opacity hover-trigger group"
-            >
-              <Instagram
-                size={16}
-                className="group-hover:scale-110 transition-transform"
-              />
-              <span>Instagram</span>
-            </a>
-            <a
-              href="https://x.com/voidwallz"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-3 text-sm opacity-60 hover:opacity-100 transition-opacity hover-trigger group"
-            >
-              <Twitter
-                size={16}
-                className="group-hover:scale-110 transition-transform"
-              />
-              <span>X // Twitter</span>
-            </a>
-            <a
-              href="https://discord.gg/xhWGaPp8H2"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-3 text-sm opacity-60 hover:opacity-100 transition-opacity hover-trigger group"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                fill="currentColor"
-                viewBox="0 0 16 16"
-                className="group-hover:scale-110 transition-transform"
-              >
-                <path d="M13.545 2.907a13.227 13.227 0 0 0-3.257-1.011.05.05 0 0 0-.052.025c-.141.25-.297.577-.406.833a12.19 12.19 0 0 0-3.658 0 8.258 8.258 0 0 0-.412-.833.051.051 0 0 0-.052-.025c-1.125.194-2.22.534-3.257 1.011a.041.041 0 0 0-.021.018C.356 6.024-.213 9.047.066 12.032c.001.014.01.028.021.037a13.276 13.276 0 0 0 3.995 2.02.05.05 0 0 0 .056-.019c.308-.42.582-.863.818-1.329a.05.05 0 0 0-.01-.059.051.051 0 0 0-.018-.011 8.875 8.875 0 0 1-1.248-.595.05.05 0 0 1-.02-.066l.015-.019c.084-.063.168-.129.248-.195a.05.05 0 0 1 .051-.007c2.619 1.196 5.454 1.196 8.041 0a.052.052 0 0 1 .053.007c.08.066.164.132.248.195a.051.051 0 0 1-.004.085 8.254 8.254 0 0 1-1.249.594.05.05 0 0 0-.03.03.052.052 0 0 0 .003.041c.24.465.515.909.817 1.329a.05.05 0 0 0 .056.019 13.235 13.235 0 0 0 4.001-2.02.049.049 0 0 0 .021-.037c.334-3.451-.559-6.449-2.366-9.106a.034.034 0 0 0-.02-.019Zm-8.198 7.307c-.789 0-1.438-.724-1.438-1.612 0-.889.637-1.613 1.438-1.613.807 0 1.45.73 1.438 1.613 0 .888-.637 1.612-1.438 1.612Zm5.316 0c-.788 0-1.438-.724-1.438-1.612 0-.889.637-1.613 1.438-1.613.807 0 1.451.73 1.438 1.613 0 .888-.631 1.612-1.438 1.612Z" />
-              </svg>
-              <span>Discord</span>
-            </a>
-          </div>
-
-          <div className="flex flex-col gap-6">
-            <span className="text-[10px] opacity-30 uppercase tracking-[0.2em] font-mono mb-2 block">
-              Support
-            </span>
-            <a
-              href="/updates"
-              onClick={(e) => {
-                e.preventDefault();
-                window.history.pushState(null, "", "/updates");
-                window.dispatchEvent(new Event("popstate"));
-              }}
-              className="text-sm opacity-60 hover:opacity-100 transition-opacity hover-trigger flex items-center gap-2"
-            >
-              <span>System Logs</span>
-              <span className="text-[8px] font-mono uppercase px-1.5 py-0.5 rounded bg-white text-black font-bold">
-                v2.5.0
-              </span>
-            </a>
-            <a
-              href="/report"
-              onClick={(e) => {
-                e.preventDefault();
-                window.history.pushState(null, "", "/report");
-                window.dispatchEvent(new Event("popstate"));
-              }}
-              className="text-sm opacity-60 hover:opacity-100 transition-opacity hover-trigger text-red-400/80 hover:text-red-400"
-            >
-              Report Anomaly
-            </a>
-            <a
-              href="mailto:voidwallzbusiness@gmail.com"
-              className="text-sm opacity-60 hover:opacity-100 transition-opacity hover-trigger"
-            >
-              Business Inquiries
-            </a>
-          </div>
-
-          <div className="flex flex-col gap-3.5 sm:gap-4">
-            <span className="text-[10px] opacity-30 uppercase tracking-[0.2em] font-mono mb-1 block">
-              Legal & Compliance
-            </span>
-            <a
-              href="/privacy"
-              onClick={(e) => {
-                e.preventDefault();
-                window.history.pushState(null, "", "/privacy");
-                window.dispatchEvent(new Event("popstate"));
-              }}
-              className="text-xs sm:text-sm opacity-60 hover:opacity-100 transition-opacity hover-trigger"
-            >
-              Privacy Policy
-            </a>
-            <a
-              href="/terms"
-              onClick={(e) => {
-                e.preventDefault();
-                window.history.pushState(null, "", "/terms");
-                window.dispatchEvent(new Event("popstate"));
-              }}
-              className="text-xs sm:text-sm opacity-60 hover:opacity-100 transition-opacity hover-trigger"
-            >
-              Terms of Service
-            </a>
-            <a
-              href="/license"
-              onClick={(e) => {
-                e.preventDefault();
-                window.history.pushState(null, "", "/license");
-                window.dispatchEvent(new Event("popstate"));
-              }}
-              className="text-xs sm:text-sm opacity-60 hover:opacity-100 transition-opacity hover-trigger"
-            >
-              Personal License
-            </a>
-            <a
-              href="/cookies"
-              onClick={(e) => {
-                e.preventDefault();
-                window.history.pushState(null, "", "/cookies");
-                window.dispatchEvent(new Event("popstate"));
-              }}
-              className="text-xs sm:text-sm opacity-60 hover:opacity-100 transition-opacity hover-trigger"
-            >
-              Cookie Policy
-            </a>
-            <a
-              href="/refunds"
-              onClick={(e) => {
-                e.preventDefault();
-                window.history.pushState(null, "", "/refunds");
-                window.dispatchEvent(new Event("popstate"));
-              }}
-              className="text-xs sm:text-sm opacity-60 hover:opacity-100 transition-opacity hover-trigger"
-            >
-              Refund Policy
-            </a>
-            <a
-              href="/dmca"
-              onClick={(e) => {
-                e.preventDefault();
-                window.history.pushState(null, "", "/dmca");
-                window.dispatchEvent(new Event("popstate"));
-              }}
-              className="text-xs sm:text-sm opacity-60 hover:opacity-100 transition-opacity hover-trigger"
-            >
-              DMCA & Copyright
-            </a>
-          </div>
-        </div>
-      </div>
-
-      <div className="w-full border-t border-white/5 pt-12 flex flex-col md:flex-row justify-between items-center gap-6">
-        <div className="w-full md:w-1/3 flex justify-center md:justify-start">
-          <span className="font-mono text-[10px] opacity-40 uppercase tracking-widest text-center md:text-left">
-            &copy; 2026 VOIDWALLZ // DIGITAL DESIGN COLLECTIVE
-          </span>
-        </div>
-
-        <div className="w-full md:w-1/3 flex justify-center text-4xl md:text-5xl font-serif italic font-light tracking-tighter opacity-20 select-none">
-          voidwallz
-        </div>
-
-        <div className="w-full md:w-1/3 flex justify-center md:justify-end">
-          <motion.div
-            className="relative w-16 h-16 opacity-20 hover:opacity-60 transition-opacity cursor-pointer delay-75"
-            whileHover={{ scale: 1.05 }}
-          >
-            {/* Desktop frame */}
-            <div className="absolute top-0 right-0 w-12 h-10 border border-current rounded-sm">
-              <div className="absolute inset-x-0 bottom-0 h-2 border-t border-current flex items-center justify-center">
-                <div className="w-2 h-[1px] bg-current"></div>
-              </div>
-            </div>
-            {/* Phone frame */}
-            <div className="absolute bottom-0 left-0 w-8 h-12 border border-current rounded-sm bg-void-black"></div>
-
-            {/* Abstract shapes / artwork */}
-            <motion.div
-              className="absolute top-2 left-2 w-6 h-6 border border-current rounded-full"
-              style={{ clipPath: "polygon(0 0, 100% 0, 100% 50%, 0 50%)" }}
-              animate={{ rotate: 360 }}
-              transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-            />
-            <motion.div
-              className="absolute bottom-2 left-4 w-4 h-4 rounded-full bg-current"
-              animate={{ y: [0, -4, 0], scale: [1, 1.1, 1] }}
-              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-            />
-          </motion.div>
-        </div>
-      </div>
-    </footer>
-  );
-}
-
 export default function App() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [hash, setHash] = useState(window.location.hash);
-  const [path, setPath] = useState(window.location.pathname);
+  const openDialogCount = useDialogCount();
+  const [showLoader, setShowLoader] = useState(true);
+  const { loading: wallpapersLoading } = useWallpapers();
+  const [hash, setHash] = useState(() => collectionLocation().hash);
+  const [path, setPath] = useState(() => collectionLocation().pathname);
+  const lastPath = useRef(window.location.pathname);
   const [atmosphereMode, setAtmosphereMode] = useState<"standard" | "oled" | "crt" | "noir">("standard");
   const [ambientImage, setAmbientImage] = useState<string | null>(null);
   const [selectedPack, setSelectedPack] = useState<VoidPack | null>(null);
@@ -1033,26 +172,54 @@ export default function App() {
 
   useEffect(() => {
     const handleLocationChange = () => {
-      setHash(window.location.hash);
-      setPath(window.location.pathname);
-      if (!window.location.hash) {
-        window.scrollTo(0, 0);
+      const previousPath = lastPath.current;
+      const nextPath = window.location.pathname;
+      lastPath.current = nextPath;
+      // A preview is an overlay: retain the collection, filters, and scroll position.
+      const previewReturn = WALLPAPER_ROUTE_PATTERN.test(previousPath);
+      const contentLocation = collectionLocation();
+      setHash(contentLocation.hash);
+      setPath(contentLocation.pathname);
+      if (!previewReturn && !WALLPAPER_ROUTE_PATTERN.test(nextPath) && nextPath !== previousPath && !window.location.hash) {
+        window.scrollTo({ top: 0, behavior: "instant" });
       }
     };
+    const handleWallpaperNavigation = () => { lastPath.current = window.location.pathname; };
 
     window.addEventListener("popstate", handleLocationChange);
     window.addEventListener("hashchange", handleLocationChange);
+    window.addEventListener("wallpaper-navigate", handleWallpaperNavigation);
 
     return () => {
       window.removeEventListener("popstate", handleLocationChange);
       window.removeEventListener("hashchange", handleLocationChange);
+      window.removeEventListener("wallpaper-navigate", handleWallpaperNavigation);
     };
   }, []);
+
+  useEffect(() => {
+    if (!hash || ["#desktop", "#phone", "#mobile"].includes(hash)) return;
+    let targetId: string;
+    try { targetId = decodeURIComponent(hash.slice(1)); } catch { return; }
+    const scroll = () => {
+      const target = document.getElementById(targetId);
+      if (!target) return false;
+      // During the exit animation the previous collection can have the same ID.
+      const expectedView = path === "/desktop" ? "desktop" : path === "/mobile" ? "phone" : "all";
+      if (targetId === "gallery" && target.getAttribute("data-collection-view") !== expectedView) return false;
+      target.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
+      return true;
+    };
+    const observer = new MutationObserver(() => { if (scroll()) observer.disconnect(); });
+    const frame = requestAnimationFrame(() => { if (!scroll()) observer.observe(document.getElementById("main-content") || document.body, { childList: true, subtree: true }); });
+    const timer = window.setTimeout(() => observer.disconnect(), 3000);
+    return () => { cancelAnimationFrame(frame); observer.disconnect(); clearTimeout(timer); };
+  }, [path, hash]);
 
   // Per-route document title + link-preview metadata (wallpaper detail
   // routes manage their own meta in WallpaperRouteManager)
   useEffect(() => {
-    if (WALLPAPER_ROUTE_PATTERN.test(path)) return;
+    if (WALLPAPER_ROUTE_PATTERN.test(window.location.pathname)) return;
     const meta = STATIC_META[path] ?? {
       title: "Page Not Found | Voidwallz",
       description: "This coordinate doesn't map to anything in the archive.",
@@ -1123,6 +290,32 @@ export default function App() {
           exit={{ opacity: 0 }}
         >
           <UpdatesPage />
+        </motion.div>
+      );
+    }
+
+    if (path === "/login") {
+      return (
+        <motion.div
+          key="login"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        >
+          <AuthPage initialMode="signin" />
+        </motion.div>
+      );
+    }
+
+    if (path === "/signup" || path === "/trial") {
+      return (
+        <motion.div
+          key="signup"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        >
+          <AuthPage initialMode="signup" />
         </motion.div>
       );
     }
@@ -1213,27 +406,36 @@ export default function App() {
         <Hero
           onOpenModal={navigateToWallpaper}
           isOledOptimized={isOledOptimized}
+          introReady={!showLoader}
         />
-        <Marquee />
+        <KineticRibbon />
         <LatestUploads
           onOpenModal={navigateToWallpaper}
           isOledOptimized={isOledOptimized}
           onHoverWallpaper={setAmbientImage}
         />
+        <ScreenStatement />
         <Gallery
           onOpenModal={navigateToWallpaper}
           isOledOptimized={isOledOptimized}
           onHoverWallpaper={setAmbientImage}
         />
-        <Manifesto />
       </motion.div>
     );
   };
 
   return (
     <VisualEffectsProvider>
+    <AnimatePresence onExitComplete={() => {
+      const dialog = document.querySelector<HTMLElement>('[role="dialog"]');
+      const target = dialog?.querySelector<HTMLElement>("button") ?? document.getElementById("main-content");
+      target?.focus({ preventScroll: true });
+    }}>
+      {showLoader && <Loader ready={!wallpapersLoading} onComplete={() => setShowLoader(false)} />}
+    </AnimatePresence>
     <div
-      className={`no-cursor bg-void-black min-h-screen text-void-light overflow-x-hidden selection:bg-white selection:text-black relative atmosphere-${atmosphereMode} ${isOledOptimized ? "oled-mode" : ""}`}
+      inert={showLoader || openDialogCount > 0 || undefined}
+      className={`void-app min-h-screen overflow-x-clip relative atmosphere-${atmosphereMode} ${isOledOptimized ? "oled-mode" : ""}`}
     >
       <AnimatePresence>
         {ambientImage && !isOledOptimized && (
@@ -1251,24 +453,15 @@ export default function App() {
       {atmosphereMode === "crt" && <div className="crt-scanlines" />}
       {atmosphereMode === "noir" && <div className="noir-vignette" />}
 
-      <div className="film-grain" />
 
-      <div className="hidden md:block">
-        <Cursor />
-      </div>
-
-      <div className="fixed top-0 w-full h-px bg-gradient-to-r from-void-black via-white to-void-black opacity-30 z-[60]" />
-
-      <AnimatePresence mode="wait">
-        {isLoading && <Loader onComplete={() => setIsLoading(false)} />}
-      </AnimatePresence>
 
       <WallpaperRouteManager isOledOptimized={isOledOptimized} />
-      <PackModal
+      {selectedPack && <Suspense fallback={<div className="pack-pending" role="status">Preparing your pack… <button type="button" className="text-link" onClick={() => setSelectedPack(null)}>Cancel</button></div>}><PackModal
         selectedPack={selectedPack}
-        onClose={() => setSelectedPack(null)}
+        onClose={() => { setSelectedPack(null); if (window.location.pathname === "/packs" && window.location.hash) { window.history.replaceState(null, "", "/packs"); window.dispatchEvent(new Event("popstate")); } }}
         isOledOptimized={isOledOptimized}
-      />
+      /></Suspense>}
+      <AuthModal />
 
       <Navbar
         isOledOptimized={isOledOptimized}
@@ -1276,7 +469,7 @@ export default function App() {
         atmosphereMode={atmosphereMode}
         setAtmosphereMode={setAtmosphereMode}
       />
-      <AnimatePresence mode="wait">{renderContent()}</AnimatePresence>
+      <main id="main-content" tabIndex={-1} ><Suspense fallback={<div className="route-pending page-shell" role="status"><span className="micro-label">Finding your next view…</span></div>}><AnimatePresence mode="wait">{renderContent()}</AnimatePresence></Suspense></main>
       <Footer />
       <CookieConsent />
     </div>

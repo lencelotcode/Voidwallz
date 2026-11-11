@@ -115,7 +115,7 @@ export function useVoidPacks() {
         const storagePacks: VoidPack[] = [];
 
         // Process Desktop Packs from storage
-        const { data: desktopEntries } = await supabase.storage
+        const { data: desktopEntries, error: desktopError } = await supabase.storage
           .from(PACKS_BUCKET_NAME)
           .list(DESKTOP_PACKS_FOLDER);
 
@@ -214,7 +214,7 @@ export function useVoidPacks() {
         }
 
         // Process Mobile Packs from storage
-        const { data: mobileEntries } = await supabase.storage
+        const { data: mobileEntries, error: mobileError } = await supabase.storage
           .from(PACKS_BUCKET_NAME)
           .list(MOBILE_PACKS_FOLDER);
 
@@ -310,6 +310,7 @@ export function useVoidPacks() {
           }
         }
 
+        if (desktopError && mobileError && !storagePacks.length) throw new Error("The pack archive is currently unavailable.");
         broadcastPacks(storagePacks);
       } catch (err: any) {
         console.warn("Supabase void pack fetch error:", err);

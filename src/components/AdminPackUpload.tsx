@@ -206,7 +206,7 @@ export default function AdminPackUpload() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-void-black text-void-light flex items-center justify-center p-6 relative overflow-hidden">
+      <div className="vw-admin min-h-screen bg-void-black text-void-light flex items-center justify-center p-6 relative overflow-hidden">
         {/* Background ambient lighting */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60vw] h-[400px] bg-white/[0.02] blur-[160px] pointer-events-none rounded-full" />
 
@@ -220,11 +220,11 @@ export default function AdminPackUpload() {
           </div>
 
           <span className="text-[9px] font-mono uppercase tracking-[0.3em] text-white/40 block mb-2">
-            Restricted Protocol // Level 4
+            Voidwallz / Publishing studio
           </span>
-          <h2 className="text-2xl font-serif italic tracking-tight text-white mb-2">
-            Admin Authentication
-          </h2>
+          <h1 className="text-2xl font-serif italic tracking-tight text-white mb-2">
+            Studio access
+          </h1>
           <p className="text-xs text-white/50 mb-8 font-sans">
             Enter your private Voidwallz admin passkey to unlock the pack publishing studio.
           </p>
@@ -233,6 +233,7 @@ export default function AdminPackUpload() {
             <div>
               <input
                 type="password"
+                aria-label="Admin passkey"
                 placeholder="Enter Admin Passkey..."
                 value={inputPasskey}
                 onChange={(e) => {
@@ -258,7 +259,7 @@ export default function AdminPackUpload() {
               className="w-full py-3.5 bg-white text-black font-mono text-xs uppercase tracking-widest font-bold rounded hover:bg-white/90 transition-all flex items-center justify-center gap-2 shadow-lg"
             >
               <KeyRound size={14} />
-              Authenticate & Unlock
+              Open publishing studio
             </button>
           </form>
 
@@ -267,7 +268,7 @@ export default function AdminPackUpload() {
               onClick={() => handleNavigate("/")}
               className="text-[10px] font-mono uppercase tracking-widest text-white/40 hover:text-white transition-colors"
             >
-              ← Return to Main Terminal
+              ← Back to collection
             </button>
           </div>
         </motion.div>
@@ -276,7 +277,7 @@ export default function AdminPackUpload() {
   }
 
   return (
-    <div className="min-h-screen bg-void-black text-void-light pt-24 sm:pt-28 pb-20 sm:pb-32 px-4 sm:px-6 md:px-10 relative overflow-hidden">
+    <div className="vw-admin min-h-screen bg-void-black text-void-light pt-24 sm:pt-28 pb-20 sm:pb-32 px-4 sm:px-6 md:px-10 relative overflow-hidden">
       {/* Ambient background glow */}
       <div className="absolute top-20 left-1/2 -translate-x-1/2 w-[60vw] h-[400px] bg-white/[0.02] blur-[160px] pointer-events-none rounded-full" />
 
@@ -306,20 +307,20 @@ export default function AdminPackUpload() {
             <div className="flex items-center gap-2.5 mb-3">
               <span className="w-2 h-2 rounded-full bg-blue-400 shadow-[0_0_8px_rgba(96,165,250,0.8)] animate-pulse" />
               <span className="text-[10px] font-mono uppercase tracking-[0.3em] text-white/50">
-                Command Terminal // Pack Studio
+                Voidwallz / Publishing studio
               </span>
             </div>
             <h1 className="text-4xl md:text-5xl font-serif italic tracking-tighter text-white">
-              Upload Void Pack_
+              PUBLISH A PACK.
             </h1>
             <p className="text-sm text-white/50 max-w-xl mt-2 font-sans">
-              Create and publish a 5-piece wallpaper capsule in one single step. Files are uploaded directly to your Supabase cloud.
+              Add up to five wallpapers, preview the collection, and publish it to Voidwallz.
             </p>
           </div>
 
           <div className="spec-badge text-[10px] font-mono px-3 py-1.5 rounded-full text-white/80 tracking-widest flex items-center gap-2">
             <Sparkles size={12} />
-            AUTO-GROUPING ENGINE ACTIVE
+            PACK PUBLISHING
           </div>
         </div>
 
@@ -356,12 +357,13 @@ export default function AdminPackUpload() {
             {/* Title & Target Device */}
             <div className="space-y-4">
               <div>
-                <label className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/50 block mb-2">
+                <label htmlFor="pack-title" className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/50 block mb-2">
                   Pack Title *
                 </label>
                 <input
                   type="text"
                   placeholder="e.g. CYBER ABYSS"
+                  id="pack-title"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   className="w-full bg-black/60 border border-white/10 rounded px-4 py-3 text-sm font-mono text-white placeholder-white/20 focus:outline-none focus:border-white/40 transition-colors"
@@ -370,19 +372,20 @@ export default function AdminPackUpload() {
               </div>
 
               <div>
-                <label className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/50 block mb-2">
+                <label htmlFor="pack-description" className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/50 block mb-2">
                   Tagline / Description
                 </label>
                 <input
                   type="text"
                   placeholder="e.g. 5-piece synthetic luminescent horizons & dystopian neon."
+                  id="pack-description"
                   value={tagline}
                   onChange={(e) => setTagline(e.target.value)}
                   className="w-full bg-black/60 border border-white/10 rounded px-4 py-3 text-sm text-white placeholder-white/20 focus:outline-none focus:border-white/40 transition-colors font-sans"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/50 block mb-2">
                     Device Ecosystem
@@ -390,6 +393,7 @@ export default function AdminPackUpload() {
                   <div className="grid grid-cols-2 gap-2">
                     <button
                       type="button"
+                      aria-pressed={device === "desktop"}
                       onClick={() => setDevice("desktop")}
                       className={`py-2.5 text-[10px] font-mono uppercase tracking-wider rounded border transition-all flex items-center justify-center gap-1.5 ${
                         device === "desktop"
@@ -402,6 +406,7 @@ export default function AdminPackUpload() {
                     </button>
                     <button
                       type="button"
+                      aria-pressed={device === "mobile"}
                       onClick={() => setDevice("mobile")}
                       className={`py-2.5 text-[10px] font-mono uppercase tracking-wider rounded border transition-all flex items-center justify-center gap-1.5 ${
                         device === "mobile"
@@ -416,10 +421,11 @@ export default function AdminPackUpload() {
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/50 block mb-2">
+                  <label htmlFor="pack-category" className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/50 block mb-2">
                     Category
                   </label>
                   <select
+                    id="pack-category"
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
                     className="w-full bg-black/60 border border-white/10 rounded px-3 py-2.5 text-[11px] font-mono text-white focus:outline-none focus:border-white/40 transition-colors"
@@ -439,9 +445,9 @@ export default function AdminPackUpload() {
             {/* File Dropzone */}
             <div>
               <label className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/50 block mb-2">
-                Select 5 Pack Wallpapers *
+                Wallpaper images *
               </label>
-              <div
+              <button type="button"
                 onClick={() => fileInputRef.current?.click()}
                 className="border-2 border-dashed border-white/15 hover:border-white/40 rounded-xl p-8 text-center cursor-pointer transition-all bg-black/40 group flex flex-col items-center justify-center gap-3"
               >
@@ -453,7 +459,7 @@ export default function AdminPackUpload() {
                     Click to select 1-5 wallpapers
                   </p>
                   <p className="text-[10px] text-white/40">
-                    Supports 8K/4K PNG, JPG, WebP, AVIF
+                    PNG, JPG, WebP and AVIF
                   </p>
                 </div>
                 {selectedFiles.length > 0 && (
@@ -461,8 +467,9 @@ export default function AdminPackUpload() {
                     ✓ {selectedFiles.length} files selected
                   </span>
                 )}
-              </div>
+              </button>
               <input
+                aria-label="Wallpaper images"
                 ref={fileInputRef}
                 type="file"
                 multiple
@@ -497,7 +504,7 @@ export default function AdminPackUpload() {
               {isUploading ? (
                 <>
                   <RefreshCw size={14} className="animate-spin" />
-                  Publishing Capsule...
+                  Publishing pack…
                 </>
               ) : (
                 <>
@@ -512,10 +519,10 @@ export default function AdminPackUpload() {
           <div className="lg:col-span-5 flex flex-col space-y-6">
             <div className="flex items-center justify-between">
               <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/40 block">
-                Live Card Mockup Preview
+                Collection preview
               </span>
               <span className="text-[9px] font-mono text-white/30">
-                {device === "desktop" ? "5-Slice Panorama" : "3D Phone Deck"}
+                {device === "desktop" ? "Desktop" : "Phone"}
               </span>
             </div>
 
@@ -558,7 +565,7 @@ export default function AdminPackUpload() {
                 )}
 
                 <span className="absolute top-3 left-3 text-[8px] font-mono bg-black/80 px-2 py-0.5 rounded text-white/70 border border-white/10">
-                  {selectedFiles.length || 5} PIECE PACK
+                  {selectedFiles.length} IMAGES
                 </span>
               </div>
 
@@ -595,6 +602,7 @@ export default function AdminPackUpload() {
                     <button
                       onClick={() => handleDeletePack(pack.id)}
                       className="p-1.5 text-red-400/60 hover:text-red-400 hover:bg-red-500/10 rounded transition-colors"
+                      aria-label={`Delete ${pack.title} pack`}
                       title="Delete Pack"
                     >
                       <Trash2 size={13} />

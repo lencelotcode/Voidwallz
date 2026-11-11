@@ -28,3 +28,16 @@ export interface VoidPack {
   items: Wallpaper[];
 }
 
+export type UserPlan = "free" | "pro_trial" | "pro";
+
+export interface UserProfile {
+  id: string;
+  email: string;
+  name?: string;
+  avatarUrl?: string;
+  plan?: UserPlan;
+  trialStartedAt?: string;
+  trialExpiresAt?: string;
+  createdAt: string;
+  isGuest?: boolean;
+}

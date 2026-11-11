@@ -1,7 +1,7 @@
 const SITE_NAME = "Voidwallz";
 const DEFAULT_TITLE = "Voidwallz | Wallpaper Beyond Reality";
 const DEFAULT_DESCRIPTION =
-  "Curated 8K, 4K & OLED minimalist wallpapers and packs engineered to elevate your digital workspace.";
+  "Find wallpapers and collections for your desktop and phone. Preview, save and download your next screen.";
 const DEFAULT_IMAGE = "https://voidwallz.live/og-image.png";
 
 export interface PageMeta {

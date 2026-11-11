@@ -1,110 +1,92 @@
-import { motion, AnimatePresence } from "motion/react";
-import { useEffect, useState } from "react";
+import BrandLogo from "./BrandLogo";
+import { motion } from "motion/react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { ArrowUpRight } from "lucide-react";
+import { useVisualEffects } from "../hooks/useVisualEffects";
+import { gsap } from "gsap";
 
-const loadingTextStates = [
-  "INITIALIZING NEURAL NET",
-  "CONNECTING TO CLUSTER",
-  "CACHING HIGH-RES ASSETS",
-  "PREPARING CANVAS",
-  "ALL NODES ACTIVE"
-];
-
-export default function Loader({ onComplete }: { onComplete: () => void }) {
-  const [progress, setProgress] = useState(0);
+export default function Loader({ ready = true, onComplete }: {
+  ready?: boolean;
+  onComplete: () => void;
+}) {
+  const { reduceMotion } = useVisualEffects();
+  const [introComplete, setIntroComplete] = useState(false);
+  const completed = useRef(false);
+  const onCompleteRef = useRef(onComplete);
+  const skipRef = useRef<HTMLButtonElement>(null);
+  const markRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(timer);
-          setTimeout(onComplete, 400);
-          return 100;
-        }
-        return prev + 4;
-      });
-    }, 18);
+    if (reduceMotion) return;
+    const context = gsap.context(() => {
+      gsap.fromTo(".void-loader-wordmark", { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.65, ease: "power3.out" });
+      gsap.fromTo(".void-loader-emblem", { scale: 0.9 }, { scale: 1, duration: 0.7, ease: "power3.out" });
+    }, markRef);
+    return () => context.revert();
+  }, [reduceMotion]);
 
-    return () => clearInterval(timer);
-  }, [onComplete]);
+  useEffect(() => { onCompleteRef.current = onComplete; }, [onComplete]);
 
-  // Determine text based on progress
-  const textIndex = Math.min(
-    Math.floor((progress / 100) * loadingTextStates.length),
-    loadingTextStates.length - 1
-  );
+  const finish = useCallback(() => {
+    if (completed.current) return;
+    completed.current = true;
+    onCompleteRef.current();
+  }, []);
+
+  useEffect(() => {
+    const minimum = window.setTimeout(() => setIntroComplete(true), reduceMotion ? 100 : 800);
+    // A slow connection must never trap visitors behind the introduction.
+    const maximum = window.setTimeout(finish, reduceMotion ? 1200 : 2400);
+    return () => { window.clearTimeout(minimum); window.clearTimeout(maximum); };
+  }, [finish, reduceMotion]);
+
+  useEffect(() => {
+    if (ready && introComplete) finish();
+  }, [ready, introComplete, finish]);
+
+  useEffect(() => {
+    // Keep this independent of the body locks used by wallpaper/account dialogs.
+    const previousOverflow = document.documentElement.style.overflow;
+    document.documentElement.style.overflow = "hidden";
+    skipRef.current?.focus({ preventScroll: true });
+    const handleKey = (event: KeyboardEvent) => {
+      if (event.key === "Tab") {
+        event.preventDefault();
+        skipRef.current?.focus({ preventScroll: true });
+      }
+      if (event.key === "Escape") {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        finish();
+      }
+    };
+    window.addEventListener("keydown", handleKey);
+    return () => {
+      document.documentElement.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", handleKey);
+    };
+  }, [finish]);
 
   return (
-    <motion.div
-      className="fixed inset-0 z-[1000] bg-void-black flex flex-col items-center justify-center overflow-hidden"
-      initial={{ opacity: 1 }}
-      exit={{ 
-        opacity: 0,
-        scale: 1.05,
-        transition: { duration: 0.8, ease: [0.76, 0, 0.24, 1] } 
-      }}
-    >
-      {/* Background ambient light */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80vw] h-[80vw] md:w-[40vw] md:h-[40vw] bg-white/5 blur-[100px] rounded-full pointer-events-none" />
-
-      {/* Giant Background Number */}
-      <motion.div 
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[30vw] font-mono font-bold text-white/[0.02] pointer-events-none select-none tracking-tighter"
-        initial={{ scale: 0.8, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 1, ease: "easeOut" }}
-      >
-        {progress}
-      </motion.div>
-
-      {/* Main Branding */}
-      <div className="relative z-10 flex flex-col items-center">
-        <div className="overflow-hidden mb-2">
-          <motion.h1 
-            className="font-mono uppercase text-4xl md:text-6xl font-bold tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-white via-white/80 to-white/40"
-            initial={{ y: "100%", opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.8, ease: [0.76, 0, 0.24, 1] }}
-          >
-            voidwallz
-          </motion.h1>
+    <motion.div className="void-loader" role="dialog" aria-modal="true" aria-label="Loading Voidwallz"
+      initial={{ opacity: 1 }} exit={{ opacity: 0, y: reduceMotion ? 0 : -12 }}
+      transition={{ duration: reduceMotion ? 0.1 : 0.32, ease: [0.22, 1, 0.36, 1] }}>
+      <div className="void-loader-top micro-label"><span>Voidwallz®</span><span>Loading the collection</span></div>
+      <div className="void-loader-center" ref={markRef}>
+        <div className="void-loader-emblem" aria-hidden="true">
+          <svg viewBox="0 0 200 200" className="void-loader-orbit" fill="none">
+            <circle cx="100" cy="100" r="83" stroke="currentColor" strokeOpacity="0.12" strokeWidth="0.75" />
+            <circle className="void-loader-arc" cx="100" cy="100" r="83" stroke="currentColor" strokeWidth="1" strokeDasharray="80 442" strokeLinecap="round" />
+            <path d="M100 8v9m0 166v9M8 100h9m166 0h9" stroke="currentColor" strokeOpacity="0.45" strokeWidth="1" />
+          </svg>
+          <BrandLogo variant="mark" className="vw-loader-brand" />
         </div>
-        
-        {/* Dynamic Loading Text */}
-        <div className="h-6 overflow-hidden mt-6">
-          <AnimatePresence mode="wait">
-            <motion.p
-              key={textIndex}
-              initial={{ y: 15, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: -15, opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              className="font-mono text-[10px] uppercase tracking-[0.3em] text-white/50"
-            >
-              {progress === 100 ? "ACCESS GRANTED" : loadingTextStates[textIndex]}
-            </motion.p>
-          </AnimatePresence>
-        </div>
+        <div className="void-loader-wordmark" aria-hidden="true">voidwallz<span>®</span></div>
+        <p className="void-loader-tagline">Wallpapers for desktop and phone.</p>
+        <div className="void-loader-status" role="status" aria-live="polite"><span className="status-dot" /><span>{ready ? "Your next view awaits" : "Finding your next view"}</span></div>
+        <div className="void-loader-line" aria-hidden="true"><span /></div>
       </div>
-
-      {/* Progress Bar Container */}
-      <div className="absolute bottom-12 md:bottom-16 left-1/2 -translate-x-1/2 w-48 md:w-64 h-px bg-white/10 overflow-hidden">
-        <motion.div 
-          className="h-full bg-white shadow-[0_0_10px_rgba(255,255,255,0.8)]"
-          initial={{ width: "0%" }}
-          animate={{ width: `${progress}%` }}
-          transition={{ ease: "linear", duration: 0.1 }}
-        />
-      </div>
-
-      {/* Progress Text overlaying bar slightly */}
-      <motion.div 
-        className="absolute bottom-16 md:bottom-20 font-mono text-[9px] text-white/40 tracking-widest"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.5 }}
-      >
-        {progress.toString().padStart(3, '0')}%
-      </motion.div>
+      <div className="void-loader-bottom"><span className="micro-label">Wallpaper beyond reality</span><button ref={skipRef} type="button" className="void-loader-skip" onClick={finish}>Skip intro <ArrowUpRight size={14} /></button></div>
     </motion.div>
   );
 }

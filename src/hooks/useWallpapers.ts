@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../lib/supabase";
 import type { Wallpaper } from "../types";
+import { bundledDesktop, bundledMobile } from "../data/featuredWallpapers";
 import { getBaseDownloads, getBaseLikes } from "./useWallpaperStats";
 
 export const BUCKET_NAME = "wallpapers";
@@ -29,148 +30,9 @@ interface UseWallpapersResult {
   reload: () => void;
 }
 
-// Fallback static data when Supabase is unavailable
-const fallbackDesktop: Wallpaper[] = [
-  {
-    id: "desktop-vortex-1",
-    title: "Vortex I",
-    serial: "ID: V-082",
-    category: "Minimal / Abstract",
-    format: "8K AVIF",
-    previewUrl:
-      "https://images.unsplash.com/photo-1604871000636-074fa5117945?auto=format&fit=crop&q=95&w=2880",
-    tinyUrl:
-      "https://images.unsplash.com/photo-1604871000636-074fa5117945?auto=format&fit=crop&q=20&w=50&h=50",
-    originalUrl:
-      "https://images.unsplash.com/photo-1604871000636-074fa5117945?auto=format&fit=crop&q=100&w=3840",
-    device: "desktop",
-    downloads: getBaseDownloads("desktop-vortex-1", "desktop"),
-    likes: getBaseLikes("desktop-vortex-1"),
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "desktop-angular-drift",
-    title: "Angular Drift",
-    serial: "ID: V-104",
-    category: "Dark / Geometry",
-    format: "8K WEBP",
-    previewUrl:
-      "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&q=95&w=2880",
-    tinyUrl:
-      "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&q=20&w=50&h=50",
-    originalUrl:
-      "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&q=100&w=3840",
-    device: "desktop",
-    downloads: getBaseDownloads("desktop-angular-drift", "desktop"),
-    likes: getBaseLikes("desktop-angular-drift"),
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "desktop-nested-void",
-    title: "Nested Void",
-    serial: "ID: V-211",
-    category: "Monochrome / Render",
-    format: "8K AVIF",
-    previewUrl:
-      "https://images.unsplash.com/photo-1518818419601-72c8673f5852?auto=format&fit=crop&q=95&w=2880",
-    tinyUrl:
-      "https://images.unsplash.com/photo-1518818419601-72c8673f5852?auto=format&fit=crop&q=20&w=50&h=50",
-    originalUrl:
-      "https://images.unsplash.com/photo-1518818419601-72c8673f5852?auto=format&fit=crop&q=100&w=3840",
-    device: "desktop",
-    downloads: getBaseDownloads("desktop-nested-void", "desktop"),
-    likes: getBaseLikes("desktop-nested-void"),
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "desktop-chrome-aesthetic",
-    title: "Chrome Aesthetic",
-    serial: "ID: V-310",
-    category: "3D / Silver",
-    format: "8K AVIF",
-    previewUrl:
-      "https://images.unsplash.com/photo-1634055627253-15df1f63fcb3?auto=format&fit=crop&q=95&w=2880",
-    tinyUrl:
-      "https://images.unsplash.com/photo-1634055627253-15df1f63fcb3?auto=format&fit=crop&q=20&w=50&h=50",
-    originalUrl:
-      "https://images.unsplash.com/photo-1634055627253-15df1f63fcb3?auto=format&fit=crop&q=100&w=3840",
-    device: "desktop",
-    downloads: getBaseDownloads("desktop-chrome-aesthetic", "desktop"),
-    likes: getBaseLikes("desktop-chrome-aesthetic"),
-    createdAt: new Date().toISOString(),
-  },
-];
-
-const fallbackMobile: Wallpaper[] = [
-  {
-    id: "mobile-singularity",
-    title: "Singularity",
-    serial: "ID: V-001",
-    category: "Dark / Space",
-    format: "4K MOBILE",
-    previewUrl:
-      "https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?auto=format&fit=crop&q=95&w=1440&h=2560",
-    tinyUrl:
-      "https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?auto=format&fit=crop&q=20&w=50&h=89",
-    originalUrl:
-      "https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?auto=format&fit=crop&q=100&w=2160&h=3840",
-    device: "mobile",
-    downloads: getBaseDownloads("mobile-singularity", "mobile"),
-    likes: getBaseLikes("mobile-singularity"),
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "mobile-obsidian-wave",
-    title: "Obsidian Wave",
-    serial: "ID: V-999",
-    category: "Liquid / Fluid",
-    format: "4K MOBILE",
-    previewUrl:
-      "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=95&w=1440&h=2560",
-    tinyUrl:
-      "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=20&w=50&h=89",
-    originalUrl:
-      "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=100&w=2160&h=3840",
-    device: "mobile",
-    downloads: getBaseDownloads("mobile-obsidian-wave", "mobile"),
-    likes: getBaseLikes("mobile-obsidian-wave"),
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "mobile-grain-matrix",
-    title: "Grain Matrix",
-    serial: "ID: V-402",
-    category: "Texture / Film",
-    format: "4K MOBILE",
-    previewUrl:
-      "https://images.unsplash.com/photo-1506443432602-ac2fcd6f54e0?auto=format&fit=crop&q=95&w=1440&h=2560",
-    tinyUrl:
-      "https://images.unsplash.com/photo-1506443432602-ac2fcd6f54e0?auto=format&fit=crop&q=20&w=50&h=89",
-    originalUrl:
-      "https://images.unsplash.com/photo-1506443432602-ac2fcd6f54e0?auto=format&fit=crop&q=100&w=2160&h=3840",
-    device: "mobile",
-    downloads: getBaseDownloads("mobile-grain-matrix", "mobile"),
-    likes: getBaseLikes("mobile-grain-matrix"),
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "mobile-void-aura",
-    title: "Void Aura",
-    serial: "ID: V-505",
-    category: "Gradient / Minimal",
-    format: "4K MOBILE",
-    previewUrl:
-      "https://images.unsplash.com/photo-1557672172-298e090bd0f1?auto=format&fit=crop&q=95&w=1440&h=2560",
-    tinyUrl:
-      "https://images.unsplash.com/photo-1557672172-298e090bd0f1?auto=format&fit=crop&q=20&w=50&h=89",
-    originalUrl:
-      "https://images.unsplash.com/photo-1557672172-298e090bd0f1?auto=format&fit=crop&q=100&w=2160&h=3840",
-    device: "mobile",
-    downloads: getBaseDownloads("mobile-void-aura", "mobile"),
-    likes: getBaseLikes("mobile-void-aura"),
-    createdAt: new Date().toISOString(),
-  },
-];
+// The bundled collection contains the owner's artwork, not stock placeholders.
+const fallbackDesktop = bundledDesktop;
+const fallbackMobile = bundledMobile;
 
 /**
  * Extract title and format from filename
@@ -278,6 +140,9 @@ let fetchPromise: Promise<void> | null = null;
 /**
  * Custom hook to fetch wallpapers from Supabase storage
  */
+let cachedIsFallback = false;
+let cachedError: string | null = null;
+
 export function useWallpapers(): UseWallpapersResult {
   const [desktopWallpapers, setDesktopWallpapers] = useState<Wallpaper[]>(
     cachedDesktopWallpapers || [],
@@ -296,6 +161,8 @@ export function useWallpapers(): UseWallpapersResult {
     cachedDesktopWallpapers = null;
     cachedMobileWallpapers = null;
     fetchPromise = null;
+    cachedIsFallback = false;
+    cachedError = null;
     setRefreshIndex((v) => v + 1);
   };
 
@@ -308,6 +175,8 @@ export function useWallpapers(): UseWallpapersResult {
         if (!cancelled) {
           setDesktopWallpapers(cachedDesktopWallpapers);
           setMobileWallpapers(cachedMobileWallpapers);
+          setIsUsingFallback(cachedIsFallback);
+          setError(cachedError);
           setLoading(false);
         }
         return;
@@ -317,6 +186,8 @@ export function useWallpapers(): UseWallpapersResult {
       if (!supabase) {
         console.warn("Supabase client is null - using fallback data");
         if (!cancelled) {
+          cachedIsFallback = true;
+          cachedError = "The full collection is unavailable.";
           cachedDesktopWallpapers = fallbackDesktop;
           cachedMobileWallpapers = fallbackMobile;
           setDesktopWallpapers(fallbackDesktop);
@@ -397,6 +268,8 @@ export function useWallpapers(): UseWallpapersResult {
                 mapFileToWallpaper(file, "mobile", index, mobileOriginalsSet),
               );
 
+            cachedIsFallback = false;
+            cachedError = null;
             cachedDesktopWallpapers = desktopResult;
             cachedMobileWallpapers = mobileResult;
           })();
@@ -428,10 +301,14 @@ export function useWallpapers(): UseWallpapersResult {
         console.error("Error fetching wallpapers from Supabase:", err);
         fetchPromise = null;
         if (!cancelled) {
-          setDesktopWallpapers([]);
-          setMobileWallpapers([]);
+          cachedDesktopWallpapers = fallbackDesktop;
+          cachedMobileWallpapers = fallbackMobile;
+          cachedIsFallback = true;
+          cachedError = "The full collection is unavailable.";
+          setDesktopWallpapers(fallbackDesktop);
+          setMobileWallpapers(fallbackMobile);
           setLoading(false);
-          setIsUsingFallback(false);
+          setIsUsingFallback(true);
           setError(
             err instanceof Error ? err.message : "Failed to fetch wallpapers",
           );

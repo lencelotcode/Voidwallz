@@ -3,13 +3,13 @@
 
 class SoundEngine {
   private ctx: AudioContext | null = null;
-  private isMuted: boolean = false;
+  private isMuted: boolean = true;
 
   constructor() {
     if (typeof window !== "undefined") {
       const stored = localStorage.getItem("voidwallz_sfx_muted");
-      // Default to unmuted (sound on) or restore user preference
-      this.isMuted = stored === "true";
+      // Sound is opt-in; preserve an existing explicit preference.
+      this.isMuted = stored !== "false";
     }
   }
 

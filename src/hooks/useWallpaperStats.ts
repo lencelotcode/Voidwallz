@@ -12,6 +12,7 @@ function hashString(str: string): number {
 
 // Deterministic baseline downloads (realistic high-fidelity metrics seeded by id)
 export function getBaseDownloads(id: string, device: "desktop" | "mobile" = "desktop"): number {
+  if (id?.startsWith("bundled-")) return 0;
   if (!id) return 2450;
   const seed = hashString(id);
   if (device === "desktop") {
@@ -25,6 +26,7 @@ export function getBaseDownloads(id: string, device: "desktop" | "mobile" = "des
 
 // Deterministic baseline likes (realistic appreciations seeded by id, ~6% to 11% of downloads)
 export function getBaseLikes(id: string): number {
+  if (id?.startsWith("bundled-")) return 0;
   if (!id) return 240;
   const seed = hashString(id);
   // Realistic like range: 180 to 740
@@ -79,37 +81,26 @@ export function useWallpaperStats() {
 
   // Record a real download (+1)
   const recordDownload = useCallback((id: string) => {
-    setDownloadMap((prev) => {
-      const current = prev[id] || 0;
-      const next = { ...prev, [id]: current + 1 };
-      try {
-        localStorage.setItem(DOWNLOADS_STORAGE_KEY, JSON.stringify(next));
-        window.dispatchEvent(new Event("wallpaper-stats-updated"));
-      } catch (err) {
-        console.error("Failed to save download to localStorage", err);
-      }
-      return next;
-    });
+    try {
+      const stored = JSON.parse(localStorage.getItem(DOWNLOADS_STORAGE_KEY) || "{}");
+      const next = { ...stored, [id]: (Number(stored[id]) || 0) + 1 };
+      localStorage.setItem(DOWNLOADS_STORAGE_KEY, JSON.stringify(next));
+      setDownloadMap(next);
+      window.dispatchEvent(new Event("wallpaper-stats-updated"));
+    } catch (error) { console.error("Failed to save download", error); }
   }, []);
 
-  // Toggle favorite / like (+1 / 0)
+  // Storage is the shared source across cards and dialogs. Keep side effects
+  // outside state updaters, which React may invoke more than once in StrictMode.
   const toggleFavorite = useCallback((id: string) => {
-    setFavorites((prev) => {
-      let next: string[];
-      if (prev.includes(id)) {
-        next = prev.filter((favId) => favId !== id);
-      } else {
-        next = [...prev, id];
-      }
-      try {
-        localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(next));
-        window.dispatchEvent(new Event("favorites-updated"));
-        window.dispatchEvent(new Event("wallpaper-stats-updated"));
-      } catch (err) {
-        console.error("Failed to save favorite to localStorage", err);
-      }
-      return next;
-    });
+    try {
+      const parsed = JSON.parse(localStorage.getItem(FAVORITES_STORAGE_KEY) || "[]");
+      const stored: string[] = Array.isArray(parsed) ? parsed : [];
+      const next = stored.includes(id) ? stored.filter((value) => value !== id) : [...stored, id];
+      localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(next));
+      setFavorites(next);
+      window.dispatchEvent(new Event("favorites-updated"));
+    } catch (error) { console.error("Failed to save favorite", error); }
   }, []);
 
   const isFavorite = useCallback(
