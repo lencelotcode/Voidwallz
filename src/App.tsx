@@ -13,7 +13,6 @@ import LatestUploads from "./components/LatestUploads";
 import Navbar from "./components/Navbar";
 import Loader from "./components/Loader";
 import WallpaperModal from "./components/WallpaperModal";
-import AuthModal from "./components/AuthModal";
 import { Wallpaper, VoidPack } from "./types";
 import { useWallpapers } from "./hooks/useWallpapers";
 import { VisualEffectsProvider } from "./hooks/useVisualEffects";
@@ -28,7 +27,6 @@ const VoidPacks = lazy(() => import("./components/VoidPacks"));
 const PackModal = lazy(() => import("./components/PackModal"));
 const ReportPage = lazy(() => import("./components/ReportPage"));
 const UpdatesPage = lazy(() => import("./components/UpdatesPage"));
-const AuthPage = lazy(() => import("./components/AuthPage"));
 const AdminPackUpload = lazy(() => import("./components/AdminPackUpload"));
 
 const KNOWN_PATHS = [
@@ -37,9 +35,6 @@ const KNOWN_PATHS = [
   "/desktop",
   "/mobile",
   "/updates",
-  "/login",
-  "/signup",
-  "/trial",
   "/privacy",
   "/terms",
   "/license",
@@ -56,9 +51,6 @@ const STATIC_META: Record<string, { title: string; description: string }> = {
   "/desktop": { title: "Desktop Wallpapers | Voidwallz", description: "Browse, save and download wallpapers for desktop and laptop screens. Preview the artwork before you download." },
   "/mobile": { title: "Phone Wallpapers | Voidwallz", description: "Browse portrait wallpapers for your phone. Preview the artwork and download the original image." },
   "/updates": { title: "Journal & Updates | Voidwallz", description: "A record of features, experiments and visual changes at Voidwallz." },
-  "/login": { title: "Sign In | Voidwallz", description: "Sign in to your Voidwallz account." },
-  "/signup": { title: "Create an Account | Voidwallz", description: "Create your Voidwallz account and explore the wallpaper collection." },
-  "/trial": { title: "Create an Account | Voidwallz", description: "Join Voidwallz and explore the wallpaper collection." },
   "/report": { title: "Report an Issue | Voidwallz", description: "Tell us about a problem with Voidwallz so we can help fix it." },
   "/privacy": { title: "Privacy Policy | Voidwallz", description: "How Voidwallz handles your information." },
   "/terms": { title: "Terms of Service | Voidwallz", description: "Terms for using Voidwallz and its wallpaper collection." },
@@ -288,30 +280,10 @@ export default function App() {
       );
     }
 
-    if (path === "/login") {
-      return (
-        <motion.div
-          key="login"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-        >
-          <AuthPage initialMode="signin" />
-        </motion.div>
-      );
-    }
-
-    if (path === "/signup" || path === "/trial") {
-      return (
-        <motion.div
-          key="signup"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-        >
-          <AuthPage initialMode="signup" />
-        </motion.div>
-      );
+    if (path === "/login" || path === "/signup" || path === "/trial") {
+      window.history.replaceState(null, "", "/");
+      window.dispatchEvent(new Event("popstate"));
+      return null;
     }
 
     if (isLegalPath(path)) {
@@ -435,7 +407,6 @@ export default function App() {
         onClose={() => { setSelectedPack(null); if (window.location.pathname === "/packs" && window.location.hash) { window.history.replaceState(null, "", "/packs"); window.dispatchEvent(new Event("popstate")); } }}
         isOledOptimized={isOledOptimized}
       /></Suspense>}
-      <AuthModal />
 
       <Navbar
         isOledOptimized={isOledOptimized}

@@ -6,7 +6,7 @@ import { ArrowUpRight } from "lucide-react";
 const groups = [
   { title: "Collection", links: [["Desktop", "/desktop"], ["Phone", "/mobile"], ["Wallpaper packs", "/packs"], ["Updates", "/updates"]] },
   { title: "Stay connected", links: [["Instagram", "https://www.instagram.com/voidwallz/"], ["X / Twitter", "https://x.com/voidwallz"], ["Discord", "https://discord.gg/xhWGaPp8H2"], ["Contact", "mailto:voidwallzbusiness@gmail.com"]] },
-  { title: "Information", links: [["Your account", "/login"], ["Image licence", "/license"], ["Report an issue", "/report"], ["Copyright", "/dmca"]] },
+  { title: "Information", links: [["Image licence", "/license"], ["Report an issue", "/report"], ["Copyright", "/dmca"]] },
 ];
 export default function Footer() {
   const { motionPaused, reduceMotion } = useVisualEffects();
