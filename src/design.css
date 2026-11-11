@@ -425,7 +425,7 @@ button:disabled { cursor: not-allowed; }
 .vw-document-body h2 { font-size: clamp(22px, 2.3vw, 30px); line-height: 1.2; font-weight: 750; letter-spacing: -.03em; margin-bottom: 20px; color: var(--ink); font-style: normal; }
 .vw-document-body h3 { font-size: 18px; font-weight: 650; color: var(--ink); }
 .vw-document-body [class*="text-white"] { color: var(--ink); }
-.vw-document-body [class*="bg-white"], .vw-document-body [class*="bg-black"] { background: var(--p-surface); border-radius: 0; }
+.vw-document-body [class*="bg-white"], .vw-document-body [class*="bg-black"] { background: color-mix(in srgb, var(--paper) 94%, var(--ink)); border-radius: 0; }
 .vw-document-body [class*="border-white"] { border-color: var(--line); }
 .vw-document-body p + p { margin-top: 16px; }
 .vw-document-body a { text-decoration: underline; text-underline-offset: 3px; overflow-wrap: anywhere; }
@@ -550,3 +550,13 @@ button:disabled { cursor: not-allowed; }
 /* Save and device controls sit above the image's loading layers. */
 .art-card-preview { position: relative; isolation: isolate; }
 .art-card-save, .art-card-device, .art-card-preview-label { z-index: 2; }
+
+/* Document callouts share the active paper/ink theme, including OLED mode. */
+.vw-document-body .vw-document-panel { padding: 24px; border: 1px solid var(--line); border-radius: 6px; background: color-mix(in srgb, var(--paper) 94%, var(--ink)); color: var(--ink); font-size: 14px; line-height: 1.8; }
+.vw-document-body .vw-license-rules { margin-top: 24px; }
+.vw-license-rules > div + div { margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--line); }
+.vw-document-body .vw-license-rules h3 { font-size: 13px; line-height: 1.5; letter-spacing: .045em; color: var(--ink); }
+.vw-license-rules h3 > span { display: inline-grid; place-items: center; width: 24px; height: 24px; background: var(--ink); color: var(--paper); flex-shrink: 0; }
+.vw-license-rules > div:first-child h3 > span { background: #c8ff00; color: #10110e; }
+.vw-document-body .vw-license-rules ul { font-family: var(--font-text); font-size: 14px; line-height: 1.8; color: var(--ink); }
+@media (max-width: 639px) { .vw-document-body .vw-document-panel { padding: 20px; } }

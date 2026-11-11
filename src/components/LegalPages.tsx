@@ -134,7 +134,7 @@ export function TermsOfService() {
 
       <section className="space-y-3">
         <h2 className="text-white text-xl font-serif italic">5. Warranty Disclaimer</h2>
-        <div className="p-4 rounded-lg bg-white/5 border border-white/10 font-mono text-xs text-white/80 leading-relaxed">
+        <div className="vw-document-panel">
           THE PLATFORM AND ALL DIGITAL ASSETS ARE PROVIDED STRICTLY ON AN "AS IS" AND "AS AVAILABLE" BASIS, WITHOUT WARRANTIES OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR FREEDOM FROM INTERRUPTIONS OR ERRORS.
         </div>
       </section>
@@ -161,7 +161,7 @@ export function License() {
           Every master wallpaper asset downloaded from Voidwallz is licensed to you under a non-exclusive, non-transferable, revocable <strong>Personal Digital Display License</strong>.
         </p>
 
-        <div className="bg-[#0c0c0c] border border-white/10 rounded-xl p-6 font-mono text-xs mt-6 space-y-6">
+        <div className="vw-document-panel vw-license-rules">
           <div>
             <h3 className="text-emerald-400 uppercase tracking-widest text-[10px] font-bold mb-3 flex items-center gap-1.5">
               <span>✓</span> Authorized Personal Uses:
@@ -308,7 +308,7 @@ export function DMCAPolicy() {
         <p>
           If you are a copyright owner or an authorized agent thereof and believe that any content hosted on Voidwallz infringes upon your copyright, please transmit a formal written notice containing the following statutory elements:
         </p>
-        <div className="bg-white/5 border border-white/10 rounded-xl p-6 font-mono text-xs space-y-3 text-white/80">
+        <div className="vw-document-panel space-y-3">
           <p>1. <strong>Physical or electronic signature</strong> of a person authorized to act on behalf of the copyright owner.</p>
           <p>2. <strong>Identification of the copyrighted work</strong> claimed to have been infringed (e.g., direct portfolio URL or copyright registration certificate).</p>
           <p>3. <strong>Identification of the infringing material</strong> on Voidwallz (specific wallpaper URL or unique serial identifier like <code>ID: V-142</code>).</p>
@@ -321,7 +321,7 @@ export function DMCAPolicy() {
       <section className="space-y-3">
         <h2 className="text-white text-xl font-serif italic">3. Designated Copyright Agent</h2>
         <p>Please deliver formal copyright notices directly to our designated DMCA Agent:</p>
-        <div className="p-4 rounded-lg bg-[#0c0c0c] border border-white/15 font-mono text-xs text-white/90">
+        <div className="vw-document-panel">
           <p className="font-bold text-white">DMCA Compliance Agent // Voidwallz Legal</p>
           <p>Electronic Mail: <a href="mailto:voidwallzbusiness@gmail.com" className="text-white underline">voidwallzbusiness@gmail.com</a></p>
           <p className="text-white/40 mt-2 text-[10px]">Turnaround Commitment: We review and action verified takedown notices within 24 to 48 business hours.</p>
