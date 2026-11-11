@@ -6,7 +6,7 @@ interface WallpaperHistoryState {
   wallpaperReturnUrl: string;
 }
 
-export function wallpaperUrl(wallpaper: Wallpaper) {
+export function wallpaperUrl(wallpaper: Pick<Wallpaper, "device" | "title">) {
   return `/${wallpaper.device}/${encodeURIComponent(wallpaper.title.toLowerCase().replace(/\s+/g, "-"))}/`;
 }
 

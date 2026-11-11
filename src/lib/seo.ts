@@ -1,3 +1,5 @@
+import { canonicalUrl } from "./siteUrls";
+
 const SITE_NAME = "Voidwallz";
 const DEFAULT_TITLE = "Voidwallz | Wallpaper Beyond Reality";
 const DEFAULT_DESCRIPTION =
@@ -37,6 +39,13 @@ export function setPageMeta({
   if (typeof document === "undefined") return;
 
   document.title = title;
+  let canonical = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]');
+  if (!canonical) {
+    canonical = document.createElement("link");
+    canonical.rel = "canonical";
+    document.head.appendChild(canonical);
+  }
+  canonical.href = canonicalUrl(url ?? window.location.href);
   upsertMeta("name", "description", description);
   upsertMeta("property", "og:title", title);
   upsertMeta("property", "og:description", description);

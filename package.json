@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite --port=3000 --host=0.0.0.0",
-    "build": "vite build",
+    "build": "npm run sitemap && vite build",
+    "sitemap": "node --import tsx scripts/generate-sitemap.ts",
+    "test:sitemap": "node --import tsx --test scripts/sitemap.test.ts",
     "preview": "vite preview",
     "clean": "rm -rf dist",
     "lint": "tsc --noEmit"
