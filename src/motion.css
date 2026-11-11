@@ -82,13 +82,6 @@
 .vw-device-image > img { width: 100%; height: 100%; object-fit: cover; }
 .vw-phone { height: 100%; max-height: 520px; max-width: 100%; aspect-ratio: 9 / 19.5; padding: 7px; border: 1px solid #7d8179; border-radius: 38px; background: linear-gradient(100deg,#22251f,#565951 40%,#1b1e18 65%,#3a3e35); box-shadow: 0 22px 40px -14px #101b184d, 0 4px 8px #10110e12, inset 0 0 0 2px #11150f; }
 .vw-phone .vw-device-screen { border-radius: 30px; }
-.vw-phone-ui { position: absolute; inset: 0; color: white; pointer-events: none; background: linear-gradient(#0002, transparent 45%); text-shadow: 0 1px 12px #0004; }
-.vw-phone-status { position: absolute; top: 12px; left: 15px; right: 13px; display: flex; align-items: center; justify-content: space-between; font-size: 9px; font-weight: 650; }
-.vw-phone-status > span:last-child { display: flex; align-items: center; gap: 3px; }
-.vw-phone-island { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); width: 29%; height: 16px; background: #10110e; border-radius: 30px; }
-.vw-phone-clock { position: absolute; top: 15%; width: 100%; text-align: center; font-size: clamp(34px, 4vw, 58px); line-height: 1; letter-spacing: -.06em; font-weight: 500; }
-.vw-phone-clock > span { display: block; font-size: 9px; line-height: 1.4; letter-spacing: 0; font-weight: 400; margin-top: 10px; }
-.vw-phone-home { position: absolute; left: 33%; width: 34%; height: 4px; border-radius: 4px; bottom: 8px; background: white; }
 .vw-phone-volume, .vw-phone-power { position: absolute; top: 23%; left: -3px; height: 12%; width: 2px; background: #686e60; border-radius: 2px 0 0 2px; }
 .vw-phone-power { left: auto; right: -3px; top: 31%; height: 15%; border-radius: 0 2px 2px 0; }
 .vw-monitor { width: min(100%, calc((100dvh - 350px) * 16 / 9)); max-height: calc(100% - 24px); aspect-ratio: 16 / 9; padding: 7px 7px 20px; background: linear-gradient(120deg,#363b30,#151912); border: 1px solid #4f5846; border-radius: 10px; box-shadow: 0 22px 36px -20px #101b1866, inset 0 0 0 1px #10110e; }
@@ -122,9 +115,6 @@
   .vw-artwork-stage.is-phone { height: 430px; padding: 26px 12px 42px; }
   .vw-phone { border-radius: 31px; padding: 6px; }
   .vw-phone .vw-device-screen { inset: 6px; border-radius: 25px; clip-path: inset(0 round 25px); }
-  .vw-phone-clock { font-size: 45px; }
-  .vw-phone-status { left: 10px; right: 8px; top: 10px; font-size: 8px; }
-  .vw-phone-island { height: 13px; }
   .vw-monitor { width: min(100%, 500px); }
   .vw-detail-tools .segmented-control > button { font-size: 11px; padding-inline: 12px; }
   .vw-heading-graphic { width: 95px; top: -8px; right: -8px; opacity: .3; }
@@ -155,8 +145,6 @@ html[data-motion-state="paused"] *, html[data-motion-state="paused"] *::before, 
 .vw-stage-motion { position: absolute; bottom: 0; right: 0; z-index: 3; color: #5d6654; border-radius: 50%; }
 .vw-stage-note { padding-inline: 30px; }
 html[data-motion-state="paused"] .vw-device, html[data-motion-state="paused"] .art-card, html[data-motion-state="paused"] .vw-button { transform: none !important; }
-/* Artwork loading layers stay below the simulated phone controls. */
-.vw-phone-ui { z-index: 2; }
 
 .vw-kinetic-ribbon[data-running="false"] > div { animation-play-state: paused; }
 .vw-account-poster > .vw-account-graphic { margin: 0; }

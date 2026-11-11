@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef } from "react";
 import { gsap } from "gsap";
-import { BatteryFull, Pause, Play, Signal, Wifi } from "lucide-react";
+import { Pause, Play } from "lucide-react";
 import { Wallpaper } from "../types";
 import { useVisualEffects } from "../hooks/useVisualEffects";
 import OptimizedImage from "./OptimizedImage";
@@ -23,7 +23,6 @@ export default function ArtworkStage({ wallpaper, mode, isOledOptimized = false 
     <MotionGraphic variant={screen ? (phone ? "phone-preview" : "desktop-preview") : "artwork"} className="vw-stage-graphic" />
     <div className="vw-device-entrance"><div className={`vw-device ${screen ? (phone ? "vw-phone" : "vw-monitor") : "vw-original-art"}`}>
       <div className="vw-device-screen"><OptimizedImage src={wallpaper.previewUrl} placeholder={wallpaper.tinyUrl} fallbackSrc={wallpaper.fallbackUrl} alt={wallpaper.title} priority containerClassName="vw-device-image" className={isOledOptimized ? "oled-image" : ""} />
-        {phone && screen && <div className="vw-phone-ui" aria-hidden="true"><div className="vw-phone-status"><span>9:41</span><span><Signal size={12} /><Wifi size={12} /><BatteryFull size={16} /></span></div><span className="vw-phone-island" /><div className="vw-phone-clock">9:41<span>Make room for a new view.</span></div><span className="vw-phone-home" /></div>}
       </div>
       {screen && !phone && <><span className="vw-monitor-chin" aria-hidden="true">VOIDWALLZ</span><span className="vw-monitor-stand" aria-hidden="true" /></>}
       {screen && phone && <><i className="vw-phone-volume" aria-hidden="true" /><i className="vw-phone-power" aria-hidden="true" /></>}
