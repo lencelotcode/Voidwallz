@@ -73,3 +73,10 @@ Open Graph image dimensions are omitted for artwork whose dimensions are unknown
 
 These are HTML shells with social metadata, not server-rendered gallery content.
 Pack overlays currently use URL fragments, so each pack shares the `/packs` card.
+
+Vercel's automatic `VITE_VERCEL_*` deployment variables can remain enabled.
+Vite's automatic environment prefix injection is disabled; the build explicitly
+exposes only `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`. Deployment metadata
+and server secrets stay out of browser JavaScript. Unexpected application
+`VITE_*` variables and privileged keys assigned to the public key still fail the
+production build, with variable names (never values) in the error.

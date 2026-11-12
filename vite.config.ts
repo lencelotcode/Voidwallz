@@ -7,6 +7,13 @@ import { defineConfig, loadEnv } from 'vite';
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, '.', '');
   return {
+    // Opt out of Vite's broad VITE_* injection. Only these two public gallery
+    // settings may reach the client, including when code reads import.meta.env.
+    envPrefix: [],
+    define: {
+      'import.meta.env.VITE_SUPABASE_URL': JSON.stringify(env.VITE_SUPABASE_URL || ''),
+      'import.meta.env.VITE_SUPABASE_ANON_KEY': JSON.stringify(env.VITE_SUPABASE_ANON_KEY || ''),
+    },
     plugins: [
       react(),
       tailwindcss(),
@@ -15,7 +22,9 @@ export default defineConfig(({ mode }) => {
         configResolved(config) {
           if (config.command !== 'build') return;
           const allowed = new Set(['VITE_SUPABASE_URL', 'VITE_SUPABASE_ANON_KEY']);
-          const exposed = Object.keys(env).filter(key => key.startsWith('VITE_') && !allowed.has(key));
+          // Vercel automatically provides VITE_VERCEL_* build metadata. Accept
+          // its presence without adding it to the browser's explicit allowlist.
+          const exposed = Object.keys(env).filter(key => key.startsWith('VITE_') && !key.startsWith('VITE_VERCEL_') && !allowed.has(key));
           if (exposed.length) throw new Error(`Unapproved browser environment variables: ${exposed.join(', ')}`);
           const publicKey = env.VITE_SUPABASE_ANON_KEY || '';
           if (publicKey.startsWith('sb_secret_')) throw new Error('A server secret was assigned to the public Supabase key.');

@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import test, { before, beforeEach, afterEach } from "node:test";
-import { readFile } from "node:fs/promises";
+import { mkdtemp, readFile, readdir, realpath, rm, writeFile } from "node:fs/promises";
 import { spawnSync } from "node:child_process";
+import { join } from "node:path";
+import { tmpdir } from "node:os";
+import { fileURLToPath } from "node:url";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import report from "../api/report";
@@ -232,5 +235,49 @@ test("production build refuses unapproved browser secrets and privileged Supabas
     });
     const output = result.stdout + result.stderr;
     assert.notEqual(result.status,0); assert.ok(output.includes(expected)); assert.ok(!output.includes(forbidden));
+  }
+});
+
+test("Vercel metadata permits a production build while only approved public settings reach the browser", async () => {
+  const fixture = await realpath(await mkdtemp(join(tmpdir(), "voidwallz-vercel-env-")));
+  try {
+    await writeFile(join(fixture, "index.html"), '<!doctype html><div id="root"></div><script type="module" src="/main.ts"></script>');
+    await writeFile(join(fixture, "main.ts"), `document.getElementById("root").textContent = JSON.stringify({
+      all: import.meta.env,
+      publicUrl: import.meta.env.VITE_SUPABASE_URL,
+      publicKey: import.meta.env.VITE_SUPABASE_ANON_KEY,
+      deployment: import.meta.env.VITE_VERCEL_GIT_REPO_ID,
+      unknownMetadata: import.meta.env.VITE_VERCEL_TEST_SECRET,
+      serverSecret: import.meta.env.ADMIN_SESSION_SECRET,
+    });`);
+    const result = spawnSync(process.execPath, ["--input-type=module"], {
+      cwd: new URL("../", import.meta.url), encoding: "utf8",
+      input: `import { build } from "vite"; await build({
+        configFile: ${JSON.stringify(fileURLToPath(new URL("../vite.config.ts", import.meta.url)))},
+        root: ${JSON.stringify(fixture)}, publicDir: false, logLevel: "silent",
+        build: { outDir: ${JSON.stringify(join(fixture, "dist"))}, emptyOutDir: true },
+      });`,
+      env: {
+        ...process.env,
+        VITE_SUPABASE_URL: "https://public-gallery-canary.supabase.co",
+        VITE_SUPABASE_ANON_KEY: "sb_publishable_public_gallery_canary",
+        VITE_VERCEL_ENV: "production",
+        VITE_VERCEL_GIT_REPO_ID: "vercel-repo-metadata-canary",
+        VITE_VERCEL_GIT_PULL_REQUEST_ID: "vercel-pr-metadata-canary",
+        VITE_VERCEL_URL: "deployment-preview-canary.vercel.app",
+        VITE_VERCEL_TEST_SECRET: "metadata-namespace-private-canary",
+        ADMIN_SESSION_SECRET: "private-session-build-canary-at-least-32-chars",
+      },
+    });
+    assert.equal(result.status, 0, `Build with Vercel-provided metadata must succeed. ${result.stderr.slice(0, 1400)}`);
+    const assets = await readdir(join(fixture, "dist/assets"));
+    const javascript = (await Promise.all(assets.filter(file => file.endsWith(".js")).map(file => readFile(join(fixture, "dist/assets", file), "utf8")))).join("\n");
+    assert.ok(javascript.includes("https://public-gallery-canary.supabase.co"));
+    assert.ok(javascript.includes("sb_publishable_public_gallery_canary"));
+    for (const value of ["vercel-repo-metadata-canary", "vercel-pr-metadata-canary", "deployment-preview-canary.vercel.app", "metadata-namespace-private-canary", "private-session-build-canary-at-least-32-chars"]) {
+      assert.equal(javascript.includes(value), false, "Non-public settings must not enter browser JavaScript.");
+    }
+  } finally {
+    await rm(fixture, { recursive: true, force: true });
   }
 });
