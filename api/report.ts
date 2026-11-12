@@ -1,144 +1,59 @@
-export const config = {
-  runtime: "edge",
-};
+import { assertOrigin, clientKey, errorResponse, HttpError, json, logSecurity, readForm, textField } from "../server/security";
+import { rateLimit } from "../server/database";
+import { MAX_REPORT_IMAGE, validateImage } from "../server/uploads";
+export const config = { runtime: "edge" };
 
 export default async function handler(req: Request) {
-  if (req.method !== "POST") {
-    return new Response("Method Not Allowed", { status: 405 });
-  }
-
+  const requestId = crypto.randomUUID();
   try {
-    const formData = await req.formData();
-
-    const title = (formData.get("title") as string) || "";
-    const email = (formData.get("email") as string) || "";
-    const device = (formData.get("device") as string) || "";
-    const browser = (formData.get("browser") as string) || "";
-    const description = (formData.get("description") as string) || "";
-    const userAgent = (formData.get("userAgent") as string) || "";
-    const viewport = (formData.get("viewport") as string) || "";
-    const currentRoute = (formData.get("currentRoute") as string) || "";
-    const screenshot = formData.get("screenshot") as File | null;
-
-    const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
-
-    if (!webhookUrl) {
-      console.warn("DISCORD_WEBHOOK_URL is not set.");
-      // We still return success to frontend to test UI if webhook is missing
-      return new Response(
-        JSON.stringify({ success: true, warning: "Webhook not configured" }),
-        {
-          status: 200,
-          headers: { "Content-Type": "application/json" },
-        },
-      );
+    if (req.method !== "POST") return json({ error: "Method not allowed." }, 405, { Allow: "POST" });
+    assertOrigin(req);
+    const client = await clientKey(req);
+    await rateLimit(`report:${client}`, 3, 200);
+    const data = await readForm(req, MAX_REPORT_IMAGE + 20_000);
+    const title = textField(data.get("title"), "title", 3, 160);
+    const description = textField(data.get("description"), "description", 10, 3500);
+    const email = textField(data.get("email") || "", "email", 0, 254);
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new HttpError(400, "Invalid email.");
+    const device = textField(data.get("device"), "device", 1, 20);
+    const browser = textField(data.get("browser"), "browser", 1, 20);
+    if (!["desktop","mobile","other"].includes(device) || !["chrome","safari","firefox","edge","other"].includes(browser)) throw new HttpError(400, "Invalid device or browser.");
+    if (data.get("consent") !== "on") throw new HttpError(400, "Consent is required to submit a report.");
+    const userAgent = textField(data.get("userAgent") || "", "browser information", 0, 512);
+    const viewport = textField(data.get("viewport") || "", "viewport", 0, 24);
+    if (viewport && !/^\d{1,5}x\d{1,5}$/.test(viewport)) throw new HttpError(400, "Invalid viewport.");
+    let route = "/report";
+    if (data.get("currentRoute")) {
+      try { route = new URL(textField(data.get("currentRoute"), "page URL", 1, 2048)).pathname.slice(0,512); }
+      catch { throw new HttpError(400, "Invalid page URL."); }
     }
-
-    const hasScreenshot = screenshot && screenshot.size > 0;
-    const screenshotFilename = hasScreenshot
-      ? screenshot.name || "screenshot.png"
-      : undefined;
-
-    const basePayload: any = {
-      content: "🚨 **New VoidWallz Anomaly Report**",
-      embeds: [
-        {
-          title: title || "Untitled Report",
-          description: description || "No description provided.",
-          color: 0xff3344,
-          fields: [
-            { name: "Device", value: device || "Unknown", inline: true },
-            { name: "Browser", value: browser || "Unknown", inline: true },
-            { name: "Viewport", value: viewport || "Unknown", inline: true },
-            {
-              name: "Current Route",
-              value: currentRoute || "Unknown",
-              inline: false,
-            },
-            {
-              name: "User Agent",
-              value: userAgent || "Unknown",
-              inline: false,
-            },
-            { name: "Email", value: email || "Not provided", inline: false },
-          ],
-          timestamp: new Date().toISOString(),
-          ...(hasScreenshot && screenshotFilename
-            ? { image: { url: `attachment://${screenshotFilename}` } }
-            : {}),
-        },
-      ],
-      ...(hasScreenshot && screenshotFilename
-        ? {
-            attachments: [
-              {
-                id: 0,
-                filename: screenshotFilename,
-                description: "Anomaly Screenshot",
-              },
-            ],
-          }
-        : {}),
+    const screenshot = data.get("screenshot");
+    const image = screenshot instanceof File && screenshot.size ? await validateImage(screenshot, MAX_REPORT_IMAGE) : null;
+    const webhook = process.env.DISCORD_WEBHOOK_URL;
+    if (!webhook) throw new HttpError(503, "Report delivery is not configured. Please use the contact email.");
+    const target = new URL(webhook);
+    if (target.protocol !== "https:" || !["discord.com","discordapp.com"].includes(target.hostname) || !/^\/api\/webhooks\/\d+\/[A-Za-z0-9_-]+$/.test(target.pathname)) throw new HttpError(503, "Report delivery is not configured.");
+    const payload = {
+      content: "New Voidwallz issue report", allowed_mentions: { parse: [] },
+      embeds: [{ title, description, color: 0xc8ff00,
+        fields: [
+          { name: "Device", value: device, inline: true }, { name: "Browser", value: browser, inline: true },
+          { name: "Viewport", value: viewport || "Not provided", inline: true },
+          { name: "Page", value: route }, { name: "Browser information", value: userAgent || "Not provided" },
+          { name: "Reply email", value: email || "Not provided" }, { name: "Reference", value: requestId },
+        ], ...(image ? { image: { url: `attachment://screenshot.${image.ext}` } } : {}),
+      }],
     };
-
-    const buildFormData = (p: any) => {
-      const discordFormData = new FormData();
-      discordFormData.append("payload_json", JSON.stringify(p));
-      if (hasScreenshot && screenshot) {
-        discordFormData.append("files[0]", screenshot, screenshotFilename);
-      }
-      return discordFormData;
-    };
-
-    // First try payload without thread_name (compatible with regular text channels)
-    // If it's a forum channel, Discord returns 400 requiring thread_name.
-    // Or if thread_name is included, Discord returns 400 on standard text channels.
-    // We handle both dynamically:
-    const forumPayload = {
-      ...basePayload,
-      thread_name: title ? `Anomaly: ${title}` : "New Anomaly Report",
-    };
-
-    // Attempt standard text channel first (most common)
-    let discordResponse = await fetch(webhookUrl, {
-      method: "POST",
-      body: buildFormData(basePayload),
-    });
-
-    // If rejected with 400 because it's a forum channel requiring a thread
-    if (!discordResponse.ok && discordResponse.status === 400) {
-      const errorBody = await discordResponse.text();
-      if (
-        errorBody.includes("thread_name") ||
-        errorBody.includes("forum") ||
-        errorBody.includes("thread")
-      ) {
-        console.warn("Discord channel is forum channel, retrying with thread_name...");
-        discordResponse = await fetch(webhookUrl, {
-          method: "POST",
-          body: buildFormData(forumPayload),
-        });
-      } else {
-        console.error("Discord API error:", discordResponse.status, errorBody);
-        throw new Error(`Discord API error: ${errorBody}`);
-      }
+    async function deliver(forum = false) {
+      const form = new FormData();
+      form.append("payload_json", JSON.stringify({ ...payload, ...(forum ? { thread_name: title.slice(0,100) } : {}) }));
+      if (image) form.append("files[0]", new Blob([image.bytes], { type: image.mime }), `screenshot.${image.ext}`);
+      return fetch(target, { method: "POST", body: form, redirect: "error", signal: AbortSignal.timeout(8000) });
     }
-
-    if (!discordResponse.ok) {
-      const errorText = await discordResponse.text();
-      console.error("Discord API error:", discordResponse.status, errorText);
-      throw new Error(`Discord API error: ${errorText}`);
-    }
-
-    return new Response(JSON.stringify({ success: true }), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    });
-  } catch (error: any) {
-    console.error("API Route Error:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
-  }
+    let response = await deliver();
+    if (response.status === 400 && /thread_name/.test(await response.text())) response = await deliver(true);
+    if (!response.ok) throw new HttpError(502, "Report delivery failed. Please try later or use the contact email.");
+    logSecurity("report_accepted", { requestId, client });
+    return json({ success: true, requestId });
+  } catch (error) { return errorResponse(error, requestId); }
 }

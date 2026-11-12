@@ -1,619 +1,94 @@
-import { motion, AnimatePresence } from "motion/react";
-import React, { useState, useRef } from "react";
-import {
-  UploadCloud,
-  Layers,
-  Monitor,
-  Smartphone,
-  CheckCircle2,
-  AlertCircle,
-  Trash2,
-  ArrowLeft,
-  Sparkles,
-  RefreshCw,
-  FolderArchive,
-  Image as ImageIcon,
-} from "lucide-react";
-import { supabase } from "../lib/supabase";
-import { VoidPack } from "../types";
-import { useVoidPacks, PACKS_BUCKET_NAME } from "../hooks/useVoidPacks";
+import React, { useEffect, useRef, useState } from "react";
+import { ArrowLeft, Lock, LogOut, UploadCloud } from "lucide-react";
 
-import { Lock, KeyRound } from "lucide-react";
-
-const ADMIN_PASSKEY = import.meta.env.VITE_ADMIN_PASSKEY || "voidwallz2026";
-
+const CATEGORIES = ["Cyber / Synth", "Liquid / Fluid", "Dark / Geometry", "Space / OLED", "Noir / Chroma", "Minimal / Abstract", "Texture / Film"];
+const MAX_BYTES = 3 * 1024 * 1024;
 export default function AdminPackUpload() {
-  const { allPacks } = useVoidPacks();
-  const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    return sessionStorage.getItem("void_admin_authenticated") === "true";
-  });
-  const [inputPasskey, setInputPasskey] = useState("");
-  const [authError, setAuthError] = useState(false);
-
+  const [csrf, setCsrf] = useState<string | null>(null);
+  const [checking, setChecking] = useState(true);
+  const [password, setPassword] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState("");
   const [title, setTitle] = useState("");
   const [tagline, setTagline] = useState("");
-  const [category, setCategory] = useState("Cyber / Synth");
-  const [device, setDevice] = useState<"desktop" | "mobile">("desktop");
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  const [filePreviews, setFilePreviews] = useState<string[]>([]);
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [statusMessage, setStatusMessage] = useState<{
-    type: "success" | "error";
-    text: string;
-  } | null>(null);
-
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const handleAuthenticate = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (inputPasskey === ADMIN_PASSKEY) {
-      setIsAuthenticated(true);
-      sessionStorage.setItem("void_admin_authenticated", "true");
-      setAuthError(false);
-    } else {
-      setAuthError(true);
-      setInputPasskey("");
-    }
-  };
-
-  const handleLogout = () => {
-    setIsAuthenticated(false);
+  const [category, setCategory] = useState(CATEGORIES[0]);
+  const [device, setDevice] = useState("desktop");
+  const [files, setFiles] = useState<File[]>([]);
+  const [previews, setPreviews] = useState<string[]>([]);
+  const input = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    // The previous client-side flag has no authorization meaning.
     sessionStorage.removeItem("void_admin_authenticated");
-  };
-
-  const handleNavigate = (path: string) => {
-    window.history.pushState(null, "", path);
-    window.dispatchEvent(new Event("popstate"));
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files) return;
-    const files = (Array.from(e.target.files) as File[]).slice(0, 5); // Max 5 files
-    setSelectedFiles(files);
-
-    // Generate local previews
-    const previews = files.map((file) => URL.createObjectURL(file));
-    setFilePreviews(previews);
-  };
-
-  const handleUploadPack = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!title.trim()) {
-      setStatusMessage({ type: "error", text: "Please enter a Pack Title." });
-      return;
+    const controller = new AbortController();
+    fetch("/api/admin", { headers: { "X-Voidwallz-Request": "1" }, credentials: "same-origin", signal: controller.signal })
+      .then(async response => { if (response.ok) setCsrf((await response.json()).csrf); })
+      .catch(() => {}).finally(() => setChecking(false));
+    return () => controller.abort();
+  }, []);
+  useEffect(() => {
+    const urls = files.map(file => URL.createObjectURL(file)); setPreviews(urls);
+    return () => urls.forEach(url => URL.revokeObjectURL(url));
+  }, [files]);
+  async function request(action: string, body: BodyInit, jsonBody = false) {
+    const response = await fetch(`/api/admin?action=${action}`, { method: "POST", credentials: "same-origin", body,
+      headers: { "X-Voidwallz-Request": "1", ...(csrf ? { "X-CSRF-Token": csrf } : {}), ...(jsonBody ? { "Content-Type": "application/json" } : {}) } });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      if (response.status === 401) setCsrf(null);
+      throw new Error(response.status >= 500 ? "The publishing studio is temporarily unavailable. Please try later." : data.error || "The request could not be completed.");
     }
-    if (selectedFiles.length === 0) {
-      setStatusMessage({ type: "error", text: "Please select at least 1 image file (up to 5)." });
-      return;
-    }
-
-    if (!supabase) {
-      setStatusMessage({
-        type: "error",
-        text: "Supabase client is not connected. Make sure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are set in .env",
-      });
-      return;
-    }
-
-    setIsUploading(true);
-    setUploadProgress(10);
-    setStatusMessage(null);
-
-    try {
-      const cleanSlug = title.toLowerCase().replace(/[^a-z0-9]/g, "-").replace(/-+/g, "-");
-      const packId = `pack-${device}-${cleanSlug}-${Date.now()}`;
-      const serialNumber = `PACK: VP-${device === "desktop" ? "D" : "M"}${Math.floor(Math.random() * 900) + 100}`;
-      const folderPath = `packs/${device}/${packId}`;
-
-      const uploadedItems = [];
-
-      for (let i = 0; i < selectedFiles.length; i++) {
-        const file = selectedFiles[i];
-        const ext = file.name.split(".").pop() || "png";
-        const cleanFileName = `0${i + 1}_${file.name.replace(/[^a-zA-Z0-9]/g, "_")}.${ext}`;
-        const storagePath = `${folderPath}/${cleanFileName}`;
-
-        // Upload image to Supabase Storage
-        const { error: uploadError } = await supabase.storage
-          .from(PACKS_BUCKET_NAME)
-          .upload(storagePath, file, {
-            cacheControl: "3600",
-            upsert: true,
-          });
-
-        if (uploadError) throw uploadError;
-
-        // Get public CDN URL
-        const { data: urlData } = supabase.storage
-          .from(PACKS_BUCKET_NAME)
-          .getPublicUrl(storagePath);
-
-        const pubUrl = urlData.publicUrl;
-        const itemTitle = `${title} Part 0${i + 1}`;
-
-        uploadedItems.push({
-          id: `${packId}-part-${i + 1}`,
-          title: itemTitle,
-          serial: `ID: VP-${device === "desktop" ? "D" : "M"}${i + 1}`,
-          category,
-          format: device === "desktop" ? "8K AVIF" : "4K MOBILE",
-          downloads: Math.floor(Math.random() * 15000) + 5000,
-          previewUrl: pubUrl,
-          tinyUrl: pubUrl,
-          originalUrl: pubUrl,
-          device,
-        });
-
-        setUploadProgress(Math.floor(((i + 1) / selectedFiles.length) * 80) + 10);
-      }
-
-      // Save complete pack metadata to 'void_packs' table
-      const newPackRecord = {
-        id: packId,
-        title: title.toUpperCase(),
-        serial: serialNumber,
-        tagline: tagline || `Curated ${uploadedItems.length}-piece ${device} wallpaper capsule.`,
-        category,
-        device,
-        format: device === "desktop" ? "8K MASTER SUITE" : "4K RETINA DECK",
-        downloads: Math.floor(Math.random() * 30000) + 20000,
-        featured_image: uploadedItems[0]?.previewUrl || "",
-        items: uploadedItems,
-        created_at: new Date().toISOString(),
-      };
-
-      const { error: dbError } = await supabase.from("void_packs").insert([newPackRecord]);
-
-      if (dbError) {
-        console.warn("Table insert fallback: files saved in storage bucket", dbError);
-      }
-
-      setUploadProgress(100);
-      setStatusMessage({
-        type: "success",
-        text: `Void Pack "${title.toUpperCase()}" published successfully with ${uploadedItems.length} wallpapers!`,
-      });
-
-      // Reset form
-      setTitle("");
-      setTagline("");
-      setSelectedFiles([]);
-      setFilePreviews([]);
-      if (fileInputRef.current) fileInputRef.current.value = "";
-    } catch (err: any) {
-      console.error("Pack upload failed:", err);
-      setStatusMessage({
-        type: "error",
-        text: err.message || "Failed to upload pack. Please verify storage permissions in Supabase.",
-      });
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
-  const handleDeletePack = async (packId: string) => {
-    if (!confirm("Are you sure you want to delete this Void Pack?")) return;
-    if (!supabase) return;
-
-    try {
-      await supabase.from("void_packs").delete().eq("id", packId);
-      window.location.reload();
-    } catch (err: any) {
-      alert("Delete error: " + err.message);
-    }
-  };
-
-  if (!isAuthenticated) {
-    return (
-      <div className="vw-admin min-h-screen bg-void-black text-void-light flex items-center justify-center p-6 relative overflow-hidden">
-        {/* Background ambient lighting */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60vw] h-[400px] bg-white/[0.02] blur-[160px] pointer-events-none rounded-full" />
-
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="w-full max-w-md bg-void-raised border border-white/10 p-8 rounded-2xl luxury-border-glow shadow-2xl relative z-10 text-center"
-        >
-          <div className="w-14 h-14 rounded-full luxury-glass mx-auto flex items-center justify-center mb-6 text-white/80">
-            <Lock size={24} />
-          </div>
-
-          <span className="text-[9px] font-mono uppercase tracking-[0.3em] text-white/40 block mb-2">
-            Voidwallz / Publishing studio
-          </span>
-          <h1 className="text-2xl font-serif italic tracking-tight text-white mb-2">
-            Studio access
-          </h1>
-          <p className="text-xs text-white/50 mb-8 font-sans">
-            Enter your private Voidwallz admin passkey to unlock the pack publishing studio.
-          </p>
-
-          <form onSubmit={handleAuthenticate} className="space-y-4">
-            <div>
-              <input
-                type="password"
-                aria-label="Admin passkey"
-                placeholder="Enter Admin Passkey..."
-                value={inputPasskey}
-                onChange={(e) => {
-                  setInputPasskey(e.target.value);
-                  setAuthError(false);
-                }}
-                className={`w-full bg-black/60 border rounded px-4 py-3 text-center text-sm font-mono text-white placeholder-white/20 focus:outline-none transition-colors ${
-                  authError
-                    ? "border-red-500/60 shadow-[0_0_15px_rgba(239,68,68,0.3)]"
-                    : "border-white/15 focus:border-white/40"
-                }`}
-                autoFocus
-              />
-              {authError && (
-                <span className="text-[10px] font-mono text-red-400 mt-2 block">
-                  Invalid Passkey. Access Denied.
-                </span>
-              )}
-            </div>
-
-            <button
-              type="submit"
-              className="w-full py-3.5 bg-white text-black font-mono text-xs uppercase tracking-widest font-bold rounded hover:bg-white/90 transition-all flex items-center justify-center gap-2 shadow-lg"
-            >
-              <KeyRound size={14} />
-              Open publishing studio
-            </button>
-          </form>
-
-          <div className="mt-8 pt-4 border-t border-white/5 flex justify-center">
-            <button
-              onClick={() => handleNavigate("/")}
-              className="text-[10px] font-mono uppercase tracking-widest text-white/40 hover:text-white transition-colors"
-            >
-              ← Back to collection
-            </button>
-          </div>
-        </motion.div>
-      </div>
-    );
+    return data;
   }
-
-  return (
-    <div className="vw-admin min-h-screen bg-void-black text-void-light pt-24 sm:pt-28 pb-20 sm:pb-32 px-4 sm:px-6 md:px-10 relative overflow-hidden">
-      {/* Ambient background glow */}
-      <div className="absolute top-20 left-1/2 -translate-x-1/2 w-[60vw] h-[400px] bg-white/[0.02] blur-[160px] pointer-events-none rounded-full" />
-
-      <div className="max-w-5xl mx-auto relative z-10">
-        {/* Back Link + Logout Button */}
-        <div className="flex justify-between items-center mb-10">
-          <button
-            onClick={() => handleNavigate("/packs")}
-            className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-white/50 hover:text-white transition-colors group"
-          >
-            <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
-            Back to Void Packs
-          </button>
-
-          <button
-            onClick={handleLogout}
-            className="text-[10px] font-mono uppercase tracking-widest text-white/40 hover:text-red-400 transition-colors flex items-center gap-1.5"
-          >
-            <Lock size={11} />
-            Lock Session
-          </button>
-        </div>
-
-        {/* Header */}
-        <div className="mb-12 pb-8 border-b border-white/5 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
-          <div>
-            <div className="flex items-center gap-2.5 mb-3">
-              <span className="w-2 h-2 rounded-full bg-blue-400 shadow-[0_0_8px_rgba(96,165,250,0.8)] animate-pulse" />
-              <span className="text-[10px] font-mono uppercase tracking-[0.3em] text-white/50">
-                Voidwallz / Publishing studio
-              </span>
-            </div>
-            <h1 className="text-4xl md:text-5xl font-serif italic tracking-tighter text-white">
-              PUBLISH A PACK.
-            </h1>
-            <p className="text-sm text-white/50 max-w-xl mt-2 font-sans">
-              Add up to five wallpapers, preview the collection, and publish it to Voidwallz.
-            </p>
-          </div>
-
-          <div className="spec-badge text-[10px] font-mono px-3 py-1.5 rounded-full text-white/80 tracking-widest flex items-center gap-2">
-            <Sparkles size={12} />
-            PACK PUBLISHING
-          </div>
-        </div>
-
-        {/* Status Notification */}
-        <AnimatePresence>
-          {statusMessage && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className={`p-4 rounded-lg mb-8 border flex items-center gap-3 text-xs font-mono ${
-                statusMessage.type === "success"
-                  ? "bg-green-500/10 border-green-500/30 text-green-400"
-                  : "bg-red-500/10 border-red-500/30 text-red-400"
-              }`}
-            >
-              {statusMessage.type === "success" ? (
-                <CheckCircle2 size={16} />
-              ) : (
-                <AlertCircle size={16} />
-              )}
-              <span>{statusMessage.text}</span>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Main Grid: Form + Live Preview */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-          {/* Left Form (7 cols) */}
-          <form
-            onSubmit={handleUploadPack}
-            className="lg:col-span-7 bg-void-raised border border-white/10 p-6 md:p-8 rounded-xl space-y-6 luxury-border-glow shadow-2xl"
-          >
-            {/* Title & Target Device */}
-            <div className="space-y-4">
-              <div>
-                <label htmlFor="pack-title" className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/50 block mb-2">
-                  Pack Title *
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. CYBER ABYSS"
-                  id="pack-title"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  className="w-full bg-black/60 border border-white/10 rounded px-4 py-3 text-sm font-mono text-white placeholder-white/20 focus:outline-none focus:border-white/40 transition-colors"
-                  required
-                />
-              </div>
-
-              <div>
-                <label htmlFor="pack-description" className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/50 block mb-2">
-                  Tagline / Description
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. 5-piece synthetic luminescent horizons & dystopian neon."
-                  id="pack-description"
-                  value={tagline}
-                  onChange={(e) => setTagline(e.target.value)}
-                  className="w-full bg-black/60 border border-white/10 rounded px-4 py-3 text-sm text-white placeholder-white/20 focus:outline-none focus:border-white/40 transition-colors font-sans"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/50 block mb-2">
-                    Device Ecosystem
-                  </label>
-                  <div className="grid grid-cols-2 gap-2">
-                    <button
-                      type="button"
-                      aria-pressed={device === "desktop"}
-                      onClick={() => setDevice("desktop")}
-                      className={`py-2.5 text-[10px] font-mono uppercase tracking-wider rounded border transition-all flex items-center justify-center gap-1.5 ${
-                        device === "desktop"
-                          ? "bg-white text-black font-bold border-white"
-                          : "border-white/10 text-white/40 hover:border-white/30"
-                      }`}
-                    >
-                      <Monitor size={12} />
-                      Desktop
-                    </button>
-                    <button
-                      type="button"
-                      aria-pressed={device === "mobile"}
-                      onClick={() => setDevice("mobile")}
-                      className={`py-2.5 text-[10px] font-mono uppercase tracking-wider rounded border transition-all flex items-center justify-center gap-1.5 ${
-                        device === "mobile"
-                          ? "bg-white text-black font-bold border-white"
-                          : "border-white/10 text-white/40 hover:border-white/30"
-                      }`}
-                    >
-                      <Smartphone size={12} />
-                      Phone
-                    </button>
-                  </div>
-                </div>
-
-                <div>
-                  <label htmlFor="pack-category" className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/50 block mb-2">
-                    Category
-                  </label>
-                  <select
-                    id="pack-category"
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value)}
-                    className="w-full bg-black/60 border border-white/10 rounded px-3 py-2.5 text-[11px] font-mono text-white focus:outline-none focus:border-white/40 transition-colors"
-                  >
-                    <option value="Cyber / Synth">Cyber / Synth</option>
-                    <option value="Liquid / Fluid">Liquid / Fluid</option>
-                    <option value="Dark / Geometry">Dark / Geometry</option>
-                    <option value="Space / OLED">Space / OLED</option>
-                    <option value="Noir / Chroma">Noir / Chroma</option>
-                    <option value="Minimal / Abstract">Minimal / Abstract</option>
-                    <option value="Texture / Film">Texture / Film</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            {/* File Dropzone */}
-            <div>
-              <label className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/50 block mb-2">
-                Wallpaper images *
-              </label>
-              <button type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="border-2 border-dashed border-white/15 hover:border-white/40 rounded-xl p-8 text-center cursor-pointer transition-all bg-black/40 group flex flex-col items-center justify-center gap-3"
-              >
-                <div className="w-12 h-12 rounded-full luxury-glass flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <UploadCloud size={20} className="text-white/70" />
-                </div>
-                <div className="space-y-1">
-                  <p className="text-xs font-mono uppercase tracking-widest text-white/90">
-                    Click to select 1-5 wallpapers
-                  </p>
-                  <p className="text-[10px] text-white/40">
-                    PNG, JPG, WebP and AVIF
-                  </p>
-                </div>
-                {selectedFiles.length > 0 && (
-                  <span className="text-[11px] font-mono text-green-400 font-bold bg-green-500/10 px-3 py-1 rounded-full border border-green-500/30">
-                    ✓ {selectedFiles.length} files selected
-                  </span>
-                )}
-              </button>
-              <input
-                aria-label="Wallpaper images"
-                ref={fileInputRef}
-                type="file"
-                multiple
-                accept="image/*"
-                onChange={handleFileChange}
-                className="hidden"
-              />
-            </div>
-
-            {/* Upload Progress Bar */}
-            {isUploading && (
-              <div className="space-y-2">
-                <div className="flex justify-between text-[10px] font-mono text-white/60">
-                  <span>Uploading assets to Supabase...</span>
-                  <span>{uploadProgress}%</span>
-                </div>
-                <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-white transition-all duration-300 shadow-[0_0_10px_rgba(255,255,255,0.8)]"
-                    style={{ width: `${uploadProgress}%` }}
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={isUploading || selectedFiles.length === 0}
-              className="w-full py-4 px-6 bg-white text-black font-bold font-mono text-xs uppercase tracking-[0.2em] rounded hover:bg-white/90 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-xl flex items-center justify-center gap-2"
-            >
-              {isUploading ? (
-                <>
-                  <RefreshCw size={14} className="animate-spin" />
-                  Publishing pack…
-                </>
-              ) : (
-                <>
-                  <FolderArchive size={15} />
-                  Publish Void Pack ({selectedFiles.length} Files)
-                </>
-              )}
-            </button>
-          </form>
-
-          {/* Right Live Preview (5 cols) */}
-          <div className="lg:col-span-5 flex flex-col space-y-6">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/40 block">
-                Collection preview
-              </span>
-              <span className="text-[9px] font-mono text-white/30">
-                {device === "desktop" ? "Desktop" : "Phone"}
-              </span>
-            </div>
-
-            {/* Preview Card */}
-            <div className="bg-[#0c0c0c] border border-white/10 rounded-xl overflow-hidden shadow-2xl luxury-border-glow">
-              <div className="w-full aspect-[16/10] bg-[#111] relative overflow-hidden flex items-center justify-center border-b border-white/10">
-                {filePreviews.length > 0 ? (
-                  device === "desktop" ? (
-                    /* 5-Slice Desktop Preview */
-                    <div className="w-full h-full flex overflow-hidden">
-                      {filePreviews.map((src, i) => (
-                        <div key={i} className="flex-1 h-full border-r last:border-r-0 border-white/10 overflow-hidden">
-                          <img src={src} alt="Preview" className="w-full h-full object-cover" />
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    /* 5-Phone Mobile Preview */
-                    <div className="relative w-full h-full flex items-center justify-center">
-                      {filePreviews.map((src, i) => {
-                        const mid = (filePreviews.length - 1) / 2;
-                        const offset = (i - mid) * 24;
-                        return (
-                          <div
-                            key={i}
-                            style={{ transform: `translateX(${offset}px) rotate(${(i - mid) * 4}deg)` }}
-                            className="absolute w-[65px] aspect-[9/19.5] rounded-xl border-2 border-[#222] bg-black overflow-hidden shadow-xl"
-                          >
-                            <img src={src} alt="Preview" className="w-full h-full object-cover" />
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )
-                ) : (
-                  <div className="flex flex-col items-center gap-2 text-white/20 font-mono text-xs">
-                    <ImageIcon size={28} />
-                    <span>Select images to preview</span>
-                  </div>
-                )}
-
-                <span className="absolute top-3 left-3 text-[8px] font-mono bg-black/80 px-2 py-0.5 rounded text-white/70 border border-white/10">
-                  {selectedFiles.length} IMAGES
-                </span>
-              </div>
-
-              <div className="p-5">
-                <span className="text-[9px] font-mono text-white/40 uppercase tracking-widest block">
-                  {category} // {device.toUpperCase()}
-                </span>
-                <h3 className="text-lg font-sans font-bold uppercase tracking-tight text-white mt-1">
-                  {title || "YOUR PACK TITLE"}
-                </h3>
-                <p className="text-xs text-white/50 mt-1 font-sans line-clamp-2">
-                  {tagline || "Your pack description will appear here on the card."}
-                </p>
-              </div>
-            </div>
-
-            {/* Currently Active Packs list */}
-            <div className="bg-void-raised border border-white/10 rounded-xl p-5 space-y-3">
-              <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/40 block mb-2 flex items-center gap-1.5">
-                <Layers size={11} />
-                Live Published Packs ({allPacks.length})
-              </span>
-              <div className="space-y-2 max-h-[220px] overflow-y-auto pr-1">
-                {allPacks.map((pack) => (
-                  <div
-                    key={pack.id}
-                    className="flex items-center justify-between p-2.5 rounded bg-white/5 border border-white/5 text-xs font-mono"
-                  >
-                    <div className="truncate max-w-[200px]">
-                      <span className="text-white block font-bold truncate">{pack.title}</span>
-                      <span className="text-[9px] text-white/40">{pack.device} // {pack.items.length} items</span>
-                    </div>
-
-                    <button
-                      onClick={() => handleDeletePack(pack.id)}
-                      className="p-1.5 text-red-400/60 hover:text-red-400 hover:bg-red-500/10 rounded transition-colors"
-                      aria-label={`Delete ${pack.title} pack`}
-                      title="Delete Pack"
-                    >
-                      <Trash2 size={13} />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+  async function login(event: React.FormEvent) {
+    event.preventDefault(); setBusy(true); setMessage("");
+    try { const data = await request("login", JSON.stringify({ password }), true); setCsrf(data.csrf); }
+    catch (error) { setMessage(error instanceof Error ? error.message : "Sign-in failed."); }
+    finally { setPassword(""); setBusy(false); }
+  }
+  async function logout() {
+    setBusy(true);
+    try { await request("logout", "{}", true); setCsrf(null); setFiles([]); setMessage(""); }
+    catch { setMessage("Could not end the session. Please try again."); }
+    finally { setBusy(false); }
+  }
+  function selectFiles(event: React.ChangeEvent<HTMLInputElement>) {
+    const selected = Array.from(event.target.files || []) as File[];
+    if (!selected.length || selected.length > 5 || selected.some(file => !["image/png","image/jpeg","image/webp"].includes(file.type)) || selected.reduce((sum,file) => sum + file.size, 0) > MAX_BYTES) {
+      setMessage("Choose up to five PNG, JPEG or WebP images, with a combined size of 3 MB or less.");
+      event.target.value = ""; setFiles([]); return;
+    }
+    setMessage(""); setFiles(selected);
+  }
+  async function publish(event: React.FormEvent) {
+    event.preventDefault(); if (!files.length || busy) return;
+    setBusy(true); setMessage("");
+    const body = new FormData();
+    for (const [key,value] of Object.entries({ title, tagline, category, device })) body.append(key,value);
+    files.forEach(file => body.append("images", file));
+    try {
+      await request("publish", body); setMessage("Your pack has been published.");
+      setTitle(""); setTagline(""); setFiles([]); if (input.current) input.current.value = "";
+    } catch (error) { setMessage(error instanceof Error ? error.message : "Publishing failed."); }
+    finally { setBusy(false); }
+  }
+  return <section className="vw-page page-shell vw-admin">
+    <header className="vw-page-heading"><span className="micro-label">Voidwallz / Publishing studio</span><h1>{csrf ? "Publish a pack." : "Studio access."}</h1><p>{csrf ? "Add your artwork and publish a collection." : "Sign in to manage the Voidwallz collection."}</p></header>
+    <a className="text-link" href="/packs"><ArrowLeft size={16} /> Back to packs</a>
+    {checking ? <p role="status">Checking studio access…</p> : !csrf ? <form onSubmit={login} className="vw-form" style={{ maxWidth: 440, marginTop: 32 }}>
+      <div className="vw-field"><label htmlFor="studio-password">Studio password</label><input id="studio-password" type="password" autoComplete="current-password" minLength={16} maxLength={256} required value={password} onChange={event => setPassword(event.target.value)} /></div>
+      <button type="submit" disabled={busy} className="btn btn--primary vw-button"><Lock size={18} />{busy ? "Signing in…" : "Open publishing studio"}</button>
+    </form> : <div style={{ maxWidth: 760, marginTop: 32 }}>
+      <button type="button" className="text-link" onClick={logout} disabled={busy}><LogOut size={16} /> End studio session</button>
+      <form onSubmit={publish} className="vw-form" style={{ marginTop: 24 }}>
+        <div className="vw-field"><label htmlFor="pack-title">Pack title</label><input id="pack-title" required minLength={3} maxLength={100} value={title} onChange={event => setTitle(event.target.value)} /></div>
+        <div className="vw-field"><label htmlFor="pack-description">Short description</label><input id="pack-description" maxLength={240} value={tagline} onChange={event => setTagline(event.target.value)} /></div>
+        <div className="vw-field-row"><div className="vw-field"><label htmlFor="pack-device">Screen</label><select id="pack-device" value={device} onChange={event => setDevice(event.target.value)}><option value="desktop">Desktop</option><option value="mobile">Phone</option></select></div>
+          <div className="vw-field"><label htmlFor="pack-category">Category</label><select id="pack-category" value={category} onChange={event => setCategory(event.target.value)}>{CATEGORIES.map(value => <option key={value}>{value}</option>)}</select></div></div>
+        <div className="vw-field"><label htmlFor="pack-files">Wallpapers</label><input id="pack-files" ref={input} type="file" accept="image/png,image/jpeg,image/webp" multiple onChange={selectFiles} required /><p className="vw-form-note">Up to five images. Maximum combined size: 3 MB.</p></div>
+        {previews.length > 0 && <div className="vw-pack-thumbs">{previews.map((src,index) => <img key={src} src={src} alt={`Selected artwork ${index + 1}`} style={{ width: 96, height: 96, objectFit: "contain" }} />)}</div>}
+        <button type="submit" disabled={busy || !files.length} className="btn btn--primary vw-button"><UploadCloud size={18} />{busy ? "Publishing…" : "Publish pack"}</button>
+      </form>
+    </div>}
+    {message && <p role="status" className="vw-form-note" style={{ marginTop: 24 }}>{message}</p>}
+  </section>;
 }

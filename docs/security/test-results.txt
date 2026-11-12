@@ -1,0 +1,11 @@
+Security checks: 26 passed, 0 failed.
+Sitemap checks: 4 passed, 0 failed.
+Social metadata checks: 7 passed, 0 failed; all 104 initial HTML pages checked.
+TypeScript: passed.
+Production build: passed (SITEMAP_OFFLINE=1 uses the verified saved catalogue).
+npm audit: 0 known vulnerabilities after updates.
+Build guard: rejects unapproved browser variables and privileged Supabase keys without printing values.
+Browser bundle: no server credential markers, env files or source maps.
+Local HTTP: unauthenticated admin/publishing 401; foreign-origin reports 403; env/Git/server source paths 403.
+Database pgTAP suite: prepared, not run (provider sign-in/connection unavailable).
+Production changes: not deployed.

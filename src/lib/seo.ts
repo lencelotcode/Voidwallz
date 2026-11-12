@@ -1,62 +1,31 @@
-import { canonicalUrl } from "./siteUrls";
+import { resolvePageMeta, socialTags, type PageMeta } from "./pageMetadata";
+export { DEFAULT_TITLE, DEFAULT_DESCRIPTION, DEFAULT_IMAGE } from "./pageMetadata";
+export type { PageMeta } from "./pageMetadata";
 
-const SITE_NAME = "Voidwallz";
-const DEFAULT_TITLE = "Voidwallz | Wallpaper Beyond Reality";
-const DEFAULT_DESCRIPTION =
-  "Find wallpapers and collections for your desktop and phone. Preview, save and download your next screen.";
-const DEFAULT_IMAGE = "https://voidwallz.live/og-image.png";
-
-export interface PageMeta {
-  title: string;
-  description?: string;
-  image?: string;
-  url?: string;
-}
-
-function upsertMeta(attr: "name" | "property", key: string, content: string) {
-  let el = document.head.querySelector<HTMLMetaElement>(
-    `meta[${attr}="${key}"]`,
-  );
-  if (!el) {
-    el = document.createElement("meta");
-    el.setAttribute(attr, key);
-    document.head.appendChild(el);
-  }
-  el.setAttribute("content", content);
-}
-
-/**
- * Client-side per-route metadata. Crawlers that execute JS (Google) and
- * in-app link previews that hydrate after load will read these values;
- * index.html carries the static defaults for everything else.
- */
-export function setPageMeta({
-  title,
-  description = DEFAULT_DESCRIPTION,
-  image = DEFAULT_IMAGE,
-  url,
-}: PageMeta) {
+/** Keep hydrated navigation consistent with the HTML generated for share crawlers. */
+export function setPageMeta(meta: PageMeta) {
   if (typeof document === "undefined") return;
-
-  document.title = title;
+  const input = { ...meta, url: meta.url ?? window.location.href };
+  const resolved = resolvePageMeta(input);
+  document.title = resolved.title;
   let canonical = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]');
   if (!canonical) {
     canonical = document.createElement("link");
     canonical.rel = "canonical";
     document.head.appendChild(canonical);
   }
-  canonical.href = canonicalUrl(url ?? window.location.href);
-  upsertMeta("name", "description", description);
-  upsertMeta("property", "og:title", title);
-  upsertMeta("property", "og:description", description);
-  upsertMeta("property", "og:image", image);
-  upsertMeta("property", "og:url", url ?? window.location.href);
-  upsertMeta("property", "og:site_name", SITE_NAME);
-  upsertMeta("name", "twitter:card", "summary_large_image");
-  upsertMeta("name", "twitter:title", title);
-  upsertMeta("name", "twitter:description", description);
-  upsertMeta("name", "twitter:image", image);
-  upsertMeta("name", "twitter:url", url ?? window.location.href);
+  canonical.href = resolved.url;
+  // A route change must clear dimensions/type belonging to the previous image.
+  for (const key of ["og:image:width", "og:image:height", "og:image:type"]) {
+    document.head.querySelector(`meta[property="${key}"]`)?.remove();
+  }
+  for (const { attr, key, content } of socialTags(input)) {
+    let el = document.head.querySelector<HTMLMetaElement>(`meta[${attr}="${key}"]`);
+    if (!el) {
+      el = document.createElement("meta");
+      el.setAttribute(attr, key);
+      document.head.appendChild(el);
+    }
+    el.content = content;
+  }
 }
-
-export { DEFAULT_TITLE, DEFAULT_DESCRIPTION, DEFAULT_IMAGE };

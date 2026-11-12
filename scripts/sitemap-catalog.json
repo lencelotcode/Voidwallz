@@ -1,284 +1,376 @@
 {
-  "source": "Public desktop and phone galleries at https://voidwallz.live, checked 2026-11-11",
+  "source": "Public desktop and phone galleries at https://voidwallz.live; titles and image URLs checked 2026-11-12",
   "catalog": {
     "desktop": [
       {
-        "title": "Dreamy Astronaut"
+        "title": "Dreamy Astronaut",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/desktop/previews/Dreamy%20Astronaut.webp"
       },
       {
-        "title": "Ember Sea"
+        "title": "Ember Sea",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/desktop/previews/Ember%20Sea.webp"
       },
       {
-        "title": "Blue Curtain"
+        "title": "Blue Curtain",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/desktop/previews/Blue%20Curtain.webp"
       },
       {
-        "title": "Spectrum"
+        "title": "Spectrum",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/desktop/previews/Spectrum.webp"
       },
       {
-        "title": "Rooftop Zone"
+        "title": "Rooftop Zone",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/desktop/previews/Rooftop%20Zone.webp"
       },
       {
-        "title": "Gasoline Dreams"
+        "title": "Gasoline Dreams",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/desktop/previews/Gasoline%20Dreams.webp"
       },
       {
-        "title": "Cloudfields"
+        "title": "Cloudfields",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/desktop/previews/Cloudfields.webp"
       },
       {
-        "title": "Phase 23"
+        "title": "Phase 23",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/desktop/previews/Phase%2023.webp"
       },
       {
-        "title": "Earthside"
+        "title": "Earthside",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/desktop/previews/Earthside.webp"
       },
       {
-        "title": "Void bubble"
+        "title": "Void bubble",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/desktop/previews/Void%20bubble.webp"
       },
       {
-        "title": " Mirror Hall"
+        "title": " Mirror Hall",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/desktop/previews/%20Mirror%20Hall.webp"
       },
       {
-        "title": "Burn Line"
+        "title": "Burn Line",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/desktop/previews/Burn%20Line.webp"
       },
       {
-        "title": "The Only Tree"
+        "title": "The Only Tree",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/desktop/previews/The%20Only%20Tree.webp"
       },
       {
-        "title": "Galaxy Eyes"
+        "title": "Galaxy Eyes",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/desktop/previews/Galaxy%20Eyes.webp"
       },
       {
-        "title": "Fallen Giant"
+        "title": "Fallen Giant",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/desktop/previews/Fallen%20Giant.webp"
       },
       {
-        "title": "Edo Sunset"
+        "title": "Edo Sunset",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/desktop/previews/Edo%20Sunset.webp"
       },
       {
-        "title": "Magnetic"
+        "title": "Magnetic",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/desktop/previews/Magnetic.webp"
       },
       {
-        "title": "Sky Eyes"
+        "title": "Sky Eyes",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/desktop/previews/Sky%20Eyes.webp"
       },
       {
-        "title": "Cat by the beach"
+        "title": "Cat by the beach",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/desktop/previews/Cat%20by%20the%20beach.webp"
       },
       {
-        "title": "Full Sail"
+        "title": "Full Sail",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/desktop/previews/Full%20Sail.webp"
       },
       {
-        "title": "Void Cat"
+        "title": "Void Cat",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/desktop/previews/Void%20Cat.webp"
       },
       {
-        "title": "Mach Prism"
+        "title": "Mach Prism",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/desktop/previews/Mach%20Prism.webp"
       },
       {
-        "title": "Nebula Drift"
+        "title": "Nebula Drift",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/desktop/previews/Nebula%20Drift.webp"
       },
       {
-        "title": "Ember Fold"
+        "title": "Ember Fold",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/desktop/previews/Ember%20Fold.webp"
       },
       {
-        "title": "Still Fuji"
+        "title": "Still Fuji",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/desktop/previews/Still%20Fuji.webp"
       },
       {
-        "title": "Midnight Express"
+        "title": "Midnight Express",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/desktop/previews/Midnight%20Express.webp"
       },
       {
-        "title": "Open Window"
+        "title": "Open Window",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/desktop/previews/Open%20Window.webp"
       },
       {
-        "title": "Cobalt Flow"
+        "title": "Cobalt Flow",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/desktop/previews/Cobalt%20Flow.webp"
       },
       {
-        "title": "Blue Mass"
+        "title": "Blue Mass",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/desktop/previews/Blue%20Mass.webp"
       }
     ],
     "mobile": [
       {
-        "title": "Hillside CRT daydream"
+        "title": "Hillside CRT daydream",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/mobile/previews/Hillside%20CRT%20daydream.webp"
       },
       {
-        "title": "Miami Dream"
+        "title": "Miami Dream",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/mobile/previews/Miami%20Dream.webp"
       },
       {
-        "title": "City at Blue Hour"
+        "title": "City at Blue Hour",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/mobile/previews/City%20at%20Blue%20Hour.webp"
       },
       {
-        "title": "Ascension"
+        "title": "Ascension",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/mobile/previews/Ascension.webp"
       },
       {
-        "title": "Reach"
+        "title": "Reach",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/mobile/previews/Reach.webp"
       },
       {
-        "title": "Twilight Drift"
+        "title": "Twilight Drift",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/mobile/previews/Twilight%20Drift.webp"
       },
       {
-        "title": "Vesper Drift"
+        "title": "Vesper Drift",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/mobile/previews/Vesper%20Drift.webp"
       },
       {
-        "title": "Above the World"
+        "title": "Above the World",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/mobile/previews/Above%20the%20World.webp"
       },
       {
-        "title": "Aurora Home"
+        "title": "Aurora Home",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/mobile/previews/Aurora%20Home.webp"
       },
       {
-        "title": "Luffy"
+        "title": "Luffy",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/mobile/previews/Luffy.webp"
       },
       {
-        "title": " Red Tree"
+        "title": " Red Tree",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/mobile/previews/%20Red%20Tree.webp"
       },
       {
-        "title": "Dessert Drive"
+        "title": "Dessert Drive",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/mobile/previews/Dessert%20Drive.webp"
       },
       {
-        "title": "Whispers of Summer"
+        "title": "Whispers of Summer",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/mobile/previews/Whispers%20of%20Summer.webp"
       },
       {
-        "title": "Takeoff"
+        "title": "Takeoff",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/mobile/previews/Takeoff.webp"
       },
       {
-        "title": "Singularity Sparks"
+        "title": "Singularity Sparks",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/mobile/previews/Singularity%20Sparks.webp"
       },
       {
-        "title": "Steambound Silence"
+        "title": "Steambound Silence",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/mobile/previews/Steambound%20Silence.webp"
       },
       {
-        "title": "Stillwater Echo"
+        "title": "Stillwater Echo",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/mobile/previews/Stillwater%20Echo.webp"
       },
       {
-        "title": "Solstice Bloom"
+        "title": "Solstice Bloom",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/mobile/previews/Solstice%20Bloom.webp"
       },
       {
-        "title": "Temporal Veil"
+        "title": "Temporal Veil",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/mobile/previews/Temporal%20Veil.webp"
       },
       {
-        "title": "Void Orb"
+        "title": "Void Orb",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/mobile/previews/Void%20Orb.webp"
       },
       {
-        "title": "Wet Asphalt"
+        "title": "Wet Asphalt",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/mobile/previews/Wet%20Asphalt.webp"
       },
       {
-        "title": "Temporal Fade"
+        "title": "Temporal Fade",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/mobile/previews/Temporal%20Fade.webp"
       },
       {
-        "title": "Sky Guardian"
+        "title": "Sky Guardian",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/mobile/previews/Sky%20Guardian.webp"
       },
       {
-        "title": "Light Finds a Way"
+        "title": "Light Finds a Way",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/mobile/previews/Light%20Finds%20a%20Way.webp"
       },
       {
-        "title": "Nocturne Grid"
+        "title": "Nocturne Grid",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/mobile/previews/Nocturne%20Grid.webp"
       },
       {
-        "title": "Radiowave Halo"
+        "title": "Radiowave Halo",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/mobile/previews/Radiowave%20Halo.webp"
       },
       {
-        "title": "Retrofusion"
+        "title": "Retrofusion",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/mobile/previews/Retrofusion.webp"
       },
       {
-        "title": "Silent Pulse"
+        "title": "Silent Pulse",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/mobile/previews/Silent%20Pulse.webp"
       },
       {
-        "title": "Orbitune"
+        "title": "Orbitune",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/mobile/previews/Orbitune.webp"
       },
       {
-        "title": "Sand Dunes"
+        "title": "Sand Dunes",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/mobile/previews/Sand%20Dunes.webp"
       },
       {
-        "title": "Monolith Drift"
+        "title": "Monolith Drift",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/mobile/previews/Monolith%20Drift.webp"
       },
       {
-        "title": "Lone Tree"
+        "title": "Lone Tree",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/mobile/previews/Lone%20Tree.webp"
       },
       {
-        "title": "NYC Skyline"
+        "title": "NYC Skyline",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/mobile/previews/NYC%20Skyline.webp"
       },
       {
-        "title": "Falling"
+        "title": "Falling",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/mobile/previews/Falling.webp"
       },
       {
-        "title": "Crimson Stillness"
+        "title": "Crimson Stillness",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/mobile/previews/Crimson%20Stillness.webp"
       },
       {
-        "title": "Late Bus"
+        "title": "Late Bus",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/mobile/previews/Late%20Bus.webp"
       },
       {
-        "title": "In Full Stride"
+        "title": "In Full Stride",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/mobile/previews/In%20Full%20Stride.webp"
       },
       {
-        "title": "Halo Dusk"
+        "title": "Halo Dusk",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/mobile/previews/Halo%20Dusk.webp"
       },
       {
-        "title": "Last Stop"
+        "title": "Last Stop",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/mobile/previews/Last%20Stop.webp"
       },
       {
-        "title": "Driveby Gotham"
+        "title": "Driveby Gotham",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/mobile/previews/Driveby%20Gotham.webp"
       },
       {
-        "title": "Crimson Phase"
+        "title": "Crimson Phase",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/mobile/previews/Crimson%20Phase.webp"
       },
       {
-        "title": "Eclipse Core"
+        "title": "Eclipse Core",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/mobile/previews/Eclipse%20Core.webp"
       },
       {
-        "title": "Emberrise"
+        "title": "Emberrise",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/mobile/previews/Emberrise.webp"
       },
       {
-        "title": "Blood Moon"
+        "title": "Blood Moon",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/mobile/previews/Blood%20Moon.webp"
       },
       {
-        "title": "Cosmic Float"
+        "title": "Cosmic Float",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/mobile/previews/Cosmic%20Float.webp"
       },
       {
-        "title": "Blossom Rest"
+        "title": "Blossom Rest",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/mobile/previews/Blossom%20Rest.webp"
       },
       {
-        "title": "Crimson Horizon (1)"
+        "title": "Crimson Horizon (1)",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/mobile/previews/Crimson%20Horizon%20(1).webp"
       },
       {
-        "title": "Cosmic Scribbles"
+        "title": "Cosmic Scribbles",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/mobile/previews/Cosmic%20Scribbles.webp"
       },
       {
-        "title": "Chrono Ascend"
+        "title": "Chrono Ascend",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/mobile/previews/Chrono%20Ascend.webp"
       },
       {
-        "title": "Classic Strips"
+        "title": "Classic Strips",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/mobile/previews/Classic%20Strips.webp"
       },
       {
-        "title": "Corelight"
+        "title": "Corelight",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/mobile/previews/Corelight.webp"
       },
       {
-        "title": "Blue Tone"
+        "title": "Blue Tone",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/mobile/previews/Blue%20Tone.webp"
       },
       {
-        "title": " Soft Geometry"
+        "title": " Soft Geometry",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/mobile/previews/%20Soft%20Geometry.webp"
       },
       {
-        "title": "Summer Line"
+        "title": "Summer Line",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/mobile/previews/Summer%20Line.webp"
       },
       {
-        "title": "Home Keys"
+        "title": "Home Keys",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/mobile/previews/Home%20Keys.webp"
       },
       {
-        "title": "Cozy Cat"
+        "title": "Cozy Cat",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/mobile/previews/Cozy%20Cat.webp"
       },
       {
-        "title": "Pink Road"
+        "title": "Pink Road",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/mobile/previews/Pink%20Road.webp"
       },
       {
-        "title": "Concrete Rain"
+        "title": "Concrete Rain",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/mobile/previews/Concrete%20Rain.webp"
       },
       {
-        "title": "Lost in Orbit"
+        "title": "Lost in Orbit",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/mobile/previews/Lost%20in%20Orbit.webp"
       },
       {
-        "title": "Crimson Horizon"
+        "title": "Crimson Horizon",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/mobile/previews/Crimson%20Horizon.webp"
       },
       {
-        "title": "Stealth"
+        "title": "Stealth",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/mobile/previews/Stealth.webp"
       },
       {
-        "title": "Open Skies"
+        "title": "Open Skies",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/mobile/previews/Open%20Skies.webp"
       },
       {
-        "title": "Duality"
+        "title": "Duality",
+        "image": "https://wrvgosqpjqrthmtpzmrm.supabase.co/storage/v1/object/public/wallpapers/mobile/previews/Duality.webp"
       }
     ]
   }

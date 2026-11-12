@@ -30,7 +30,7 @@ if (env.VITE_SUPABASE_URL && env.VITE_SUPABASE_ANON_KEY && process.env.SITEMAP_O
       if (error) throw new Error("Catalogue unavailable");
       for (const file of data ?? []) {
         if ((file.metadata?.size ?? 0) <= 0 || file.name.startsWith(".") || !/\.(png|jpe?g|webp|avif|gif)$/i.test(file.name)) continue;
-        items.push({ title: file.name.replace(/\.[^/.]+$/, ""), ...(file.updated_at ? { modifiedAt: file.updated_at } : {}) });
+        items.push({ title: file.name.replace(/\.[^/.]+$/, ""), image: client.storage.from("wallpapers").getPublicUrl(`${device}/previews/${file.name}`).data.publicUrl, ...(file.updated_at ? { modifiedAt: file.updated_at } : {}) });
       }
       if (!data || data.length < 1000) return items;
       if (offset >= 50_000) throw new Error("Catalogue is too large for a single sitemap.");

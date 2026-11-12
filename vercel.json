@@ -1,13 +1,157 @@
 {
   "rewrites": [
     {
+      "source": "/desktop/:slug",
+      "destination": "/desktop/:slug/index.html"
+    },
+    {
+      "source": "/mobile/:slug",
+      "destination": "/mobile/:slug/index.html"
+    },
+    {
+      "source": "/desktop",
+      "destination": "/desktop/index.html"
+    },
+    {
+      "source": "/mobile",
+      "destination": "/mobile/index.html"
+    },
+    {
+      "source": "/packs",
+      "destination": "/packs/index.html"
+    },
+    {
+      "source": "/updates",
+      "destination": "/updates/index.html"
+    },
+    {
+      "source": "/privacy",
+      "destination": "/privacy/index.html"
+    },
+    {
+      "source": "/terms",
+      "destination": "/terms/index.html"
+    },
+    {
+      "source": "/license",
+      "destination": "/license/index.html"
+    },
+    {
+      "source": "/cookies",
+      "destination": "/cookies/index.html"
+    },
+    {
+      "source": "/refunds",
+      "destination": "/refunds/index.html"
+    },
+    {
+      "source": "/dmca",
+      "destination": "/dmca/index.html"
+    },
+    {
+      "source": "/report",
+      "destination": "/report/index.html"
+    },
+    {
       "source": "/((?!api/.*|sitemap\\.xml$|robots\\.txt$|BingSiteAuth\\.xml$).*)",
       "destination": "/"
     }
   ],
   "headers": [
-    { "source": "/sitemap.xml", "headers": [{ "key": "Content-Type", "value": "application/xml; charset=utf-8" }] },
-    { "source": "/robots.txt", "headers": [{ "key": "Content-Type", "value": "text/plain; charset=utf-8" }] },
-    { "source": "/BingSiteAuth.xml", "headers": [{ "key": "Content-Type", "value": "application/xml; charset=utf-8" }] }
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=31536000; includeSubDomains"
+        },
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://*.supabase.co; connect-src 'self' https://*.supabase.co wss://*.supabase.co; media-src 'self' blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
+        },
+        {
+          "key": "Cross-Origin-Opener-Policy",
+          "value": "same-origin"
+        }
+      ]
+    },
+    {
+      "source": "/sitemap.xml",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/xml; charset=utf-8"
+        }
+      ]
+    },
+    {
+      "source": "/robots.txt",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "text/plain; charset=utf-8"
+        }
+      ]
+    },
+    {
+      "source": "/BingSiteAuth.xml",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/xml; charset=utf-8"
+        }
+      ]
+    },
+    {
+      "source": "/admin",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "no-store"
+        }
+      ]
+    },
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store"
+        }
+      ]
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.voidwallz.live"
+        }
+      ],
+      "destination": "https://voidwallz.live/:path*",
+      "permanent": true
+    }
   ]
 }

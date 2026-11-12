@@ -4,37 +4,36 @@
   "version": "2.5.0",
   "type": "module",
   "scripts": {
-    "dev": "vite --port=3000 --host=0.0.0.0",
-    "build": "npm run sitemap && vite build",
+    "dev": "vite --port=3000 --host=127.0.0.1",
+    "build": "npm run sitemap && vite build && npm run social:pages",
     "sitemap": "node --import tsx scripts/generate-sitemap.ts",
     "test:sitemap": "node --import tsx --test scripts/sitemap.test.ts",
     "preview": "vite preview",
     "clean": "rm -rf dist",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "test:security": "node --import tsx --test scripts/security.test.ts",
+    "security:setup": "node --import tsx scripts/security-setup.ts",
+    "security:scan": "python3 scripts/scan-secrets.py",
+    "social:pages": "node --import tsx scripts/generate-social-pages.ts",
+    "test:social": "node --import tsx --test scripts/social-pages.test.ts"
   },
   "dependencies": {
-    "@google/genai": "^1.29.0",
-    "@supabase/supabase-js": "^2.105.4",
-    "@tailwindcss/vite": "^4.1.14",
-    "@vitejs/plugin-react": "^5.0.4",
-    "dotenv": "^17.2.3",
-    "express": "^4.21.2",
+    "@supabase/supabase-js": "^2.119.0",
     "gsap": "^3.15.1",
-    "jszip": "^3.10.1",
+    "jszip": "^3.10.2",
     "lucide-react": "^0.546.0",
     "motion": "^12.23.24",
-    "react": "^19.0.1",
-    "react-dom": "^19.0.1",
-    "vite": "^6.2.3"
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
   },
   "devDependencies": {
-    "@types/express": "^4.17.21",
-    "@types/jszip": "^3.4.0",
-    "@types/node": "^22.14.0",
-    "autoprefixer": "^10.4.21",
-    "tailwindcss": "^4.1.14",
-    "tsx": "^4.21.0",
+    "@types/node": "^22.20.5",
+    "autoprefixer": "^10.6.2",
+    "tailwindcss": "^4.3.5",
+    "tsx": "^4.23.15",
     "typescript": "~5.8.2",
-    "vite": "^6.2.3"
+    "vite": "^6.4.6",
+    "@tailwindcss/vite": "^4.3.5",
+    "@vitejs/plugin-react": "^5.2.0"
   }
 }

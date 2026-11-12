@@ -2,7 +2,7 @@ import { canonicalUrl, PUBLIC_SITE_PATHS } from "../src/lib/siteUrls";
 import { wallpaperUrl } from "../src/lib/wallpaperNavigation";
 
 export type Device = "desktop" | "mobile";
-export interface CatalogItem { title: string; modifiedAt?: string; }
+export interface CatalogItem { title: string; modifiedAt?: string; image?: string; }
 export interface Catalog { desktop: CatalogItem[]; mobile: CatalogItem[]; }
 
 export function escapeXml(value: string) {

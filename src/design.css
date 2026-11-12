@@ -182,7 +182,13 @@ body { background: var(--paper); color: var(--ink); }
 .vw-legacy-surface { background: #080908; color: #e5e5e5; }
 .pack-pending { background: #10110ef5; color: #f4f4ef; }
 .pack-pending .text-link { color: #c8ff00; }
-.route-pending { min-height: 75vh; }
+.route-pending { min-height: 60vh; padding-block: clamp(48px, 8vw, 96px); }
+.route-pending-hint { display: flex; flex-direction: column; gap: 14px; align-items: flex-start; color: var(--muted); }
+.route-pending-track { display: block; width: 112px; height: 2px; overflow: hidden; background: var(--line); }
+.route-pending-track > span { display: block; width: 45%; height: 100%; background: var(--ink); animation: route-pending-slide 1.1s ease-in-out infinite; }
+@keyframes route-pending-slide { from { transform: translateX(-110%); } to { transform: translateX(330%); } }
+html[data-motion-state="paused"] .route-pending-track > span { width: 100%; animation: none; }
+@media (prefers-reduced-motion: reduce) { .route-pending-track > span { width: 100%; animation: none; } }
 .void-app.atmosphere-oled, .void-app.atmosphere-noir { --paper: #080908; --ink: #f4f4ef; --muted: #b5b8aa; --line: #f4f4ef33; background-color: #080908; color: #f4f4ef; }
 .void-app.atmosphere-crt { text-shadow: none; }
 

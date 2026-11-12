@@ -40,7 +40,7 @@ test("deduplicates format variants and only includes trustworthy modified dates"
 
 test("deployment does not rewrite crawler files to the React app", async () => {
   const config = JSON.parse(await readFile(new URL("../vercel.json", import.meta.url), "utf8"));
-  const appRewrite = new RegExp(`^${config.rewrites[0].source}$`);
+  const appRewrite = new RegExp(`^${config.rewrites.find(rule => rule.destination === "/").source}$`);
   assert.equal(appRewrite.test("/sitemap.xml"), false);
   assert.equal(appRewrite.test("/robots.txt"), false);
   assert.equal(appRewrite.test("/BingSiteAuth.xml"), false);

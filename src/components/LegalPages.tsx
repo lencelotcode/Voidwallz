@@ -280,7 +280,7 @@ export function CookiePolicy() {
       <section className="space-y-3">
         <h2 className="text-white text-xl font-serif italic">1. What Technologies We Use</h2>
         <p>
-          Voidwallz utilizes standard client-side browser storage (specifically <code>localStorage</code> and transient <code>sessionStorage</code>) to maintain your preferences across page transitions. We do not use third-party cross-site advertising cookies or tracking pixels.
+          Voidwallz uses local browser storage to maintain your display preferences and saved wallpapers. The publishing studio also uses an expiring, HttpOnly session cookie to authenticate its administrator. We do not use third-party cross-site advertising cookies or tracking pixels.
         </p>
       </section>
 
@@ -297,6 +297,12 @@ export function CookiePolicy() {
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5 text-white/80">
+              <tr>
+                <td className="p-3 font-bold text-white">voidwallz_intro_seen</td>
+                <td className="p-3">sessionStorage</td>
+                <td className="p-3 text-blue-400">Functional</td>
+                <td className="p-3">Keeps the homepage introduction from replaying during this browser tab session. It is not an authentication token.</td>
+              </tr>
               <tr>
                 <td className="p-3 font-bold text-white">voidwallz_cookie_consent</td>
                 <td className="p-3">localStorage</td>
@@ -316,10 +322,10 @@ export function CookiePolicy() {
                 <td className="p-3">Remembers your acoustic Web Audio synthesizer toggle (sound on/muted).</td>
               </tr>
               <tr>
-                <td className="p-3 font-bold text-white">void_admin_authenticated</td>
-                <td className="p-3">sessionStorage</td>
+                <td className="p-3 font-bold text-white">__Host-vw_admin</td>
+                <td className="p-3">HttpOnly cookie</td>
                 <td className="p-3 text-emerald-400">Security</td>
-                <td className="p-3">Transient authentication token cleared automatically upon closing your browser.</td>
+                <td className="p-3">A server-verified publishing-studio session that expires after 30 minutes. It is marked Secure and SameSite=Strict in production and cannot be read by browser JavaScript.</td>
               </tr>
             </tbody>
           </table>

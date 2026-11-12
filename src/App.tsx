@@ -3,7 +3,7 @@ import {
   AnimatePresence,
   motion,
 } from "motion/react";
-import React, { lazy, Suspense, useEffect, useState, useRef } from "react";
+import React, { lazy, Suspense, startTransition, useEffect, useState, useRef } from "react";
 import { KineticRibbon } from "./components/MotionGraphic";
 import Hero from "./components/Hero";
 import Footer from "./components/Footer";
@@ -12,6 +12,7 @@ import Gallery from "./components/Gallery";
 import LatestUploads from "./components/LatestUploads";
 import Navbar from "./components/Navbar";
 import Loader from "./components/Loader";
+import RoutePending from "./components/RoutePending";
 import WallpaperModal from "./components/WallpaperModal";
 import { Wallpaper, VoidPack } from "./types";
 import { useWallpapers } from "./hooks/useWallpapers";
@@ -19,15 +20,28 @@ import { VisualEffectsProvider } from "./hooks/useVisualEffects";
 import CookieConsent from "./components/CookieConsent";
 import NotFoundPage from "./components/NotFoundPage";
 import { useDialogCount } from "./lib/dialogState";
-import { setPageMeta, DEFAULT_TITLE, DEFAULT_DESCRIPTION } from "./lib/seo";
+import { setPageMeta } from "./lib/seo";
+import { STATIC_META, wallpaperMeta } from "./lib/pageMetadata";
 import { closeWallpaper, collectionLocation, openWallpaper, WALLPAPER_ROUTE_PATTERN } from "./lib/wallpaperNavigation";
 import { LegalDocuments, isLegalPath } from "./components/LegalPages";
+import { navigateSiteLink, siteLink } from "./lib/siteNavigation";
+import { rememberIntro, shouldShowIntro } from "./lib/intro";
 
-const VoidPacks = lazy(() => import("./components/VoidPacks"));
+const loadPacks = () => import("./components/VoidPacks");
+const loadReport = () => import("./components/ReportPage");
+const loadUpdates = () => import("./components/UpdatesPage");
+const VoidPacks = lazy(loadPacks);
 const PackModal = lazy(() => import("./components/PackModal"));
-const ReportPage = lazy(() => import("./components/ReportPage"));
-const UpdatesPage = lazy(() => import("./components/UpdatesPage"));
+const ReportPage = lazy(loadReport);
+const UpdatesPage = lazy(loadUpdates);
 const AdminPackUpload = lazy(() => import("./components/AdminPackUpload"));
+
+function preloadPage(event: React.MouseEvent<HTMLElement> | React.FocusEvent<HTMLElement> | React.PointerEvent<HTMLElement>) {
+  const anchor = event.target instanceof Element ? event.target.closest<HTMLAnchorElement>("a[href]") : null;
+  if (!anchor || anchor.origin !== window.location.origin) return;
+  const load = ({ "/packs": loadPacks, "/report": loadReport, "/updates": loadUpdates })[anchor.pathname.replace(/\/+$/, "")];
+  if (load) void load().catch(() => { /* The page boundary handles a failed navigation import. */ });
+}
 
 const KNOWN_PATHS = [
   "/",
@@ -44,22 +58,6 @@ const KNOWN_PATHS = [
   "/report",
   "/admin",
 ];
-
-const STATIC_META: Record<string, { title: string; description: string }> = {
-  "/": { title: DEFAULT_TITLE, description: DEFAULT_DESCRIPTION },
-  "/packs": { title: "Wallpaper Packs | Voidwallz", description: "Browse coordinated wallpaper collections for desktop and phone. Preview each image and download the full pack or a single image." },
-  "/desktop": { title: "Desktop Wallpapers | Voidwallz", description: "Browse, save and download wallpapers for desktop and laptop screens. Preview the artwork before you download." },
-  "/mobile": { title: "Phone Wallpapers | Voidwallz", description: "Browse portrait wallpapers for your phone. Preview the artwork and download the original image." },
-  "/updates": { title: "Journal & Updates | Voidwallz", description: "A record of features, experiments and visual changes at Voidwallz." },
-  "/report": { title: "Report an Issue | Voidwallz", description: "Tell us about a problem with Voidwallz so we can help fix it." },
-  "/privacy": { title: "Privacy Policy | Voidwallz", description: "How Voidwallz handles your information." },
-  "/terms": { title: "Terms of Service | Voidwallz", description: "Terms for using Voidwallz and its wallpaper collection." },
-  "/license": { title: "Image Licence | Voidwallz", description: "Personal use terms for Voidwallz wallpapers." },
-  "/cookies": { title: "Cookie & Storage Policy | Voidwallz", description: "How Voidwallz uses cookies and local device storage." },
-  "/refunds": { title: "Refund Policy | Voidwallz", description: "Voidwallz refund and digital goods policy." },
-  "/dmca": { title: "Copyright Policy | Voidwallz", description: "Copyright information and contact details for Voidwallz." },
-  "/admin": { title: "Publishing Studio | Voidwallz", description: "Voidwallz pack publishing tools." },
-};
 
 export const navigateToWallpaper = openWallpaper;
 
@@ -123,12 +121,7 @@ function WallpaperRouteManager({
       if (meta) setPageMeta(meta);
       return;
     }
-    setPageMeta({
-      title: `${selectedWp.title} — ${selectedWp.device === "desktop" ? "Desktop" : "Phone"} Wallpaper | Voidwallz`,
-      description: `${selectedWp.title} — a ${selectedWp.device === "desktop" ? "desktop" : "phone"} wallpaper by Voidwallz. Preview the artwork and download the original image.`,
-      image: selectedWp.previewUrl,
-      url: window.location.href,
-    });
+    setPageMeta(wallpaperMeta(selectedWp, window.location.href));
   }, [selectedWp]);
 
   return (
@@ -142,7 +135,7 @@ function WallpaperRouteManager({
 
 export default function App() {
   const openDialogCount = useDialogCount();
-  const [showLoader, setShowLoader] = useState(true);
+  const [showLoader, setShowLoader] = useState(shouldShowIntro);
   const { loading: wallpapersLoading } = useWallpapers();
   const [hash, setHash] = useState(() => collectionLocation().hash);
   const [path, setPath] = useState(() => collectionLocation().pathname);
@@ -150,6 +143,8 @@ export default function App() {
   const [atmosphereMode, setAtmosphereMode] = useState<"standard" | "oled" | "crt" | "noir">("standard");
   const [ambientImage, setAmbientImage] = useState<string | null>(null);
   const [selectedPack, setSelectedPack] = useState<VoidPack | null>(null);
+
+  useEffect(() => { if (!showLoader) rememberIntro(); }, [showLoader]);
 
   const isOledOptimized = atmosphereMode === "oled";
   const setIsOledOptimized = (val: boolean) => {
@@ -164,8 +159,10 @@ export default function App() {
       // A preview is an overlay: retain the collection, filters, and scroll position.
       const previewReturn = WALLPAPER_ROUTE_PATTERN.test(previousPath);
       const contentLocation = collectionLocation();
-      setHash(contentLocation.hash);
-      setPath(contentLocation.pathname);
+      startTransition(() => {
+        setHash(contentLocation.hash);
+        setPath(contentLocation.pathname);
+      });
       if (!previewReturn && !WALLPAPER_ROUTE_PATTERN.test(nextPath) && nextPath !== previousPath && !(isLegalPath(previousPath) && isLegalPath(nextPath)) && !window.location.hash) {
         window.scrollTo({ top: 0, behavior: "instant" });
       }
@@ -381,6 +378,13 @@ export default function App() {
     </AnimatePresence>
     <div
       inert={showLoader || openDialogCount > 0 || undefined}
+      onClick={(event) => {
+        if (siteLink(event)) preloadPage(event);
+        navigateSiteLink(event, document.documentElement.dataset.motionState === "paused");
+      }}
+      onPointerOver={preloadPage}
+      onFocusCapture={preloadPage}
+      onPointerDown={preloadPage}
       className={`void-app min-h-screen overflow-x-clip relative atmosphere-${atmosphereMode} ${isOledOptimized ? "oled-mode" : ""}`}
     >
       <AnimatePresence>
@@ -414,7 +418,7 @@ export default function App() {
         atmosphereMode={atmosphereMode}
         setAtmosphereMode={setAtmosphereMode}
       />
-      <main id="main-content" tabIndex={-1} ><Suspense fallback={<div className="route-pending page-shell" role="status"><span className="micro-label">Finding your next view…</span></div>}><AnimatePresence mode="wait">{renderContent()}</AnimatePresence></Suspense></main>
+      <main id="main-content" tabIndex={-1} ><Suspense fallback={<RoutePending />}><AnimatePresence mode="wait">{renderContent()}</AnimatePresence></Suspense></main>
       <Footer />
       <CookieConsent />
       <DownloadFeedback />

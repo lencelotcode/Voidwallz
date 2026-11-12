@@ -1,0 +1,87 @@
+[
+  {
+    "url": "http://voidwallz.live/",
+    "status": 308,
+    "headers": {
+      "content-type": "text/plain",
+      "location": "https://voidwallz.live/",
+      "strict-transport-security": null,
+      "content-security-policy": null,
+      "x-content-type-options": null,
+      "x-frame-options": null,
+      "referrer-policy": null,
+      "permissions-policy": null
+    },
+    "htmlApp": false,
+    "looksLikeEnv": false,
+    "looksLikeGitConfig": false
+  },
+  {
+    "url": "https://voidwallz.live/",
+    "status": 200,
+    "headers": {
+      "content-type": "text/html; charset=utf-8",
+      "location": null,
+      "strict-transport-security": "max-age=63072000",
+      "content-security-policy": null,
+      "x-content-type-options": null,
+      "x-frame-options": null,
+      "referrer-policy": null,
+      "permissions-policy": null
+    },
+    "htmlApp": true,
+    "looksLikeEnv": false,
+    "looksLikeGitConfig": false
+  },
+  {
+    "url": "https://voidwallz.live/.env",
+    "status": 200,
+    "headers": {
+      "content-type": "text/html; charset=utf-8",
+      "location": null,
+      "strict-transport-security": "max-age=63072000",
+      "content-security-policy": null,
+      "x-content-type-options": null,
+      "x-frame-options": null,
+      "referrer-policy": null,
+      "permissions-policy": null
+    },
+    "htmlApp": true,
+    "looksLikeEnv": false,
+    "looksLikeGitConfig": false
+  },
+  {
+    "url": "https://voidwallz.live/.git/config",
+    "status": 200,
+    "headers": {
+      "content-type": "text/html; charset=utf-8",
+      "location": null,
+      "strict-transport-security": "max-age=63072000",
+      "content-security-policy": null,
+      "x-content-type-options": null,
+      "x-frame-options": null,
+      "referrer-policy": null,
+      "permissions-policy": null
+    },
+    "htmlApp": true,
+    "looksLikeEnv": false,
+    "looksLikeGitConfig": false
+  },
+  {
+    "url": "https://voidwallz.live/server/adminSession.ts",
+    "status": 200,
+    "headers": {
+      "content-type": "text/html; charset=utf-8",
+      "location": null,
+      "strict-transport-security": "max-age=63072000",
+      "content-security-policy": null,
+      "x-content-type-options": null,
+      "x-frame-options": null,
+      "referrer-policy": null,
+      "permissions-policy": null
+    },
+    "htmlApp": true,
+    "looksLikeEnv": false,
+    "looksLikeGitConfig": false
+  }
+]

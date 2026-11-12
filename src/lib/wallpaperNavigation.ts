@@ -24,9 +24,9 @@ export function collectionLocation() {
   const returnUrl = window.history.state?.wallpaperReturnUrl;
   if (match) {
     const url = new URL(typeof returnUrl === "string" && returnUrl.startsWith("/") && !returnUrl.startsWith("//") ? returnUrl : `/${match[1]}`, window.location.origin);
-    return { pathname: url.pathname, hash: url.hash };
+    return { pathname: url.pathname.replace(/\/+$/, "") || "/", hash: url.hash };
   }
-  return { pathname: window.location.pathname, hash: window.location.hash };
+  return { pathname: window.location.pathname.replace(/\/+$/, "") || "/", hash: window.location.hash };
 }
 
 /** Browsing inside a preview keeps one history entry and its collection position. */
