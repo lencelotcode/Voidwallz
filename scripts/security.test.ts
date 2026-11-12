@@ -238,7 +238,7 @@ test("production build refuses unapproved browser secrets and privileged Supabas
   }
 });
 
-test("Vercel metadata permits a production build while only approved public settings reach the browser", async () => {
+test("Vercel metadata and a retired passkey permit builds without entering browser code", async () => {
   const fixture = await realpath(await mkdtemp(join(tmpdir(), "voidwallz-vercel-env-")));
   try {
     await writeFile(join(fixture, "index.html"), '<!doctype html><div id="root"></div><script type="module" src="/main.ts"></script>');
@@ -248,6 +248,7 @@ test("Vercel metadata permits a production build while only approved public sett
       publicKey: import.meta.env.VITE_SUPABASE_ANON_KEY,
       deployment: import.meta.env.VITE_VERCEL_GIT_REPO_ID,
       unknownMetadata: import.meta.env.VITE_VERCEL_TEST_SECRET,
+      retiredPasskey: import.meta.env.VITE_ADMIN_PASSKEY,
       serverSecret: import.meta.env.ADMIN_SESSION_SECRET,
     });`);
     const result = spawnSync(process.execPath, ["--input-type=module"], {
@@ -266,6 +267,7 @@ test("Vercel metadata permits a production build while only approved public sett
         VITE_VERCEL_GIT_PULL_REQUEST_ID: "vercel-pr-metadata-canary",
         VITE_VERCEL_URL: "deployment-preview-canary.vercel.app",
         VITE_VERCEL_TEST_SECRET: "metadata-namespace-private-canary",
+        VITE_ADMIN_PASSKEY: "retired-browser-password-build-canary",
         ADMIN_SESSION_SECRET: "private-session-build-canary-at-least-32-chars",
       },
     });
@@ -274,8 +276,9 @@ test("Vercel metadata permits a production build while only approved public sett
     const javascript = (await Promise.all(assets.filter(file => file.endsWith(".js")).map(file => readFile(join(fixture, "dist/assets", file), "utf8")))).join("\n");
     assert.ok(javascript.includes("https://public-gallery-canary.supabase.co"));
     assert.ok(javascript.includes("sb_publishable_public_gallery_canary"));
-    for (const value of ["vercel-repo-metadata-canary", "vercel-pr-metadata-canary", "deployment-preview-canary.vercel.app", "metadata-namespace-private-canary", "private-session-build-canary-at-least-32-chars"]) {
+    for (const value of ["vercel-repo-metadata-canary", "vercel-pr-metadata-canary", "deployment-preview-canary.vercel.app", "metadata-namespace-private-canary", "retired-browser-password-build-canary", "private-session-build-canary-at-least-32-chars"]) {
       assert.equal(javascript.includes(value), false, "Non-public settings must not enter browser JavaScript.");
+      assert.equal((result.stdout + result.stderr).includes(value), false, "Non-public values must not be logged during builds.");
     }
   } finally {
     await rm(fixture, { recursive: true, force: true });

@@ -22,10 +22,12 @@ export default defineConfig(({ mode }) => {
         configResolved(config) {
           if (config.command !== 'build') return;
           const allowed = new Set(['VITE_SUPABASE_URL', 'VITE_SUPABASE_ANON_KEY']);
-          // Vercel automatically provides VITE_VERCEL_* build metadata. Accept
-          // its presence without adding it to the browser's explicit allowlist.
-          const exposed = Object.keys(env).filter(key => key.startsWith('VITE_') && !key.startsWith('VITE_VERCEL_') && !allowed.has(key));
+          // Deployment metadata and the retired client passkey may remain in an
+          // existing hosting project. Neither is exposed by the explicit define
+          // list above; the passkey never authorizes the server-side studio.
+          const exposed = Object.keys(env).filter(key => key.startsWith('VITE_') && !key.startsWith('VITE_VERCEL_') && key !== 'VITE_ADMIN_PASSKEY' && !allowed.has(key));
           if (exposed.length) throw new Error(`Unapproved browser environment variables: ${exposed.join(', ')}`);
+          if (env.VITE_ADMIN_PASSKEY) console.warn('[security] Ignoring retired VITE_ADMIN_PASSKEY. Remove this obsolete setting from the hosting environment; studio login uses server-only credentials.');
           const publicKey = env.VITE_SUPABASE_ANON_KEY || '';
           if (publicKey.startsWith('sb_secret_')) throw new Error('A server secret was assigned to the public Supabase key.');
           try {

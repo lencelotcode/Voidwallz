@@ -9,4 +9,4 @@ Browser bundle: no server credential markers, env files or source maps.
 Local HTTP: unauthenticated admin/publishing 401; foreign-origin reports 403; env/Git/server source paths 403.
 Database pgTAP suite: prepared, not run (provider sign-in/connection unavailable).
 Production changes: not deployed.
-Vercel environment regression: full build succeeds with injected metadata; isolated bundle check confirms only public gallery settings are exposed.
+Vercel environment regression: full build succeeds with injected metadata and the retired VITE_ADMIN_PASSKEY present; isolated bundle check confirms only public gallery settings are exposed.

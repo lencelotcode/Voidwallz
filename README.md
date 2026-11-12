@@ -77,6 +77,8 @@ Pack overlays currently use URL fragments, so each pack shares the `/packs` card
 Vercel's automatic `VITE_VERCEL_*` deployment variables can remain enabled.
 Vite's automatic environment prefix injection is disabled; the build explicitly
 exposes only `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`. Deployment metadata
-and server secrets stay out of browser JavaScript. Unexpected application
+and server secrets stay out of browser JavaScript. A leftover `VITE_ADMIN_PASSKEY`
+is ignored with a warning and never bundled; remove that retired setting from
+Vercel when cleaning up the project. It does not authorize studio access. Unexpected application
 `VITE_*` variables and privileged keys assigned to the public key still fail the
 production build, with variable names (never values) in the error.
