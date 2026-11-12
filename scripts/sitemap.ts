@@ -1,5 +1,5 @@
-import { canonicalUrl, PUBLIC_SITE_PATHS } from "../src/lib/siteUrls";
-import { wallpaperUrl } from "../src/lib/wallpaperNavigation";
+import { canonicalUrl, PUBLIC_SITE_PATHS } from "../src/shared/seo/siteUrls";
+import { wallpaperUrl } from "../src/app/routing/wallpaperNavigation";
 
 export type Device = "desktop" | "mobile";
 export interface CatalogItem { title: string; modifiedAt?: string; image?: string; }

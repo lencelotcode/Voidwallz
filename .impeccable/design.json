@@ -1,0 +1,164 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-12T16:50:15Z",
+  "title": "Design System: Voidwallz",
+  "extensions": {
+    "colorMeta": {
+      "primary": {
+        "role": "primary",
+        "displayName": "Neon Acid Lime",
+        "canonical": "#c8ff00",
+        "tonalRamp": ["#f4ffcc", "#e3ff80", "#c8ff00", "#9ecf00", "#6b8c00"]
+      },
+      "neutral-bg": {
+        "role": "neutral",
+        "displayName": "Warm Editorial Paper",
+        "canonical": "#f4f4ef",
+        "tonalRamp": ["#ffffff", "#fbfbf8", "#f4f4ef", "#e7e7e2", "#d9d9d2"]
+      },
+      "neutral-ink": {
+        "role": "neutral",
+        "displayName": "Deep Carbon Ink",
+        "canonical": "#10110e",
+        "tonalRamp": ["#383935", "#242521", "#10110e", "#0a0b08", "#000000"]
+      },
+      "neutral-muted": {
+        "role": "neutral",
+        "displayName": "Graphite Olive Muted",
+        "canonical": "#5d6056",
+        "tonalRamp": ["#9fa198", "#7a7d73", "#5d6056", "#44473e", "#2c2e28"]
+      },
+      "void-black": {
+        "role": "neutral",
+        "displayName": "OLED Pure Black",
+        "canonical": "#080908",
+        "tonalRamp": ["#1d1f1c", "#121411", "#080908", "#040504", "#000000"]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display Condensed",
+        "purpose": "Major architectural hero titles and section banners."
+      },
+      "headline": {
+        "displayName": "Section Headline",
+        "purpose": "Modal headers and collection introductions."
+      },
+      "title": {
+        "displayName": "Card Title",
+        "purpose": "Wallpaper titles and pack cards."
+      },
+      "body": {
+        "displayName": "Body Text",
+        "purpose": "Long-form reading, documentation, and legal policies."
+      },
+      "label": {
+        "displayName": "Technical Label",
+        "purpose": "Monospaced metadata, indices, serial identifiers, and filters."
+      }
+    },
+    "shadows": [
+      {
+        "name": "specimen-ambient",
+        "value": "0 18px 48px rgba(16, 17, 14, 0.07), 0 2px 6px rgba(16, 17, 14, 0.03)",
+        "purpose": "Ambient ground shadow beneath hero preview specimens."
+      },
+      {
+        "name": "card-hover",
+        "value": "0 16px 32px rgba(16, 17, 14, 0.10)",
+        "purpose": "Kinetic lift upon card hover or keyboard focus."
+      },
+      {
+        "name": "popover",
+        "value": "0 12px 36px rgba(16, 17, 14, 0.10)",
+        "purpose": "Floating toast notifications, menus, and popovers."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-standard",
+        "value": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+        "purpose": "Default easing for interactive state transitions and card scaling."
+      },
+      {
+        "name": "ease-out-smooth",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Modal slide-in and drawer entrance transitions."
+      }
+    ],
+    "breakpoints": [
+      { "name": "mobile", "value": "639px" },
+      { "name": "tablet", "value": "900px" },
+      { "name": "desktop", "value": "1100px" },
+      { "name": "wide", "value": "1600px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "High-visibility primary action button for direct wallpaper downloads.",
+      "html": "<button class=\"vw-button\"><span>FIND A WALLPAPER</span><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M7 17L17 7M17 7H7M17 7V17\"/></svg></button>",
+      "css": ".vw-button { display: inline-flex; align-items: center; justify-content: space-between; gap: 24px; min-height: 52px; padding: 14px 20px; background: #c8ff00; color: #10110e; border: 1px solid #10110e; border-radius: 0; font-family: 'Archivo', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; transition: background 0.2s, color 0.2s; } .vw-button:hover { background: #10110e; color: #f4f4ef; }"
+    },
+    {
+      "name": "Outline Button",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "Secondary action button for toggles, audio, and secondary flows.",
+      "html": "<button class=\"outline-button\"><span>EXPLORE PACKS</span><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M7 17L17 7M17 7H7M17 7V17\"/></svg></button>",
+      "css": ".outline-button { display: inline-flex; align-items: center; justify-content: space-between; gap: 20px; min-height: 52px; padding: 14px 20px; background: transparent; color: #10110e; border: 1px solid #10110e; border-radius: 0; font-family: 'Archivo', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; transition: background 0.2s, color 0.2s; } .outline-button:hover { background: #10110e; color: #f4f4ef; }"
+    },
+    {
+      "name": "Segmented Control",
+      "kind": "chip",
+      "refersTo": "segmented-control",
+      "description": "Multi-option toggle group for atmosphere, orientation, and category filters.",
+      "html": "<div class=\"segmented-control\"><button type=\"button\" aria-pressed=\"true\">DESKTOP</button><button type=\"button\" aria-pressed=\"false\">PHONE</button></div>",
+      "css": ".segmented-control { display: inline-flex; border: 1px solid rgba(16, 17, 14, 0.17); border-radius: 0; padding: 3px; gap: 2px; background: #f4f4ef; } .segmented-control button { min-height: 40px; min-width: 44px; padding: 6px 14px; border: none; border-radius: 0; font-family: 'Space Mono', monospace; font-size: 12px; font-weight: 600; color: #10110e; cursor: pointer; background: transparent; } .segmented-control button[aria-pressed=\"true\"] { background: #10110e; color: #f4f4ef; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Monolithic Gallery",
+    "overview": "Voidwallz is built as an architectural digital gallery where precision-cut typography, strict structural hairline grids, and deep void blacks create an austere, museum-grade framing for digital art. The atmosphere is confident, technical, and deliberate: interface controls recede into quiet boundaries, letting high-resolution 4K, 8K, and OLED wallpapers command full visual authority.",
+    "keyCharacteristics": [
+      "Zero-Radius Architecture: Structural UI elements use 0px border-radius.",
+      "Electric Accent Calibration: Neon Acid Lime (#c8ff00) is used sparingly on primary actions and active indicators.",
+      "Hardware-Accurate Staging: Device previews use physically proportioned monitor and smartphone silhouettes.",
+      "Dual-Voice Typography: Hyper-condensed heavyweight sans-serif display headers paired with technical monospaced indices."
+    ],
+    "rules": [
+      {
+        "name": "The Rarity of Lime Rule",
+        "body": "Neon Acid Lime (#c8ff00) must never exceed 10% of any viewport's surface area. Its rarity is what gives it electric punch and navigational clarity.",
+        "section": "colors"
+      },
+      {
+        "name": "The Zero-Radius Rule",
+        "body": "All UI furniture, buttons, cards, dialogs, inputs, and controls stay sharp with 0px radius. Only simulated physical hardware frames have radii.",
+        "section": "shapes"
+      },
+      {
+        "name": "The Lossless Master Rule",
+        "body": "Master wallpapers are treated as inviolable specimens. Never compress, watermark, or distort original assets.",
+        "section": "components"
+      }
+    ],
+    "dos": [
+      "Do maintain strict 0px border-radius on all interactive buttons, inputs, tabs, and content cards.",
+      "Do restrict Neon Acid Lime (#c8ff00) to high-priority interactive calls to action and active status markers.",
+      "Do preserve dual-font discipline: Archivo for bold display and body reading, Space Mono for all technical metadata and telemetry.",
+      "Do ensure all master downloads are delivered as authentic, byte-verified lossless PNG files.",
+      "Do honor prefers-reduced-motion and provide immediate manual toggle switches for motion and audio effects."
+    ],
+    "donts": [
+      "Don't add heavy drop shadows, rounded bubble corners, or multi-colored gradient fills to UI cards.",
+      "Don't introduce account gates, email collection popups, or download countdown timers.",
+      "Don't use generic icon libraries when a precise geometric glyph or monospace text label communicates more clearly.",
+      "Don't overlay decorative simulated phone UI (clocks, battery bars, islands) directly over wallpaper artwork previews.",
+      "Don't split the color palette into arbitrary primary/secondary brand tints; maintain the purity of the paper, ink, and lime trinity."
+    ]
+  }
+}
+

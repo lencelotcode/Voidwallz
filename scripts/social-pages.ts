@@ -1,6 +1,6 @@
-import { resolvePageMeta, socialTags, STATIC_META, wallpaperMeta, type PageMeta } from "../src/lib/pageMetadata";
-import { PUBLIC_SITE_PATHS } from "../src/lib/siteUrls";
-import { wallpaperUrl } from "../src/lib/wallpaperNavigation";
+import { resolvePageMeta, socialTags, STATIC_META, wallpaperMeta, type PageMeta } from "../src/shared/seo/pageMetadata";
+import { PUBLIC_SITE_PATHS } from "../src/shared/seo/siteUrls";
+import { wallpaperUrl } from "../src/app/routing/wallpaperNavigation";
 import { escapeXml, type Catalog } from "./sitemap";
 
 export function renderSocialHead(meta: PageMeta) {

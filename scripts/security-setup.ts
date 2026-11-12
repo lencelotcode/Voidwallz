@@ -1,5 +1,5 @@
 import { readFile, writeFile, chmod } from "node:fs/promises";
-import { hashPassword } from "../server/adminSession";
+import { hashPassword } from "../server/auth/adminSession";
 
 if (process.argv.includes("--help")) {
   console.log("Run npm run security:setup in your own terminal. It reads a new studio password without echoing it and saves only its hash plus fresh session/logging secrets in .env.local.");

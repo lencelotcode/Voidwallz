@@ -15,7 +15,12 @@
     "security:setup": "node --import tsx scripts/security-setup.ts",
     "security:scan": "python3 scripts/scan-secrets.py",
     "social:pages": "node --import tsx scripts/generate-social-pages.ts",
-    "test:social": "node --import tsx --test scripts/social-pages.test.ts"
+    "test:social": "node --import tsx --test scripts/social-pages.test.ts",
+    "test:architecture": "node --import tsx --test tests/architecture.test.ts",
+    "test": "npm run test:architecture && npm run test:security && npm run test:sitemap && npm run test:social",
+    "check": "npm run format:check && npm run lint && npm run build && npm test",
+    "format": "prettier --write \"src/**/*.{ts,tsx}\" \"api/**/*.ts\" \"server/**/*.ts\" \"config/**/*.ts\" \"tests/**/*.ts\" vite.config.ts",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx}\" \"api/**/*.ts\" \"server/**/*.ts\" \"config/**/*.ts\" \"tests/**/*.ts\" vite.config.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.119.0",
@@ -27,13 +32,16 @@
     "react-dom": "^19.3.1"
   },
   "devDependencies": {
+    "@tailwindcss/vite": "^4.3.5",
     "@types/node": "^22.20.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^5.2.0",
     "autoprefixer": "^10.6.2",
+    "prettier": "^3.10.1",
     "tailwindcss": "^4.3.5",
     "tsx": "^4.23.15",
     "typescript": "~5.8.2",
-    "vite": "^6.4.6",
-    "@tailwindcss/vite": "^4.3.5",
-    "@vitejs/plugin-react": "^5.2.0"
+    "vite": "^6.4.6"
   }
 }

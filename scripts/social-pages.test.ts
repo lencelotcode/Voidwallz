@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
-import { DEFAULT_IMAGE, resolvePageMeta, socialTags, STATIC_META, wallpaperMeta } from "../src/lib/pageMetadata";
-import { canonicalUrl, PUBLIC_SITE_PATHS } from "../src/lib/siteUrls";
+import { DEFAULT_IMAGE, resolvePageMeta, socialTags, STATIC_META, wallpaperMeta } from "../src/shared/seo/pageMetadata";
+import { canonicalUrl, PUBLIC_SITE_PATHS } from "../src/shared/seo/siteUrls";
 import { renderSocialHead, renderSocialPage, routeFile, socialPages } from "./social-pages";
 
 const root = new URL("../", import.meta.url);

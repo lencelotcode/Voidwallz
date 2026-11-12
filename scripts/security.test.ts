@@ -7,12 +7,12 @@ import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import report from "../api/report";
-import admin from "../api/admin";
-import { hashPassword, verifyPassword, createSession, requireSession } from "../server/adminSession";
-import { assertOrigin, HttpError, readBody } from "../server/security";
-import { validateImage, MAX_PACK_BYTES } from "../server/uploads";
-import WallpaperCard from "../src/components/WallpaperCard";
+import report from "../server/modules/reports/reportHandler";
+import admin from "../server/modules/admin/adminHandler";
+import { hashPassword, verifyPassword, createSession, requireSession } from "../server/auth/adminSession";
+import { assertOrigin, HttpError, readBody } from "../server/http/security";
+import { validateImage, MAX_PACK_BYTES } from "../server/validation/images";
+import WallpaperCard from "../src/features/wallpapers/components/WallpaperCard";
 
 const PASSWORD = "unique-test-only-password-2026";
 const png = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a3ioAAAAASUVORK5CYII=", "base64");

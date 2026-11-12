@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
-import { canonicalUrl, PUBLIC_SITE_PATHS } from "../src/lib/siteUrls";
+import { canonicalUrl, PUBLIC_SITE_PATHS } from "../src/shared/seo/siteUrls";
 import { escapeXml, renderSitemap } from "./sitemap";
 
 test("uses production canonicals without query/fragment variants", () => {

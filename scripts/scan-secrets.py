@@ -27,7 +27,7 @@ def scan(text,location,scope):
   except Exception: pass
 extensions={'.ts','.tsx','.js','.jsx','.mjs','.json','.md','.yml','.yaml','.txt','.env','.pem','.key','.html','.css','.sql','.toml','.ini','.xml'}
 current=[]
-for directory in ['src','api','server','dist']:
+for directory in ['src','api','server','config','dist']:
  if Path(directory).exists(): current.extend(p for p in Path(directory).rglob('*') if p.is_file() and p.suffix in extensions)
 current.extend(p for p in Path('.').glob('.env*') if p.is_file())
 current.extend(Path(name) for name in ['index.html','vite.config.ts','vercel.json','package.json','package-lock.json'])

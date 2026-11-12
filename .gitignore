@@ -8,3 +8,5 @@ coverage/
 !.env.example
 .idea/
 .taste-skill/
+.codex/
+*.local.json
